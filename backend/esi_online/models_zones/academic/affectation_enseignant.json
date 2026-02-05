@@ -1,0 +1,18 @@
+{
+  "model_name": "AffectationEnseignant",
+  "app_name": "academic",
+  "fields": {
+    "enseignant": { "type": "fk", "to": "authentification.Enseignant", "related_name": "affectations", "on_delete": "CASCADE" },
+    "matiere": { "type": "fk", "to": "academic.Matiere", "related_name": "affectations", "on_delete": "CASCADE" },
+    "classe": { "type": "fk", "to": "academic.Classe", "related_name": "affectations", "on_delete": "CASCADE" },
+    "annee_academique": { "type": "fk", "to": "espace_admin.AnneeAcademique", "related_name": "affectations", "on_delete": "CASCADE" },
+    "type_intervention": { "type": "char", "max_length": 10, "default": "COURS" },
+    "is_responsable": { "type": "bool", "default": false },
+    "created_by": { "type": "fk", "to": "authentification.User", "related_name": "affectations_creees", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "affectations_enseignants",
+    "verbose_name": "Affectation Enseignant",
+    "verbose_name_plural": "Affectations Enseignants"
+  }
+}

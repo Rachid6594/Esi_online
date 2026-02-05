@@ -1,0 +1,22 @@
+{
+  "model_name": "QCM",
+  "app_name": "courses",
+  "fields": {
+    "chapitre": { "type": "fk", "to": "courses.Chapitre", "related_name": "qcms", "on_delete": "CASCADE" },
+    "titre": { "type": "char", "max_length": 300 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "duree_minutes": { "type": "int", "default": 30 },
+    "note_sur": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "default": 20 },
+    "nombre_tentatives_max": { "type": "int", "default": 1 },
+    "affiche_correction": { "type": "bool", "default": true },
+    "melange_questions": { "type": "bool", "default": true },
+    "date_ouverture": { "type": "datetime" },
+    "date_fermeture": { "type": "datetime" },
+    "ordre": { "type": "int", "default": 0 }
+  },
+  "meta": {
+    "db_table": "qcms",
+    "verbose_name": "QCM",
+    "verbose_name_plural": "QCMs"
+  }
+}

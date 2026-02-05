@@ -1,0 +1,16 @@
+from rest_framework import serializers
+from app.espace_prof.models import Cours, Enseignant
+
+
+class EnseignantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enseignant
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class CoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cours
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']

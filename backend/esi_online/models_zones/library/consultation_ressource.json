@@ -1,0 +1,14 @@
+{
+  "model_name": "ConsultationRessource",
+  "app_name": "library",
+  "fields": {
+    "ressource": { "type": "fk", "to": "library.Ressource", "related_name": "consultations", "on_delete": "CASCADE" },
+    "user": { "type": "fk", "to": "authentification.User", "related_name": "consultations", "on_delete": "CASCADE" },
+    "a_telecharge": { "type": "bool", "default": false }
+  },
+  "meta": {
+    "db_table": "consultations_ressources",
+    "verbose_name": "Consultation Ressource",
+    "verbose_name_plural": "Consultations Ressources"
+  }
+}

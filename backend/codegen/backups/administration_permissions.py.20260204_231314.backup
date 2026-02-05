@@ -1,0 +1,155 @@
+"""
+Permissions pour l'application administration.
+"""
+from rest_framework import permissions
+
+
+class CanViewAdministration(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("administration.view_administration")
+        )
+
+
+class CanCreateAdministration(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("administration.add_administration")
+        )
+
+
+class CanUpdateAdministration(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("administration.change_administration")
+        )
+
+
+class CanDeleteAdministration(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("administration.delete_administration")
+        )
+
+
+# --- AnneeAcademique ---
+class CanViewAnneeAcademique(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_anneeacademique."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.view_anneeacademique")
+            )
+        return True
+
+
+class CanCreateAnneeAcademique(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_anneeacademique."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.add_anneeacademique")
+            )
+        return True
+
+
+class CanUpdateAnneeAcademique(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_anneeacademique."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.change_anneeacademique")
+            )
+        return True
+
+
+class CanDeleteAnneeAcademique(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_anneeacademique."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.delete_anneeacademique")
+            )
+        return True
+
+
+# --- Niveau ---
+class CanViewNiveau(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_niveau."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.view_niveau")
+            )
+        return True
+
+
+class CanCreateNiveau(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_niveau."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.add_niveau")
+            )
+        return True
+
+
+class CanUpdateNiveau(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_niveau."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.change_niveau")
+            )
+        return True
+
+
+class CanDeleteNiveau(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_niveau."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.delete_niveau")
+            )
+        return True
+
+
+# --- Filiere ---
+class CanViewFiliere(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_filiere."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.view_filiere")
+            )
+        return True
+
+
+class CanCreateFiliere(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_filiere."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.add_filiere")
+            )
+        return True
+
+
+class CanUpdateFiliere(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_filiere."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.change_filiere")
+            )
+        return True
+
+
+class CanDeleteFiliere(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_filiere."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.delete_filiere")
+            )
+        return True

@@ -1,0 +1,14 @@
+{
+  "model_name": "Filiere",
+  "app_name": "administration",
+  "fields": {
+    "code": { "type": "char", "max_length": 10 },
+    "libelle": { "type": "char", "max_length": 200 },
+    "description": { "type": "text", "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "filieres",
+    "verbose_name": "Filière",
+    "verbose_name_plural": "Filières"
+  }
+}

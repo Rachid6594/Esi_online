@@ -1,0 +1,16 @@
+{
+  "model_name": "Reservation",
+  "app_name": "library",
+  "fields": {
+    "ressource": { "type": "fk", "to": "library.Ressource", "related_name": "reservations", "on_delete": "CASCADE" },
+    "utilisateur": { "type": "fk", "to": "authentification.User", "related_name": "reservations", "on_delete": "CASCADE" },
+    "statut": { "type": "char", "max_length": 15, "default": "EN_ATTENTE" },
+    "date_expiration": { "type": "datetime", "blank": true, "null": true },
+    "date_notification": { "type": "datetime", "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "reservations",
+    "verbose_name": "Réservation",
+    "verbose_name_plural": "Réservations"
+  }
+}

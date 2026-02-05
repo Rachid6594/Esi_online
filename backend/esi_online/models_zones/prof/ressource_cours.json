@@ -1,0 +1,19 @@
+{
+  "model_name": "RessourceCours",
+  "app_name": "espace_prof",
+  "fields": {
+    "chapitre": { "type": "fk", "to": "espace_prof.Chapitre", "related_name": "ressources", "on_delete": "CASCADE" },
+    "titre": { "type": "char", "max_length": 300 },
+    "type_ressource": { "type": "char", "max_length": 10 },
+    "fichier": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "lien": { "type": "url", "blank": true, "null": true },
+    "description": { "type": "text", "blank": true, "null": true },
+    "ordre": { "type": "int", "default": 0 },
+    "is_downloadable": { "type": "bool", "default": true }
+  },
+  "meta": {
+    "db_table": "ressources_cours",
+    "verbose_name": "Ressource de Cours",
+    "verbose_name_plural": "Ressources de Cours"
+  }
+}

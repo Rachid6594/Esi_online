@@ -1,0 +1,1 @@
+"""Application admin - Admin."""

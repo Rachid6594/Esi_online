@@ -1,0 +1,221 @@
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from app.admin.services import UserService
+from app.admin.api.serializers import UserSerializer
+from app.core.exceptions import NotFoundError
+from app.admin.permissions.admin_permissions import (
+    CanViewUser, CanCreateUser,
+    CanUpdateUser, CanDeleteUser,
+)
+from app.admin.services import SuperAdminService
+from app.admin.api.serializers import SuperAdminSerializer
+from app.admin.permissions.admin_permissions import (
+    CanViewSuperAdmin, CanCreateSuperAdmin,
+    CanUpdateSuperAdmin, CanDeleteSuperAdmin,
+)
+from app.admin.services import NotificationService
+from app.admin.api.serializers import NotificationSerializer
+from app.admin.permissions.admin_permissions import (
+    CanViewNotification, CanCreateNotification,
+    CanUpdateNotification, CanDeleteNotification,
+)
+from app.admin.services import PreferenceNotificationService
+from app.admin.api.serializers import PreferenceNotificationSerializer
+from app.admin.permissions.admin_permissions import (
+    CanViewPreferenceNotification, CanCreatePreferenceNotification,
+    CanUpdatePreferenceNotification, CanDeletePreferenceNotification,
+)
+
+# --- User (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewUser,
+    CanCreateUser,
+])
+def user_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = UserService()
+        qs = service.list_all()
+        serializer = UserSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = UserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = UserService()
+    obj = service.create(**serializer.validated_data)
+    serializer = UserSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewUser,
+    CanUpdateUser,
+    CanDeleteUser,
+])
+def user_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = UserService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = UserSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = UserSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(UserSerializer(updated).data)
+
+# --- SuperAdmin (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewSuperAdmin,
+    CanCreateSuperAdmin,
+])
+def superadmin_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = SuperAdminService()
+        qs = service.list_all()
+        serializer = SuperAdminSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = SuperAdminSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = SuperAdminService()
+    obj = service.create(**serializer.validated_data)
+    serializer = SuperAdminSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewSuperAdmin,
+    CanUpdateSuperAdmin,
+    CanDeleteSuperAdmin,
+])
+def superadmin_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = SuperAdminService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = SuperAdminSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = SuperAdminSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(SuperAdminSerializer(updated).data)
+
+# --- Notification (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewNotification,
+    CanCreateNotification,
+])
+def notification_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = NotificationService()
+        qs = service.list_all()
+        serializer = NotificationSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = NotificationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = NotificationService()
+    obj = service.create(**serializer.validated_data)
+    serializer = NotificationSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewNotification,
+    CanUpdateNotification,
+    CanDeleteNotification,
+])
+def notification_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = NotificationService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = NotificationSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = NotificationSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(NotificationSerializer(updated).data)
+
+# --- PreferenceNotification (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewPreferenceNotification,
+    CanCreatePreferenceNotification,
+])
+def preferencenotification_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = PreferenceNotificationService()
+        qs = service.list_all()
+        serializer = PreferenceNotificationSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = PreferenceNotificationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = PreferenceNotificationService()
+    obj = service.create(**serializer.validated_data)
+    serializer = PreferenceNotificationSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewPreferenceNotification,
+    CanUpdatePreferenceNotification,
+    CanDeletePreferenceNotification,
+])
+def preferencenotification_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = PreferenceNotificationService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = PreferenceNotificationSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = PreferenceNotificationSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(PreferenceNotificationSerializer(updated).data)
+

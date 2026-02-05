@@ -1,0 +1,83 @@
+from rest_framework import permissions
+
+
+# --- Enseignant ---
+class CanViewEnseignant(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_enseignant."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.view_enseignant")
+            )
+        return True
+
+
+class CanCreateEnseignant(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_enseignant."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.add_enseignant")
+            )
+        return True
+
+
+class CanUpdateEnseignant(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_enseignant."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.change_enseignant")
+            )
+        return True
+
+
+class CanDeleteEnseignant(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_enseignant."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.delete_enseignant")
+            )
+        return True
+
+
+# --- Cours ---
+class CanViewCours(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_cours."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.view_cours")
+            )
+        return True
+
+
+class CanCreateCours(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_cours."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.add_cours")
+            )
+        return True
+
+
+class CanUpdateCours(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_cours."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.change_cours")
+            )
+        return True
+
+
+class CanDeleteCours(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_cours."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_prof.delete_cours")
+            )
+        return True

@@ -1,0 +1,16 @@
+{
+  "model_name": "QuestionQCM",
+  "app_name": "espace_prof",
+  "fields": {
+    "qcm": { "type": "fk", "to": "espace_prof.QCM", "related_name": "questions", "on_delete": "CASCADE" },
+    "enonce": { "type": "text" },
+    "type_question": { "type": "char", "max_length": 10, "default": "UNIQUE" },
+    "points": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "default": 1 },
+    "ordre": { "type": "int", "default": 0 }
+  },
+  "meta": {
+    "db_table": "questions_qcm",
+    "verbose_name": "Question QCM",
+    "verbose_name_plural": "Questions QCM"
+  }
+}

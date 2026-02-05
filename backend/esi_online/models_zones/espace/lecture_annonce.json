@@ -1,0 +1,13 @@
+{
+  "model_name": "LectureAnnonce",
+  "app_name": "administration",
+  "fields": {
+    "annonce": { "type": "fk", "to": "administration.Annonce", "related_name": "lectures", "on_delete": "CASCADE" },
+    "user": { "type": "fk", "to": "admin.User", "related_name": "annonces_lues", "on_delete": "CASCADE" }
+  },
+  "meta": {
+    "db_table": "lectures_annonces",
+    "verbose_name": "Lecture Annonce",
+    "verbose_name_plural": "Lectures Annonces"
+  }
+}

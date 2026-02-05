@@ -1,0 +1,113 @@
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from app.espace_prof.services import EnseignantService
+from app.espace_prof.api.serializers import EnseignantSerializer
+from app.core.exceptions import NotFoundError
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewEnseignant, CanCreateEnseignant,
+    CanUpdateEnseignant, CanDeleteEnseignant,
+)
+from app.espace_prof.services import CoursService
+from app.espace_prof.api.serializers import CoursSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewCours, CanCreateCours,
+    CanUpdateCours, CanDeleteCours,
+)
+
+# --- Enseignant (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewEnseignant,
+    CanCreateEnseignant,
+])
+def enseignant_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = EnseignantService()
+        qs = service.list_all()
+        serializer = EnseignantSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = EnseignantSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = EnseignantService()
+    obj = service.create(**serializer.validated_data)
+    serializer = EnseignantSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewEnseignant,
+    CanUpdateEnseignant,
+    CanDeleteEnseignant,
+])
+def enseignant_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = EnseignantService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = EnseignantSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = EnseignantSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(EnseignantSerializer(updated).data)
+
+# --- Cours (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewCours,
+    CanCreateCours,
+])
+def cours_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = CoursService()
+        qs = service.list_all()
+        serializer = CoursSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = CoursSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = CoursService()
+    obj = service.create(**serializer.validated_data)
+    serializer = CoursSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewCours,
+    CanUpdateCours,
+    CanDeleteCours,
+])
+def cours_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = CoursService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = CoursSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = CoursSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(CoursSerializer(updated).data)
+

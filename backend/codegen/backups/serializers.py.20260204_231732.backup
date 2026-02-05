@@ -1,0 +1,35 @@
+from rest_framework import serializers
+from app.admin.models import AuditLog, Notification, PreferenceNotification, SuperAdmin, User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class SuperAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SuperAdmin
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class PreferenceNotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PreferenceNotification
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuditLog
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+

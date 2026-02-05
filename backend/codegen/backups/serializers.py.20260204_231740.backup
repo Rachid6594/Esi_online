@@ -1,0 +1,65 @@
+from rest_framework import serializers
+from app.espace_prof.models import Chapitre, Cours, Enseignant, Exercice, FichierSupportTP, QCM, QuestionQCM, ReponseQCM, RessourceCours, TP
+
+
+class EnseignantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enseignant
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class CoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cours
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class ChapitreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chapitre
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class RessourceCoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RessourceCours
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class ExerciceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exercice
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class TPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TP
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class FichierSupportTPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FichierSupportTP
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class QCMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QCM
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class QuestionQCMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionQCM
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class ReponseQCMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReponseQCM
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']

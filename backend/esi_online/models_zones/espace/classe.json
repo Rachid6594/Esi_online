@@ -1,0 +1,18 @@
+{
+  "model_name": "Classe",
+  "app_name": "administration",
+  "fields": {
+    "code": { "type": "char", "max_length": 20 },
+    "libelle": { "type": "char", "max_length": 200 },
+    "niveau": { "type": "fk", "to": "administration.Niveau", "related_name": "classes", "on_delete": "CASCADE" },
+    "filiere": { "type": "fk", "to": "administration.Filiere", "related_name": "classes", "on_delete": "CASCADE" },
+    "annee_academique": { "type": "fk", "to": "administration.AnneeAcademique", "related_name": "classes", "on_delete": "CASCADE" },
+    "effectif_max": { "type": "int", "default": 50 },
+    "created_by": { "type": "fk", "to": "admin.User", "related_name": "classes_creees", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "classes",
+    "verbose_name": "Classe",
+    "verbose_name_plural": "Classes"
+  }
+}

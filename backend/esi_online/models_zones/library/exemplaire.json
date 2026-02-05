@@ -1,0 +1,18 @@
+{
+  "model_name": "Exemplaire",
+  "app_name": "library",
+  "fields": {
+    "ressource": { "type": "fk", "to": "library.Ressource", "related_name": "exemplaires", "on_delete": "CASCADE" },
+    "cote": { "type": "char", "max_length": 50 },
+    "code_barres": { "type": "char", "max_length": 50, "blank": true, "null": true },
+    "emplacement": { "type": "char", "max_length": 200, "blank": true, "null": true },
+    "statut": { "type": "char", "max_length": 20, "default": "DISPONIBLE" },
+    "date_entree": { "type": "date", "blank": true, "null": true },
+    "notes": { "type": "text", "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "exemplaires",
+    "verbose_name": "Exemplaire",
+    "verbose_name_plural": "Exemplaires"
+  }
+}

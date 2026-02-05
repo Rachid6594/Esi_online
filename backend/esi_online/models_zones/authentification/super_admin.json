@@ -1,0 +1,14 @@
+{
+  "model_name": "SuperAdmin",
+  "app_name": "authentification",
+  "fields": {
+    "user": { "type": "one2one", "to": "authentification.User", "related_name": "super_admin_profile", "on_delete": "CASCADE" },
+    "niveau_acces": { "type": "int", "default": 1 },
+    "dernier_acces": { "type": "datetime", "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "super_admins",
+    "verbose_name": "Super Administrateur",
+    "verbose_name_plural": "Super Administrateurs"
+  }
+}

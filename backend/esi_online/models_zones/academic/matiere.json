@@ -1,0 +1,20 @@
+{
+  "model_name": "Matiere",
+  "app_name": "academic",
+  "fields": {
+    "code": { "type": "char", "max_length": 20 },
+    "libelle": { "type": "char", "max_length": 200 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "type_matiere": { "type": "char", "max_length": 10, "default": "COURS" },
+    "coefficient": { "type": "decimal", "max_digits": 4, "decimal_places": 2, "default": 1.0 },
+    "credit": { "type": "int", "default": 3 },
+    "niveau": { "type": "fk", "to": "academic.Niveau", "related_name": "matieres", "on_delete": "CASCADE" },
+    "filiere": { "type": "fk", "to": "academic.Filiere", "related_name": "matieres", "on_delete": "CASCADE", "blank": true, "null": true },
+    "semestre": { "type": "int" }
+  },
+  "meta": {
+    "db_table": "matieres",
+    "verbose_name": "Matière",
+    "verbose_name_plural": "Matières"
+  }
+}

@@ -1,0 +1,18 @@
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+
+    path("users/", views.user_list),
+    path("users/<int:pk>/", views.user_detail),
+
+    path("superadmins/", views.superadmin_list),
+    path("superadmins/<int:pk>/", views.superadmin_detail),
+
+    path("notifications/", views.notification_list),
+    path("notifications/<int:pk>/", views.notification_detail),
+
+    path("preferencenotifications/", views.preferencenotification_list),
+    path("preferencenotifications/<int:pk>/", views.preferencenotification_detail),
+]

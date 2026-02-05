@@ -1,0 +1,565 @@
+"""
+Modèles pour l'application administration.
+"""
+from django.db import models
+from django.utils import timezone
+
+
+class Administration(models.Model):
+    """Modèle Administration."""
+    name = models.CharField(max_length=255, verbose_name="Nom")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Date de modification")
+
+    class Meta:
+        verbose_name = "Administration"
+        verbose_name_plural = "Administration"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class AnneeAcademique(models.Model):
+    """AnneeAcademique."""
+
+    libelle = models.CharField(max_length=50)
+    date_debut = models.DateField()
+    date_fin = models.DateField()
+    is_active = models.BooleanField(default=False)
+    created_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='annees_creees')
+    updated_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='annees_modifiees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'annees_academiques'
+        verbose_name = 'Année académique'
+        verbose_name_plural = 'Années académiques'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Niveau(models.Model):
+    """Niveau."""
+
+    code = models.CharField(max_length=2)
+    libelle = models.CharField(max_length=100)
+    ordre = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'niveaux'
+        verbose_name = 'Niveau'
+        verbose_name_plural = 'Niveaux'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Filiere(models.Model):
+    """Filiere."""
+
+    code = models.CharField(max_length=10)
+    libelle = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'filieres'
+        verbose_name = 'Filière'
+        verbose_name_plural = 'Filières'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Classe(models.Model):
+    """Classe."""
+
+    code = models.CharField(max_length=20)
+    libelle = models.CharField(max_length=200)
+    niveau = models.ForeignKey(to='administration.Niveau', on_delete=models.CASCADE, related_name='classes')
+    filiere = models.ForeignKey(to='administration.Filiere', on_delete=models.CASCADE, related_name='classes')
+    annee_academique = models.ForeignKey(to='administration.AnneeAcademique', on_delete=models.CASCADE, related_name='classes')
+    effectif_max = models.IntegerField(default=50)
+    created_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='classes_creees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'classes'
+        verbose_name = 'Classe'
+        verbose_name_plural = 'Classes'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Matiere(models.Model):
+    """Matiere."""
+
+    code = models.CharField(max_length=20)
+    libelle = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    type_matiere = models.CharField(max_length=10, default='COURS')
+    coefficient = models.DecimalField(max_digits=4, decimal_places=2, default=1.0)
+    credit = models.IntegerField(default=3)
+    niveau = models.ForeignKey(to='administration.Niveau', on_delete=models.CASCADE, related_name='matieres')
+    filiere = models.ForeignKey(null=True, blank=True, to='administration.Filiere', on_delete=models.CASCADE, related_name='matieres')
+    semestre = models.IntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'matieres'
+        verbose_name = 'Matière'
+        verbose_name_plural = 'Matières'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class AdministrationEcole(models.Model):
+    """AdministrationEcole."""
+
+    user = models.OneToOneField(to='admin.User', on_delete=models.CASCADE, related_name='admin_ecole_profile')
+    matricule = models.CharField(max_length=20)
+    poste = models.CharField(max_length=30)
+    departement = models.CharField(max_length=200, null=True, blank=True)
+    bureau = models.CharField(max_length=50, null=True, blank=True)
+    peut_gerer_etudiants = models.BooleanField(default=True)
+    peut_gerer_enseignants = models.BooleanField(default=False)
+    peut_gerer_structure_academique = models.BooleanField(default=False)
+    peut_envoyer_annonces = models.BooleanField(default=True)
+    peut_gerer_bibliotheque = models.BooleanField(default=False)
+    peut_voir_statistiques = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'administration_ecole'
+        verbose_name = 'Administration École'
+        verbose_name_plural = 'Administration École'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Annonce(models.Model):
+    """Annonce."""
+
+    titre = models.CharField(max_length=300)
+    contenu = models.TextField()
+    categorie = models.CharField(max_length=20, default='INFORMATION')
+    fichier_joint = models.CharField(max_length=500, null=True, blank=True)
+    destinataires_tous = models.BooleanField(default=False)
+    destinataires_roles = models.CharField(max_length=200, null=True, blank=True)
+    statut = models.CharField(max_length=15, default='BROUILLON')
+    date_publication = models.DateTimeField(null=True, blank=True)
+    date_expiration = models.DateTimeField(null=True, blank=True)
+    auteur = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='annonces_creees')
+    envoi_email = models.BooleanField(default=True)
+    envoi_notification = models.BooleanField(default=True)
+    affichage_tableau = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'annonces'
+        verbose_name = 'Annonce'
+        verbose_name_plural = 'Annonces'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class LectureAnnonce(models.Model):
+    """LectureAnnonce."""
+
+    annonce = models.ForeignKey(to='administration.Annonce', on_delete=models.CASCADE, related_name='lectures')
+    user = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='annonces_lues')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'lectures_annonces'
+        verbose_name = 'Lecture Annonce'
+        verbose_name_plural = 'Lectures Annonces'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class EmploiDuTemps(models.Model):
+    """EmploiDuTemps."""
+
+    classe = models.ForeignKey(to='administration.Classe', on_delete=models.CASCADE, related_name='emplois_du_temps')
+    matiere = models.ForeignKey(to='administration.Matiere', on_delete=models.CASCADE, related_name='emplois_du_temps')
+    enseignant = models.ForeignKey(null=True, to='espace_prof.Enseignant', on_delete=models.SET_NULL, related_name='emplois_du_temps')
+    annee_academique = models.ForeignKey(to='administration.AnneeAcademique', on_delete=models.CASCADE, related_name='emplois_du_temps')
+    jour = models.CharField(max_length=10)
+    heure_debut = models.TimeField()
+    heure_fin = models.TimeField()
+    salle = models.CharField(max_length=50, null=True, blank=True)
+    type_seance = models.CharField(max_length=10, default='COURS')
+    date_debut_validite = models.DateField(null=True, blank=True)
+    date_fin_validite = models.DateField(null=True, blank=True)
+    created_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='edt_crees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'emplois_du_temps'
+        verbose_name = 'Emploi du Temps'
+        verbose_name_plural = 'Emplois du Temps'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Evenement(models.Model):
+    """Evenement."""
+
+    titre = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    type_evenement = models.CharField(max_length=20, default='AUTRE')
+    date_debut = models.DateTimeField()
+    date_fin = models.DateTimeField(null=True, blank=True)
+    classe = models.ForeignKey(null=True, blank=True, to='administration.Classe', on_delete=models.CASCADE, related_name='evenements')
+    annee_academique = models.ForeignKey(to='administration.AnneeAcademique', on_delete=models.CASCADE, related_name='evenements')
+    created_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='evenements_crees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'evenements'
+        verbose_name = 'Événement'
+        verbose_name_plural = 'Événements'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Categorie(models.Model):
+    """Categorie."""
+
+    nom = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    icone = models.CharField(max_length=50, null=True, blank=True)
+    ordre = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'categories'
+        verbose_name = 'Catégorie'
+        verbose_name_plural = 'Catégories'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Tag(models.Model):
+    """Tag."""
+
+    nom = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
+    couleur = models.CharField(max_length=7, default='#3B82F6')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'tags'
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class AffectationEnseignant(models.Model):
+    """AffectationEnseignant."""
+
+    enseignant = models.ForeignKey(to='espace_prof.Enseignant', on_delete=models.CASCADE, related_name='affectations')
+    matiere = models.ForeignKey(to='administration.Matiere', on_delete=models.CASCADE, related_name='affectations')
+    classe = models.ForeignKey(to='administration.Classe', on_delete=models.CASCADE, related_name='affectations')
+    annee_academique = models.ForeignKey(to='administration.AnneeAcademique', on_delete=models.CASCADE, related_name='affectations')
+    type_intervention = models.CharField(max_length=10, default='COURS')
+    is_responsable = models.BooleanField(default=False)
+    created_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='affectations_creees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'affectations_enseignants'
+        verbose_name = 'Affectation Enseignant'
+        verbose_name_plural = 'Affectations Enseignants'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Ressource(models.Model):
+    """Ressource."""
+
+    titre = models.CharField(max_length=300)
+    description = models.TextField(null=True, blank=True)
+    type_ressource = models.CharField(max_length=15)
+    niveau = models.ForeignKey(null=True, blank=True, to='administration.Niveau', on_delete=models.CASCADE, related_name='ressources')
+    matiere = models.ForeignKey(null=True, blank=True, to='administration.Matiere', on_delete=models.CASCADE, related_name='ressources')
+    annee_academique = models.ForeignKey(null=True, blank=True, to='administration.AnneeAcademique', on_delete=models.CASCADE, related_name='ressources')
+    filiere = models.ForeignKey(null=True, blank=True, to='administration.Filiere', on_delete=models.CASCADE, related_name='ressources')
+    categorie = models.ForeignKey(null=True, blank=True, to='administration.Categorie', on_delete=models.SET_NULL, related_name='ressources')
+    isbn = models.CharField(max_length=20, null=True, blank=True)
+    editeur = models.CharField(max_length=200, null=True, blank=True)
+    annee_edition = models.IntegerField(null=True, blank=True)
+    soutenu_par = models.ForeignKey(null=True, blank=True, to='espace_student.Etudiant', on_delete=models.SET_NULL, related_name='memoires_theses')
+    date_soutenance = models.DateField(null=True, blank=True)
+    jury = models.TextField(null=True, blank=True)
+    resume = models.TextField(null=True, blank=True)
+    fichier = models.CharField(max_length=500, null=True, blank=True)
+    lien = models.URLField(null=True, blank=True)
+    taille_fichier = models.BigIntegerField(null=True, blank=True)
+    format_fichier = models.CharField(max_length=10, null=True, blank=True)
+    auteur = models.CharField(max_length=200, null=True, blank=True)
+    date_publication = models.DateField(null=True, blank=True)
+    is_public = models.BooleanField(default=True)
+    nombre_vues = models.IntegerField(default=0)
+    nombre_telechargements = models.IntegerField(default=0)
+    uploaded_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='ressources_uploadees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'ressources'
+        verbose_name = 'Ressource'
+        verbose_name_plural = 'Ressources'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class ConsultationRessource(models.Model):
+    """ConsultationRessource."""
+
+    ressource = models.ForeignKey(to='administration.Ressource', on_delete=models.CASCADE, related_name='consultations')
+    user = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='consultations')
+    a_telecharge = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'consultations_ressources'
+        verbose_name = 'Consultation Ressource'
+        verbose_name_plural = 'Consultations Ressources'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Exemplaire(models.Model):
+    """Exemplaire."""
+
+    ressource = models.ForeignKey(to='administration.Ressource', on_delete=models.CASCADE, related_name='exemplaires')
+    cote = models.CharField(max_length=50)
+    code_barres = models.CharField(max_length=50, null=True, blank=True)
+    emplacement = models.CharField(max_length=200, null=True, blank=True)
+    statut = models.CharField(max_length=20, default='DISPONIBLE')
+    date_entree = models.DateField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'exemplaires'
+        verbose_name = 'Exemplaire'
+        verbose_name_plural = 'Exemplaires'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Emprunt(models.Model):
+    """Emprunt."""
+
+    exemplaire = models.ForeignKey(to='administration.Exemplaire', on_delete=models.CASCADE, related_name='emprunts')
+    emprunteur = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='emprunts')
+    type_emprunt = models.CharField(max_length=15, default='EMPORTE')
+    date_emprunt = models.DateTimeField()
+    date_retour_prevue = models.DateField()
+    date_retour_effective = models.DateTimeField(null=True, blank=True)
+    statut = models.CharField(max_length=15, default='EN_COURS')
+    remarques = models.TextField(null=True, blank=True)
+    enregistre_par = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='emprunts_enregistres')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'emprunts'
+        verbose_name = 'Emprunt'
+        verbose_name_plural = 'Emprunts'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Reservation(models.Model):
+    """Reservation."""
+
+    ressource = models.ForeignKey(to='administration.Ressource', on_delete=models.CASCADE, related_name='reservations')
+    utilisateur = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='reservations')
+    statut = models.CharField(max_length=15, default='EN_ATTENTE')
+    date_expiration = models.DateTimeField(null=True, blank=True)
+    date_notification = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'reservations'
+        verbose_name = 'Réservation'
+        verbose_name_plural = 'Réservations'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Message(models.Model):
+    """Message."""
+
+    expediteur = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='messages_envoyes')
+    destinataire = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='messages_recus')
+    sujet = models.CharField(max_length=300)
+    contenu = models.TextField()
+    fichier_joint = models.CharField(max_length=500, null=True, blank=True)
+    is_lu = models.BooleanField(default=False)
+    date_lecture = models.DateTimeField(null=True, blank=True)
+    parent = models.ForeignKey(null=True, blank=True, to='administration.Message', on_delete=models.CASCADE, related_name='reponses')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'messages'
+        verbose_name = 'Message'
+        verbose_name_plural = 'Messages'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Forum(models.Model):
+    """Forum."""
+
+    titre = models.CharField(max_length=300)
+    description = models.TextField(null=True, blank=True)
+    matiere = models.ForeignKey(null=True, blank=True, to='administration.Matiere', on_delete=models.CASCADE, related_name='forums')
+    is_general = models.BooleanField(default=False)
+    created_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='forums_crees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'forums'
+        verbose_name = 'Forum'
+        verbose_name_plural = 'Forums'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Sujet(models.Model):
+    """Sujet."""
+
+    forum = models.ForeignKey(to='administration.Forum', on_delete=models.CASCADE, related_name='sujets')
+    titre = models.CharField(max_length=300)
+    contenu = models.TextField()
+    auteur = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='sujets_crees')
+    is_epingle = models.BooleanField(default=False)
+    is_ferme = models.BooleanField(default=False)
+    is_resolu = models.BooleanField(default=False)
+    nombre_vues = models.IntegerField(default=0)
+    nombre_reponses = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'sujets'
+        verbose_name = 'Sujet'
+        verbose_name_plural = 'Sujets'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Reponse(models.Model):
+    """Reponse."""
+
+    sujet = models.ForeignKey(to='administration.Sujet', on_delete=models.CASCADE, related_name='reponses')
+    contenu = models.TextField()
+    auteur = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='reponses_forum')
+    parent = models.ForeignKey(null=True, blank=True, to='administration.Reponse', on_delete=models.CASCADE, related_name='sous_reponses')
+    nombre_likes = models.IntegerField(default=0)
+    is_solution = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'reponses'
+        verbose_name = 'Réponse'
+        verbose_name_plural = 'Réponses'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class ReactionReponse(models.Model):
+    """ReactionReponse."""
+
+    reponse = models.ForeignKey(to='administration.Reponse', on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='reactions')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'reactions_reponses'
+        verbose_name = 'Réaction'
+        verbose_name_plural = 'Réactions'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)

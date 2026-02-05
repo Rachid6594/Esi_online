@@ -1,0 +1,44 @@
+from rest_framework import serializers
+from app.administration.models import AdministrationEcole, AnneeAcademique, Classe, Filiere, Matiere, Niveau
+
+
+class AnneeAcademiqueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnneeAcademique
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class NiveauSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Niveau
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class FiliereSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filiere
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class ClasseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classe
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class MatiereSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Matiere
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class AdministrationEcoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdministrationEcole
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']

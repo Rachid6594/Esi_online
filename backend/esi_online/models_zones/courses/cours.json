@@ -1,0 +1,20 @@
+{
+  "model_name": "Cours",
+  "app_name": "courses",
+  "fields": {
+    "titre": { "type": "char", "max_length": 300 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "matiere": { "type": "fk", "to": "academic.Matiere", "related_name": "cours", "on_delete": "CASCADE" },
+    "classe": { "type": "fk", "to": "academic.Classe", "related_name": "cours", "on_delete": "CASCADE" },
+    "enseignant": { "type": "fk", "to": "authentification.Enseignant", "related_name": "cours", "on_delete": "CASCADE" },
+    "annee_academique": { "type": "fk", "to": "espace_admin.AnneeAcademique", "related_name": "cours", "on_delete": "CASCADE" },
+    "is_published": { "type": "bool", "default": false },
+    "date_debut": { "type": "date", "blank": true, "null": true },
+    "date_fin": { "type": "date", "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "cours",
+    "verbose_name": "Cours",
+    "verbose_name_plural": "Cours"
+  }
+}

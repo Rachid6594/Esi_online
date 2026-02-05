@@ -1,0 +1,84 @@
+"""
+Modèles pour l'application administration.
+"""
+from django.db import models
+from django.utils import timezone
+
+
+class Administration(models.Model):
+    """Modèle Administration."""
+    name = models.CharField(max_length=255, verbose_name="Nom")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Date de modification")
+
+    class Meta:
+        verbose_name = "Administration"
+        verbose_name_plural = "Administration"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class AnneeAcademique(models.Model):
+    """AnneeAcademique."""
+
+    libelle = models.CharField(max_length=50)
+    date_debut = models.DateField()
+    date_fin = models.DateField()
+    is_active = models.BooleanField(default=False)
+    created_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='annees_creees')
+    updated_by = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='annees_modifiees')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'annees_academiques'
+        verbose_name = 'Année académique'
+        verbose_name_plural = 'Années académiques'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Niveau(models.Model):
+    """Niveau."""
+
+    code = models.CharField(max_length=2)
+    libelle = models.CharField(max_length=100)
+    ordre = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'niveaux'
+        verbose_name = 'Niveau'
+        verbose_name_plural = 'Niveaux'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class Filiere(models.Model):
+    """Filiere."""
+
+    code = models.CharField(max_length=10)
+    libelle = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'filieres'
+        verbose_name = 'Filière'
+        verbose_name_plural = 'Filières'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)

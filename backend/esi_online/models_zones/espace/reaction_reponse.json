@@ -1,0 +1,13 @@
+{
+  "model_name": "ReactionReponse",
+  "app_name": "administration",
+  "fields": {
+    "reponse": { "type": "fk", "to": "administration.Reponse", "related_name": "reactions", "on_delete": "CASCADE" },
+    "user": { "type": "fk", "to": "admin.User", "related_name": "reactions", "on_delete": "CASCADE" }
+  },
+  "meta": {
+    "db_table": "reactions_reponses",
+    "verbose_name": "Réaction",
+    "verbose_name_plural": "Réactions"
+  }
+}

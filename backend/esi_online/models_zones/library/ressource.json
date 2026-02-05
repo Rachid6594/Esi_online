@@ -1,0 +1,36 @@
+{
+  "model_name": "Ressource",
+  "app_name": "library",
+  "fields": {
+    "titre": { "type": "char", "max_length": 300 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "type_ressource": { "type": "char", "max_length": 15 },
+    "niveau": { "type": "fk", "to": "academic.Niveau", "related_name": "ressources", "on_delete": "CASCADE", "null": true, "blank": true },
+    "matiere": { "type": "fk", "to": "academic.Matiere", "related_name": "ressources", "on_delete": "CASCADE", "null": true, "blank": true },
+    "annee_academique": { "type": "fk", "to": "espace_admin.AnneeAcademique", "related_name": "ressources", "on_delete": "CASCADE", "null": true, "blank": true },
+    "filiere": { "type": "fk", "to": "academic.Filiere", "related_name": "ressources", "on_delete": "CASCADE", "null": true, "blank": true },
+    "categorie": { "type": "fk", "to": "library.Categorie", "related_name": "ressources", "on_delete": "SET_NULL", "null": true, "blank": true },
+    "isbn": { "type": "char", "max_length": 20, "blank": true, "null": true },
+    "editeur": { "type": "char", "max_length": 200, "blank": true, "null": true },
+    "annee_edition": { "type": "int", "blank": true, "null": true },
+    "soutenu_par": { "type": "fk", "to": "authentification.Etudiant", "related_name": "memoires_theses", "on_delete": "SET_NULL", "null": true, "blank": true },
+    "date_soutenance": { "type": "date", "blank": true, "null": true },
+    "jury": { "type": "text", "blank": true, "null": true },
+    "resume": { "type": "text", "blank": true, "null": true },
+    "fichier": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "lien": { "type": "url", "blank": true, "null": true },
+    "taille_fichier": { "type": "bigint", "blank": true, "null": true },
+    "format_fichier": { "type": "char", "max_length": 10, "blank": true, "null": true },
+    "auteur": { "type": "char", "max_length": 200, "blank": true, "null": true },
+    "date_publication": { "type": "date", "blank": true, "null": true },
+    "is_public": { "type": "bool", "default": true },
+    "nombre_vues": { "type": "int", "default": 0 },
+    "nombre_telechargements": { "type": "int", "default": 0 },
+    "uploaded_by": { "type": "fk", "to": "authentification.User", "related_name": "ressources_uploadees", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "ressources",
+    "verbose_name": "Ressource",
+    "verbose_name_plural": "Ressources"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "model_name": "RenduTP",
+  "app_name": "espace_student",
+  "fields": {
+    "tp": { "type": "fk", "to": "espace_prof.TP", "related_name": "rendus", "on_delete": "CASCADE" },
+    "etudiant": { "type": "fk", "to": "espace_student.Etudiant", "related_name": "rendus_tp", "on_delete": "CASCADE" },
+    "fichier": { "type": "char", "max_length": 500 },
+    "commentaire_etudiant": { "type": "text", "blank": true, "null": true },
+    "statut": { "type": "char", "max_length": 15, "default": "RENDU" },
+    "note": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "blank": true, "null": true },
+    "commentaire_enseignant": { "type": "text", "blank": true, "null": true },
+    "fichier_correction": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "date_correction": { "type": "datetime", "blank": true, "null": true },
+    "corrige_par": { "type": "fk", "to": "espace_prof.Enseignant", "related_name": "tps_corriges", "on_delete": "SET_NULL", "null": true, "blank": true }
+  },
+  "meta": {
+    "db_table": "rendus_tp",
+    "verbose_name": "Rendu TP",
+    "verbose_name_plural": "Rendus TP"
+  }
+}

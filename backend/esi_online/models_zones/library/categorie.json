@@ -1,0 +1,15 @@
+{
+  "model_name": "Categorie",
+  "app_name": "library",
+  "fields": {
+    "nom": { "type": "char", "max_length": 100 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "icone": { "type": "char", "max_length": 50, "blank": true, "null": true },
+    "ordre": { "type": "int", "default": 0 }
+  },
+  "meta": {
+    "db_table": "categories",
+    "verbose_name": "Catégorie",
+    "verbose_name_plural": "Catégories"
+  }
+}

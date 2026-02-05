@@ -1,0 +1,17 @@
+{
+  "model_name": "Enseignant",
+  "app_name": "espace_prof",
+  "fields": {
+    "user": { "type": "one2one", "to": "admin.User", "related_name": "enseignant_profile", "on_delete": "CASCADE" },
+    "matricule": { "type": "char", "max_length": 20 },
+    "grade": { "type": "char", "max_length": 20, "blank": true, "null": true },
+    "specialite": { "type": "char", "max_length": 200, "blank": true, "null": true },
+    "bureau": { "type": "char", "max_length": 50, "blank": true, "null": true },
+    "bio": { "type": "text", "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "enseignants",
+    "verbose_name": "Enseignant",
+    "verbose_name_plural": "Enseignants"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "model_name": "Niveau",
+  "app_name": "administration",
+  "fields": {
+    "code": { "type": "char", "max_length": 2 },
+    "libelle": { "type": "char", "max_length": 100 },
+    "ordre": { "type": "int", "default": 0 }
+  },
+  "meta": {
+    "db_table": "niveaux",
+    "verbose_name": "Niveau",
+    "verbose_name_plural": "Niveaux"
+  }
+}

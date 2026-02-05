@@ -1,0 +1,18 @@
+{
+  "model_name": "TentativeQCM",
+  "app_name": "courses",
+  "fields": {
+    "qcm": { "type": "fk", "to": "courses.QCM", "related_name": "tentatives", "on_delete": "CASCADE" },
+    "etudiant": { "type": "fk", "to": "authentification.Etudiant", "related_name": "tentatives_qcm", "on_delete": "CASCADE" },
+    "numero_tentative": { "type": "int", "default": 1 },
+    "statut": { "type": "char", "max_length": 15, "default": "EN_COURS" },
+    "date_fin": { "type": "datetime", "blank": true, "null": true },
+    "note_obtenue": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "blank": true, "null": true },
+    "pourcentage": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "tentatives_qcm",
+    "verbose_name": "Tentative QCM",
+    "verbose_name_plural": "Tentatives QCM"
+  }
+}

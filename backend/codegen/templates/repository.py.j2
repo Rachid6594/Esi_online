@@ -1,0 +1,12 @@
+"""
+Repository {{ model.model_name.lower() }} : accès aux données (pattern Repository).
+"""
+from app.core.repositories.base import BaseRepository
+from app.{{ model.app_name }}.models import {{ model.model_name }}
+
+
+class {{ model.model_name }}Repository(BaseRepository):
+    model = {{ model.model_name }}
+
+    def get_queryset(self):
+        return super().get_queryset()

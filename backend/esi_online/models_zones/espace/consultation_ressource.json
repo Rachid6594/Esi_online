@@ -1,0 +1,14 @@
+{
+  "model_name": "ConsultationRessource",
+  "app_name": "administration",
+  "fields": {
+    "ressource": { "type": "fk", "to": "administration.Ressource", "related_name": "consultations", "on_delete": "CASCADE" },
+    "user": { "type": "fk", "to": "admin.User", "related_name": "consultations", "on_delete": "CASCADE" },
+    "a_telecharge": { "type": "bool", "default": false }
+  },
+  "meta": {
+    "db_table": "consultations_ressources",
+    "verbose_name": "Consultation Ressource",
+    "verbose_name_plural": "Consultations Ressources"
+  }
+}

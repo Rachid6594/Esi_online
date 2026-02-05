@@ -1,0 +1,17 @@
+{
+  "model_name": "AnneeAcademique",
+  "app_name": "espace_admin",
+  "fields": {
+    "libelle": { "type": "char", "max_length": 50 },
+    "date_debut": { "type": "date" },
+    "date_fin": { "type": "date" },
+    "is_active": { "type": "bool", "default": false },
+    "created_by": { "type": "fk", "to": "authentification.User", "related_name": "annees_creees", "on_delete": "SET_NULL", "null": true },
+    "updated_by": { "type": "fk", "to": "authentification.User", "related_name": "annees_modifiees", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "annees_academiques",
+    "verbose_name": "Année académique",
+    "verbose_name_plural": "Années académiques"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "model_name": "Etudiant",
+  "app_name": "espace_student",
+  "fields": {
+    "user": { "type": "one2one", "to": "admin.User", "related_name": "etudiant_profile", "on_delete": "CASCADE" },
+    "matricule": { "type": "char", "max_length": 20 },
+    "date_naissance": { "type": "date", "blank": true, "null": true },
+    "lieu_naissance": { "type": "char", "max_length": 200, "blank": true, "null": true },
+    "adresse": { "type": "text", "blank": true, "null": true },
+    "classe": { "type": "fk", "to": "administration.Classe", "related_name": "etudiants", "on_delete": "SET_NULL", "null": true },
+    "annee_entree": { "type": "int", "blank": true, "null": true },
+    "contact_urgence_nom": { "type": "char", "max_length": 200, "blank": true, "null": true },
+    "contact_urgence_phone": { "type": "char", "max_length": 20, "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "etudiants",
+    "verbose_name": "Étudiant",
+    "verbose_name_plural": "Étudiants"
+  }
+}

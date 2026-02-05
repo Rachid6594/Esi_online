@@ -1,0 +1,24 @@
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+
+    path("anneeacademiques/", views.anneeacademique_list),
+    path("anneeacademiques/<int:pk>/", views.anneeacademique_detail),
+
+    path("niveaus/", views.niveau_list),
+    path("niveaus/<int:pk>/", views.niveau_detail),
+
+    path("filieres/", views.filiere_list),
+    path("filieres/<int:pk>/", views.filiere_detail),
+
+    path("classes/", views.classe_list),
+    path("classes/<int:pk>/", views.classe_detail),
+
+    path("matieres/", views.matiere_list),
+    path("matieres/<int:pk>/", views.matiere_detail),
+
+    path("administrationecoles/", views.administrationecole_list),
+    path("administrationecoles/<int:pk>/", views.administrationecole_detail),
+]

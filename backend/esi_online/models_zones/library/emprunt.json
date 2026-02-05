@@ -1,0 +1,20 @@
+{
+  "model_name": "Emprunt",
+  "app_name": "library",
+  "fields": {
+    "exemplaire": { "type": "fk", "to": "library.Exemplaire", "related_name": "emprunts", "on_delete": "CASCADE" },
+    "emprunteur": { "type": "fk", "to": "authentification.User", "related_name": "emprunts", "on_delete": "CASCADE" },
+    "type_emprunt": { "type": "char", "max_length": 15, "default": "EMPORTE" },
+    "date_emprunt": { "type": "datetime" },
+    "date_retour_prevue": { "type": "date" },
+    "date_retour_effective": { "type": "datetime", "blank": true, "null": true },
+    "statut": { "type": "char", "max_length": 15, "default": "EN_COURS" },
+    "remarques": { "type": "text", "blank": true, "null": true },
+    "enregistre_par": { "type": "fk", "to": "authentification.User", "related_name": "emprunts_enregistres", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "emprunts",
+    "verbose_name": "Emprunt",
+    "verbose_name_plural": "Emprunts"
+  }
+}

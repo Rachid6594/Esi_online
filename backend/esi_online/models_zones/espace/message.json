@@ -1,0 +1,19 @@
+{
+  "model_name": "Message",
+  "app_name": "administration",
+  "fields": {
+    "expediteur": { "type": "fk", "to": "admin.User", "related_name": "messages_envoyes", "on_delete": "CASCADE" },
+    "destinataire": { "type": "fk", "to": "admin.User", "related_name": "messages_recus", "on_delete": "CASCADE" },
+    "sujet": { "type": "char", "max_length": 300 },
+    "contenu": { "type": "text" },
+    "fichier_joint": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "is_lu": { "type": "bool", "default": false },
+    "date_lecture": { "type": "datetime", "blank": true, "null": true },
+    "parent": { "type": "fk", "to": "administration.Message", "related_name": "reponses", "on_delete": "CASCADE", "null": true, "blank": true }
+  },
+  "meta": {
+    "db_table": "messages",
+    "verbose_name": "Message",
+    "verbose_name_plural": "Messages"
+  }
+}

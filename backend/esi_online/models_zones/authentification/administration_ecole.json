@@ -1,0 +1,22 @@
+{
+  "model_name": "AdministrationEcole",
+  "app_name": "authentification",
+  "fields": {
+    "user": { "type": "one2one", "to": "authentification.User", "related_name": "admin_ecole_profile", "on_delete": "CASCADE" },
+    "matricule": { "type": "char", "max_length": 20 },
+    "poste": { "type": "char", "max_length": 30 },
+    "departement": { "type": "char", "max_length": 200, "blank": true, "null": true },
+    "bureau": { "type": "char", "max_length": 50, "blank": true, "null": true },
+    "peut_gerer_etudiants": { "type": "bool", "default": true },
+    "peut_gerer_enseignants": { "type": "bool", "default": false },
+    "peut_gerer_structure_academique": { "type": "bool", "default": false },
+    "peut_envoyer_annonces": { "type": "bool", "default": true },
+    "peut_gerer_bibliotheque": { "type": "bool", "default": false },
+    "peut_voir_statistiques": { "type": "bool", "default": true }
+  },
+  "meta": {
+    "db_table": "administration_ecole",
+    "verbose_name": "Administration École",
+    "verbose_name_plural": "Administration École"
+  }
+}

@@ -1,0 +1,26 @@
+from app.administration.services.administration_service import AdministrationService
+
+__all__ = ["AdministrationService"]
+from app.administration.services.anneeacademique_service import AnneeAcademiqueService
+from app.administration.services.niveau_service import NiveauService
+from app.administration.services.filiere_service import FiliereService
+from app.administration.services.classe_service import ClasseService
+from app.administration.services.matiere_service import MatiereService
+from app.administration.services.administrationecole_service import AdministrationEcoleService
+from app.administration.services.annonce_service import AnnonceService
+from app.administration.services.lectureannonce_service import LectureAnnonceService
+from app.administration.services.emploidutemps_service import EmploiDuTempsService
+from app.administration.services.evenement_service import EvenementService
+from app.administration.services.categorie_service import CategorieService
+from app.administration.services.tag_service import TagService
+from app.administration.services.affectationenseignant_service import AffectationEnseignantService
+from app.administration.services.ressource_service import RessourceService
+from app.administration.services.consultationressource_service import ConsultationRessourceService
+from app.administration.services.exemplaire_service import ExemplaireService
+from app.administration.services.emprunt_service import EmpruntService
+from app.administration.services.reservation_service import ReservationService
+from app.administration.services.message_service import MessageService
+from app.administration.services.forum_service import ForumService
+from app.administration.services.sujet_service import SujetService
+from app.administration.services.reponse_service import ReponseService
+from app.administration.services.reactionreponse_service import ReactionReponseService

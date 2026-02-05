@@ -1,0 +1,17 @@
+{
+  "model_name": "Reponse",
+  "app_name": "administration",
+  "fields": {
+    "sujet": { "type": "fk", "to": "administration.Sujet", "related_name": "reponses", "on_delete": "CASCADE" },
+    "contenu": { "type": "text" },
+    "auteur": { "type": "fk", "to": "admin.User", "related_name": "reponses_forum", "on_delete": "CASCADE" },
+    "parent": { "type": "fk", "to": "administration.Reponse", "related_name": "sous_reponses", "on_delete": "CASCADE", "null": true, "blank": true },
+    "nombre_likes": { "type": "int", "default": 0 },
+    "is_solution": { "type": "bool", "default": false }
+  },
+  "meta": {
+    "db_table": "reponses",
+    "verbose_name": "Réponse",
+    "verbose_name_plural": "Réponses"
+  }
+}

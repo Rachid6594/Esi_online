@@ -1,0 +1,21 @@
+class {{ model.model_name }}(models.Model):
+    """
+    {{ model.model_name }}.
+    """
+{% for field_name, field in model.fields.items() %}
+{% if field_name != 'id' %}
+    {{ field_name }} = models.{{ model.get_django_field_type(field_name) }}({% for k, v in model.get_field_params(field_name).items() %}{{ k }}={{ v if v not in ['True', 'False'] else v|lower }}{{ ", " if not loop.last else "" }}{% endfor %})
+{% endif %}
+{% endfor %}
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = '{{ model.meta.get("db_table") or model.app_name + "_" + model.model_name.lower() + "s" }}'
+        verbose_name = {{ (model.meta.get("verbose_name") or model.model_name)|py_string }}
+        verbose_name_plural = {{ (model.meta.get("verbose_name_plural") or model.model_name + "s")|py_string }}
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{{ '{{' }}self.title if hasattr(self, 'title') else self.id{{ '}}' }}"

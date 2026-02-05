@@ -1,0 +1,39 @@
+# --- {{ model.model_name }} ---
+class CanView{{ model.model_name }}(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_{{ model.model_name.lower() }}."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("{{ model.app_name }}.view_{{ model.model_name.lower() }}")
+            )
+        return True
+
+
+class CanCreate{{ model.model_name }}(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_{{ model.model_name.lower() }}."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("{{ model.app_name }}.add_{{ model.model_name.lower() }}")
+            )
+        return True
+
+
+class CanUpdate{{ model.model_name }}(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_{{ model.model_name.lower() }}."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("{{ model.app_name }}.change_{{ model.model_name.lower() }}")
+            )
+        return True
+
+
+class CanDelete{{ model.model_name }}(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_{{ model.model_name.lower() }}."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("{{ model.app_name }}.delete_{{ model.model_name.lower() }}")
+            )
+        return True

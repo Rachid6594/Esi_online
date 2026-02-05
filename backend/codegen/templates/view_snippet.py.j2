@@ -1,0 +1,48 @@
+# --- {{ model.model_name }} (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanView{{ model.model_name }},
+    CanCreate{{ model.model_name }},
+])
+def {{ model.model_name.lower() }}_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = {{ model.model_name }}Service()
+        qs = service.list_all()
+        serializer = {{ model.model_name }}Serializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = {{ model.model_name }}Serializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = {{ model.model_name }}Service()
+    obj = service.create(**serializer.validated_data)
+    serializer = {{ model.model_name }}Serializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanView{{ model.model_name }},
+    CanUpdate{{ model.model_name }},
+    CanDelete{{ model.model_name }},
+])
+def {{ model.model_name.lower() }}_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = {{ model.model_name }}Service()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = {{ model.model_name }}Serializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = {{ model.model_name }}Serializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response({{ model.model_name }}Serializer(updated).data)
+

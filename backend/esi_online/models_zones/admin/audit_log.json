@@ -1,0 +1,18 @@
+{
+  "model_name": "AuditLog",
+  "app_name": "admin",
+  "fields": {
+    "user": { "type": "fk", "to": "admin.User", "related_name": "audit_logs", "on_delete": "SET_NULL", "null": true },
+    "action": { "type": "char", "max_length": 10 },
+    "model_name": { "type": "char", "max_length": 100, "blank": true, "null": true },
+    "object_id": { "type": "int", "blank": true, "null": true },
+    "description": { "type": "text", "blank": true, "null": true },
+    "ip_address": { "type": "char", "max_length": 45, "blank": true, "null": true },
+    "user_agent": { "type": "char", "max_length": 500, "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "audit_logs",
+    "verbose_name": "Log d'Audit",
+    "verbose_name_plural": "Logs d'Audit"
+  }
+}

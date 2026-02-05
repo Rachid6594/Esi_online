@@ -1,0 +1,19 @@
+{
+  "model_name": "Evenement",
+  "app_name": "administration",
+  "fields": {
+    "titre": { "type": "char", "max_length": 200 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "type_evenement": { "type": "char", "max_length": 20, "default": "AUTRE" },
+    "date_debut": { "type": "datetime" },
+    "date_fin": { "type": "datetime", "blank": true, "null": true },
+    "classe": { "type": "fk", "to": "administration.Classe", "related_name": "evenements", "on_delete": "CASCADE", "null": true, "blank": true },
+    "annee_academique": { "type": "fk", "to": "administration.AnneeAcademique", "related_name": "evenements", "on_delete": "CASCADE" },
+    "created_by": { "type": "fk", "to": "admin.User", "related_name": "evenements_crees", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "evenements",
+    "verbose_name": "Événement",
+    "verbose_name_plural": "Événements"
+  }
+}

@@ -1,0 +1,32 @@
+"""
+Permissions pour l'application admin.
+"""
+from rest_framework import permissions
+
+
+class CanViewAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("admin.view_admin")
+        )
+
+
+class CanCreateAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("admin.add_admin")
+        )
+
+
+class CanUpdateAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("admin.change_admin")
+        )
+
+
+class CanDeleteAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.is_staff or request.user.has_perm("admin.delete_admin")
+        )

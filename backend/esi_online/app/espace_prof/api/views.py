@@ -1,0 +1,545 @@
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from app.espace_prof.services import EnseignantService
+from app.espace_prof.api.serializers import EnseignantSerializer
+from app.core.exceptions import NotFoundError
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewEnseignant, CanCreateEnseignant,
+    CanUpdateEnseignant, CanDeleteEnseignant,
+)
+from app.espace_prof.services import CoursService
+from app.espace_prof.api.serializers import CoursSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewCours, CanCreateCours,
+    CanUpdateCours, CanDeleteCours,
+)
+from app.espace_prof.services import ChapitreService
+from app.espace_prof.api.serializers import ChapitreSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewChapitre, CanCreateChapitre,
+    CanUpdateChapitre, CanDeleteChapitre,
+)
+from app.espace_prof.services import RessourceCoursService
+from app.espace_prof.api.serializers import RessourceCoursSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewRessourceCours, CanCreateRessourceCours,
+    CanUpdateRessourceCours, CanDeleteRessourceCours,
+)
+from app.espace_prof.services import ExerciceService
+from app.espace_prof.api.serializers import ExerciceSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewExercice, CanCreateExercice,
+    CanUpdateExercice, CanDeleteExercice,
+)
+from app.espace_prof.services import TPService
+from app.espace_prof.api.serializers import TPSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewTP, CanCreateTP,
+    CanUpdateTP, CanDeleteTP,
+)
+from app.espace_prof.services import FichierSupportTPService
+from app.espace_prof.api.serializers import FichierSupportTPSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewFichierSupportTP, CanCreateFichierSupportTP,
+    CanUpdateFichierSupportTP, CanDeleteFichierSupportTP,
+)
+from app.espace_prof.services import QCMService
+from app.espace_prof.api.serializers import QCMSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewQCM, CanCreateQCM,
+    CanUpdateQCM, CanDeleteQCM,
+)
+from app.espace_prof.services import QuestionQCMService
+from app.espace_prof.api.serializers import QuestionQCMSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewQuestionQCM, CanCreateQuestionQCM,
+    CanUpdateQuestionQCM, CanDeleteQuestionQCM,
+)
+from app.espace_prof.services import ReponseQCMService
+from app.espace_prof.api.serializers import ReponseQCMSerializer
+from app.espace_prof.permissions.espace_prof_permissions import (
+    CanViewReponseQCM, CanCreateReponseQCM,
+    CanUpdateReponseQCM, CanDeleteReponseQCM,
+)
+
+# --- Enseignant (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewEnseignant,
+    CanCreateEnseignant,
+])
+def enseignant_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = EnseignantService()
+        qs = service.list_all()
+        serializer = EnseignantSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = EnseignantSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = EnseignantService()
+    obj = service.create(**serializer.validated_data)
+    serializer = EnseignantSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewEnseignant,
+    CanUpdateEnseignant,
+    CanDeleteEnseignant,
+])
+def enseignant_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = EnseignantService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = EnseignantSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = EnseignantSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(EnseignantSerializer(updated).data)
+
+# --- Cours (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewCours,
+    CanCreateCours,
+])
+def cours_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = CoursService()
+        qs = service.list_all()
+        serializer = CoursSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = CoursSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = CoursService()
+    obj = service.create(**serializer.validated_data)
+    serializer = CoursSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewCours,
+    CanUpdateCours,
+    CanDeleteCours,
+])
+def cours_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = CoursService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = CoursSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = CoursSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(CoursSerializer(updated).data)
+
+# --- Chapitre (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewChapitre,
+    CanCreateChapitre,
+])
+def chapitre_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = ChapitreService()
+        qs = service.list_all()
+        serializer = ChapitreSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = ChapitreSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = ChapitreService()
+    obj = service.create(**serializer.validated_data)
+    serializer = ChapitreSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewChapitre,
+    CanUpdateChapitre,
+    CanDeleteChapitre,
+])
+def chapitre_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = ChapitreService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = ChapitreSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = ChapitreSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(ChapitreSerializer(updated).data)
+
+# --- RessourceCours (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewRessourceCours,
+    CanCreateRessourceCours,
+])
+def ressourcecours_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = RessourceCoursService()
+        qs = service.list_all()
+        serializer = RessourceCoursSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = RessourceCoursSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = RessourceCoursService()
+    obj = service.create(**serializer.validated_data)
+    serializer = RessourceCoursSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewRessourceCours,
+    CanUpdateRessourceCours,
+    CanDeleteRessourceCours,
+])
+def ressourcecours_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = RessourceCoursService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = RessourceCoursSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = RessourceCoursSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(RessourceCoursSerializer(updated).data)
+
+# --- Exercice (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewExercice,
+    CanCreateExercice,
+])
+def exercice_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = ExerciceService()
+        qs = service.list_all()
+        serializer = ExerciceSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = ExerciceSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = ExerciceService()
+    obj = service.create(**serializer.validated_data)
+    serializer = ExerciceSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewExercice,
+    CanUpdateExercice,
+    CanDeleteExercice,
+])
+def exercice_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = ExerciceService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = ExerciceSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = ExerciceSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(ExerciceSerializer(updated).data)
+
+# --- TP (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewTP,
+    CanCreateTP,
+])
+def tp_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = TPService()
+        qs = service.list_all()
+        serializer = TPSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = TPSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = TPService()
+    obj = service.create(**serializer.validated_data)
+    serializer = TPSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewTP,
+    CanUpdateTP,
+    CanDeleteTP,
+])
+def tp_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = TPService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = TPSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = TPSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(TPSerializer(updated).data)
+
+# --- FichierSupportTP (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewFichierSupportTP,
+    CanCreateFichierSupportTP,
+])
+def fichiersupporttp_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = FichierSupportTPService()
+        qs = service.list_all()
+        serializer = FichierSupportTPSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = FichierSupportTPSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = FichierSupportTPService()
+    obj = service.create(**serializer.validated_data)
+    serializer = FichierSupportTPSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewFichierSupportTP,
+    CanUpdateFichierSupportTP,
+    CanDeleteFichierSupportTP,
+])
+def fichiersupporttp_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = FichierSupportTPService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = FichierSupportTPSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = FichierSupportTPSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(FichierSupportTPSerializer(updated).data)
+
+# --- QCM (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewQCM,
+    CanCreateQCM,
+])
+def qcm_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = QCMService()
+        qs = service.list_all()
+        serializer = QCMSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = QCMSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = QCMService()
+    obj = service.create(**serializer.validated_data)
+    serializer = QCMSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewQCM,
+    CanUpdateQCM,
+    CanDeleteQCM,
+])
+def qcm_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = QCMService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = QCMSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = QCMSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(QCMSerializer(updated).data)
+
+# --- QuestionQCM (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewQuestionQCM,
+    CanCreateQuestionQCM,
+])
+def questionqcm_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = QuestionQCMService()
+        qs = service.list_all()
+        serializer = QuestionQCMSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = QuestionQCMSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = QuestionQCMService()
+    obj = service.create(**serializer.validated_data)
+    serializer = QuestionQCMSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewQuestionQCM,
+    CanUpdateQuestionQCM,
+    CanDeleteQuestionQCM,
+])
+def questionqcm_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = QuestionQCMService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = QuestionQCMSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = QuestionQCMSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(QuestionQCMSerializer(updated).data)
+
+# --- ReponseQCM (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewReponseQCM,
+    CanCreateReponseQCM,
+])
+def reponseqcm_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = ReponseQCMService()
+        qs = service.list_all()
+        serializer = ReponseQCMSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = ReponseQCMSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = ReponseQCMService()
+    obj = service.create(**serializer.validated_data)
+    serializer = ReponseQCMSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewReponseQCM,
+    CanUpdateReponseQCM,
+    CanDeleteReponseQCM,
+])
+def reponseqcm_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = ReponseQCMService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = ReponseQCMSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = ReponseQCMSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(ReponseQCMSerializer(updated).data)
+

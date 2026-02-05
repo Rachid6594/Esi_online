@@ -1,0 +1,23 @@
+{
+  "model_name": "EmploiDuTemps",
+  "app_name": "administration",
+  "fields": {
+    "classe": { "type": "fk", "to": "administration.Classe", "related_name": "emplois_du_temps", "on_delete": "CASCADE" },
+    "matiere": { "type": "fk", "to": "administration.Matiere", "related_name": "emplois_du_temps", "on_delete": "CASCADE" },
+    "enseignant": { "type": "fk", "to": "espace_prof.Enseignant", "related_name": "emplois_du_temps", "on_delete": "SET_NULL", "null": true },
+    "annee_academique": { "type": "fk", "to": "administration.AnneeAcademique", "related_name": "emplois_du_temps", "on_delete": "CASCADE" },
+    "jour": { "type": "char", "max_length": 10 },
+    "heure_debut": { "type": "time" },
+    "heure_fin": { "type": "time" },
+    "salle": { "type": "char", "max_length": 50, "blank": true, "null": true },
+    "type_seance": { "type": "char", "max_length": 10, "default": "COURS" },
+    "date_debut_validite": { "type": "date", "blank": true, "null": true },
+    "date_fin_validite": { "type": "date", "blank": true, "null": true },
+    "created_by": { "type": "fk", "to": "admin.User", "related_name": "edt_crees", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "emplois_du_temps",
+    "verbose_name": "Emploi du Temps",
+    "verbose_name_plural": "Emplois du Temps"
+  }
+}

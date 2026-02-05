@@ -1,0 +1,16 @@
+{
+  "model_name": "Forum",
+  "app_name": "forum",
+  "fields": {
+    "titre": { "type": "char", "max_length": 300 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "matiere": { "type": "fk", "to": "academic.Matiere", "related_name": "forums", "on_delete": "CASCADE", "null": true, "blank": true },
+    "is_general": { "type": "bool", "default": false },
+    "created_by": { "type": "fk", "to": "authentification.User", "related_name": "forums_crees", "on_delete": "SET_NULL", "null": true }
+  },
+  "meta": {
+    "db_table": "forums",
+    "verbose_name": "Forum",
+    "verbose_name_plural": "Forums"
+  }
+}

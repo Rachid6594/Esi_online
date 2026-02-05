@@ -1,0 +1,134 @@
+"""
+Modèles pour l'application admin.
+"""
+from django.db import models
+from django.utils import timezone
+
+
+class Admin(models.Model):
+    """Modèle Admin."""
+    name = models.CharField(max_length=255, verbose_name="Nom")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Date de modification")
+
+    class Meta:
+        verbose_name = "Admin"
+        verbose_name_plural = "Admin"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class User(models.Model):
+    """User."""
+
+    role = models.CharField(max_length=15)
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    avatar = models.CharField(max_length=100, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'users'
+        verbose_name = 'Utilisateur'
+        verbose_name_plural = 'Utilisateurs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class SuperAdmin(models.Model):
+    """SuperAdmin."""
+
+    user = models.OneToOneField(to='admin.User', on_delete=models.CASCADE, related_name='super_admin_profile')
+    niveau_acces = models.IntegerField(default=1)
+    dernier_acces = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'super_admins'
+        verbose_name = 'Super Administrateur'
+        verbose_name_plural = 'Super Administrateurs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class Notification(models.Model):
+    """Notification."""
+
+    user = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='notifications')
+    titre = models.CharField(max_length=200)
+    message = models.TextField()
+    type_notification = models.CharField(max_length=10, default='INFO')
+    source = models.CharField(max_length=20, default='AUTRE')
+    lien = models.CharField(max_length=500, null=True, blank=True)
+    objet_type = models.CharField(max_length=100, null=True, blank=True)
+    objet_id = models.IntegerField(null=True, blank=True)
+    is_lu = models.BooleanField(default=False)
+    date_lecture = models.DateTimeField(null=True, blank=True)
+    envoye_par_email = models.BooleanField(default=False)
+    date_expiration = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'notifications'
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+class PreferenceNotification(models.Model):
+    """PreferenceNotification."""
+
+    user = models.ForeignKey(to='admin.User', on_delete=models.CASCADE, related_name='preferences_notifications')
+    source = models.CharField(max_length=20)
+    recevoir_application = models.BooleanField(default=True)
+    recevoir_email = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'preferences_notifications'
+        verbose_name = 'Préférence de notification'
+        verbose_name_plural = 'Préférences de notification'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+
+
+class AuditLog(models.Model):
+    """AuditLog."""
+
+    user = models.ForeignKey(null=True, to='admin.User', on_delete=models.SET_NULL, related_name='audit_logs')
+    action = models.CharField(max_length=10)
+    model_name = models.CharField(max_length=100, null=True, blank=True)
+    object_id = models.IntegerField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    user_agent = models.CharField(max_length=500, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'audit_logs'
+        verbose_name = "Log d'Audit"
+        verbose_name_plural = "Logs d'Audit"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return str(self.title if hasattr(self, 'title') else self.id)
+

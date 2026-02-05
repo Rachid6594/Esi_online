@@ -1,0 +1,20 @@
+{
+  "model_name": "Sujet",
+  "app_name": "forum",
+  "fields": {
+    "forum": { "type": "fk", "to": "forum.Forum", "related_name": "sujets", "on_delete": "CASCADE" },
+    "titre": { "type": "char", "max_length": 300 },
+    "contenu": { "type": "text" },
+    "auteur": { "type": "fk", "to": "authentification.User", "related_name": "sujets_crees", "on_delete": "CASCADE" },
+    "is_epingle": { "type": "bool", "default": false },
+    "is_ferme": { "type": "bool", "default": false },
+    "is_resolu": { "type": "bool", "default": false },
+    "nombre_vues": { "type": "int", "default": 0 },
+    "nombre_reponses": { "type": "int", "default": 0 }
+  },
+  "meta": {
+    "db_table": "sujets",
+    "verbose_name": "Sujet",
+    "verbose_name_plural": "Sujets"
+  }
+}

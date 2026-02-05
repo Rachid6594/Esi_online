@@ -1,0 +1,23 @@
+{
+  "model_name": "Notification",
+  "app_name": "admin",
+  "fields": {
+    "user": { "type": "fk", "to": "admin.User", "related_name": "notifications", "on_delete": "CASCADE" },
+    "titre": { "type": "char", "max_length": 200 },
+    "message": { "type": "text" },
+    "type_notification": { "type": "char", "max_length": 10, "default": "INFO" },
+    "source": { "type": "char", "max_length": 20, "default": "AUTRE" },
+    "lien": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "objet_type": { "type": "char", "max_length": 100, "blank": true, "null": true },
+    "objet_id": { "type": "int", "blank": true, "null": true },
+    "is_lu": { "type": "bool", "default": false },
+    "date_lecture": { "type": "datetime", "blank": true, "null": true },
+    "envoye_par_email": { "type": "bool", "default": false },
+    "date_expiration": { "type": "datetime", "blank": true, "null": true }
+  },
+  "meta": {
+    "db_table": "notifications",
+    "verbose_name": "Notification",
+    "verbose_name_plural": "Notifications"
+  }
+}

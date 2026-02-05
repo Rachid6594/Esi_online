@@ -1,0 +1,65 @@
+from rest_framework import serializers
+from app.administration.models import AdministrationEcole, AnneeAcademique, Annonce, Classe, EmploiDuTemps, Filiere, LectureAnnonce, Matiere, Niveau
+
+
+class AnneeAcademiqueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnneeAcademique
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class NiveauSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Niveau
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class FiliereSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filiere
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class ClasseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classe
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class MatiereSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Matiere
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class AdministrationEcoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdministrationEcole
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class AnnonceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Annonce
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class LectureAnnonceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LectureAnnonce
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class EmploiDuTempsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmploiDuTemps
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']

@@ -1,0 +1,15 @@
+{
+  "model_name": "ReponseEtudiantQCM",
+  "app_name": "espace_student",
+  "fields": {
+    "tentative": { "type": "fk", "to": "espace_student.TentativeQCM", "related_name": "reponses_etudiant", "on_delete": "CASCADE" },
+    "question": { "type": "fk", "to": "espace_prof.QuestionQCM", "related_name": "reponses_etudiants", "on_delete": "CASCADE" },
+    "is_correcte": { "type": "bool", "default": false },
+    "points_obtenus": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "default": 0 }
+  },
+  "meta": {
+    "db_table": "reponses_etudiant_qcm",
+    "verbose_name": "Réponse Étudiant QCM",
+    "verbose_name_plural": "Réponses Étudiant QCM"
+  }
+}

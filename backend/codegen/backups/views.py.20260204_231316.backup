@@ -1,0 +1,491 @@
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from app.administration.services import AnneeAcademiqueService
+from app.administration.api.serializers import AnneeAcademiqueSerializer
+from app.core.exceptions import NotFoundError
+from app.administration.permissions.administration_permissions import (
+    CanViewAnneeAcademique, CanCreateAnneeAcademique,
+    CanUpdateAnneeAcademique, CanDeleteAnneeAcademique,
+)
+from app.administration.services import NiveauService
+from app.administration.api.serializers import NiveauSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewNiveau, CanCreateNiveau,
+    CanUpdateNiveau, CanDeleteNiveau,
+)
+from app.administration.services import FiliereService
+from app.administration.api.serializers import FiliereSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewFiliere, CanCreateFiliere,
+    CanUpdateFiliere, CanDeleteFiliere,
+)
+from app.administration.services import ClasseService
+from app.administration.api.serializers import ClasseSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewClasse, CanCreateClasse,
+    CanUpdateClasse, CanDeleteClasse,
+)
+from app.administration.services import MatiereService
+from app.administration.api.serializers import MatiereSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewMatiere, CanCreateMatiere,
+    CanUpdateMatiere, CanDeleteMatiere,
+)
+from app.administration.services import AdministrationEcoleService
+from app.administration.api.serializers import AdministrationEcoleSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewAdministrationEcole, CanCreateAdministrationEcole,
+    CanUpdateAdministrationEcole, CanDeleteAdministrationEcole,
+)
+from app.administration.services import AnnonceService
+from app.administration.api.serializers import AnnonceSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewAnnonce, CanCreateAnnonce,
+    CanUpdateAnnonce, CanDeleteAnnonce,
+)
+from app.administration.services import LectureAnnonceService
+from app.administration.api.serializers import LectureAnnonceSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewLectureAnnonce, CanCreateLectureAnnonce,
+    CanUpdateLectureAnnonce, CanDeleteLectureAnnonce,
+)
+from app.administration.services import EmploiDuTempsService
+from app.administration.api.serializers import EmploiDuTempsSerializer
+from app.administration.permissions.administration_permissions import (
+    CanViewEmploiDuTemps, CanCreateEmploiDuTemps,
+    CanUpdateEmploiDuTemps, CanDeleteEmploiDuTemps,
+)
+
+# --- AnneeAcademique (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewAnneeAcademique,
+    CanCreateAnneeAcademique,
+])
+def anneeacademique_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = AnneeAcademiqueService()
+        qs = service.list_all()
+        serializer = AnneeAcademiqueSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = AnneeAcademiqueSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = AnneeAcademiqueService()
+    obj = service.create(**serializer.validated_data)
+    serializer = AnneeAcademiqueSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewAnneeAcademique,
+    CanUpdateAnneeAcademique,
+    CanDeleteAnneeAcademique,
+])
+def anneeacademique_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = AnneeAcademiqueService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = AnneeAcademiqueSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = AnneeAcademiqueSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(AnneeAcademiqueSerializer(updated).data)
+
+# --- Niveau (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewNiveau,
+    CanCreateNiveau,
+])
+def niveau_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = NiveauService()
+        qs = service.list_all()
+        serializer = NiveauSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = NiveauSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = NiveauService()
+    obj = service.create(**serializer.validated_data)
+    serializer = NiveauSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewNiveau,
+    CanUpdateNiveau,
+    CanDeleteNiveau,
+])
+def niveau_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = NiveauService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = NiveauSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = NiveauSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(NiveauSerializer(updated).data)
+
+# --- Filiere (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewFiliere,
+    CanCreateFiliere,
+])
+def filiere_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = FiliereService()
+        qs = service.list_all()
+        serializer = FiliereSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = FiliereSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = FiliereService()
+    obj = service.create(**serializer.validated_data)
+    serializer = FiliereSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewFiliere,
+    CanUpdateFiliere,
+    CanDeleteFiliere,
+])
+def filiere_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = FiliereService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = FiliereSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = FiliereSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(FiliereSerializer(updated).data)
+
+# --- Classe (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewClasse,
+    CanCreateClasse,
+])
+def classe_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = ClasseService()
+        qs = service.list_all()
+        serializer = ClasseSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = ClasseSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = ClasseService()
+    obj = service.create(**serializer.validated_data)
+    serializer = ClasseSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewClasse,
+    CanUpdateClasse,
+    CanDeleteClasse,
+])
+def classe_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = ClasseService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = ClasseSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = ClasseSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(ClasseSerializer(updated).data)
+
+# --- Matiere (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewMatiere,
+    CanCreateMatiere,
+])
+def matiere_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = MatiereService()
+        qs = service.list_all()
+        serializer = MatiereSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = MatiereSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = MatiereService()
+    obj = service.create(**serializer.validated_data)
+    serializer = MatiereSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewMatiere,
+    CanUpdateMatiere,
+    CanDeleteMatiere,
+])
+def matiere_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = MatiereService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = MatiereSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = MatiereSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(MatiereSerializer(updated).data)
+
+# --- AdministrationEcole (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewAdministrationEcole,
+    CanCreateAdministrationEcole,
+])
+def administrationecole_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = AdministrationEcoleService()
+        qs = service.list_all()
+        serializer = AdministrationEcoleSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = AdministrationEcoleSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = AdministrationEcoleService()
+    obj = service.create(**serializer.validated_data)
+    serializer = AdministrationEcoleSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewAdministrationEcole,
+    CanUpdateAdministrationEcole,
+    CanDeleteAdministrationEcole,
+])
+def administrationecole_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = AdministrationEcoleService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = AdministrationEcoleSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = AdministrationEcoleSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(AdministrationEcoleSerializer(updated).data)
+
+# --- Annonce (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewAnnonce,
+    CanCreateAnnonce,
+])
+def annonce_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = AnnonceService()
+        qs = service.list_all()
+        serializer = AnnonceSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = AnnonceSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = AnnonceService()
+    obj = service.create(**serializer.validated_data)
+    serializer = AnnonceSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewAnnonce,
+    CanUpdateAnnonce,
+    CanDeleteAnnonce,
+])
+def annonce_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = AnnonceService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = AnnonceSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = AnnonceSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(AnnonceSerializer(updated).data)
+
+# --- LectureAnnonce (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewLectureAnnonce,
+    CanCreateLectureAnnonce,
+])
+def lectureannonce_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = LectureAnnonceService()
+        qs = service.list_all()
+        serializer = LectureAnnonceSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = LectureAnnonceSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = LectureAnnonceService()
+    obj = service.create(**serializer.validated_data)
+    serializer = LectureAnnonceSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewLectureAnnonce,
+    CanUpdateLectureAnnonce,
+    CanDeleteLectureAnnonce,
+])
+def lectureannonce_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = LectureAnnonceService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = LectureAnnonceSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = LectureAnnonceSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(LectureAnnonceSerializer(updated).data)
+
+# --- EmploiDuTemps (CRUD + permissions) ---
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewEmploiDuTemps,
+    CanCreateEmploiDuTemps,
+])
+def emploidutemps_list(request):
+    """GET: liste | POST: création."""
+    if request.method == "GET":
+        service = EmploiDuTempsService()
+        qs = service.list_all()
+        serializer = EmploiDuTempsSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST
+    serializer = EmploiDuTempsSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    service = EmploiDuTempsService()
+    obj = service.create(**serializer.validated_data)
+    serializer = EmploiDuTempsSerializer(obj)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewEmploiDuTemps,
+    CanUpdateEmploiDuTemps,
+    CanDeleteEmploiDuTemps,
+])
+def emploidutemps_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = EmploiDuTempsService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = EmploiDuTempsSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = EmploiDuTempsSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(EmploiDuTempsSerializer(updated).data)
+

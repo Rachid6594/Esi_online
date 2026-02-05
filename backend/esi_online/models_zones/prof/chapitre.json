@@ -1,0 +1,18 @@
+{
+  "model_name": "Chapitre",
+  "app_name": "espace_prof",
+  "fields": {
+    "cours": { "type": "fk", "to": "espace_prof.Cours", "related_name": "chapitres", "on_delete": "CASCADE" },
+    "titre": { "type": "char", "max_length": 300 },
+    "description": { "type": "text", "blank": true, "null": true },
+    "ordre": { "type": "int", "default": 0 },
+    "date_disponibilite": { "type": "datetime", "blank": true, "null": true },
+    "date_expiration": { "type": "datetime", "blank": true, "null": true },
+    "is_visible": { "type": "bool", "default": true }
+  },
+  "meta": {
+    "db_table": "chapitres",
+    "verbose_name": "Chapitre",
+    "verbose_name_plural": "Chapitres"
+  }
+}

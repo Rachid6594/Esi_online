@@ -1,0 +1,26 @@
+from app.administration.repositories.administration_repository import AdministrationRepository
+
+__all__ = ["AdministrationRepository", "AnneeAcademiqueRepository", "NiveauRepository", "FiliereRepository", "ClasseRepository", "MatiereRepository", "AdministrationEcoleRepository", "AnnonceRepository", "LectureAnnonceRepository", "EmploiDuTempsRepository", "EvenementRepository", "CategorieRepository", "TagRepository", "AffectationEnseignantRepository", "RessourceRepository", "ConsultationRessourceRepository", "ExemplaireRepository", "EmpruntRepository", "ReservationRepository", "MessageRepository", "ForumRepository", "SujetRepository", "ReponseRepository", "ReactionReponseRepository"]
+from app.administration.repositories.anneeacademique_repository import AnneeAcademiqueRepository
+from app.administration.repositories.niveau_repository import NiveauRepository
+from app.administration.repositories.filiere_repository import FiliereRepository
+from app.administration.repositories.classe_repository import ClasseRepository
+from app.administration.repositories.matiere_repository import MatiereRepository
+from app.administration.repositories.administrationecole_repository import AdministrationEcoleRepository
+from app.administration.repositories.annonce_repository import AnnonceRepository
+from app.administration.repositories.lectureannonce_repository import LectureAnnonceRepository
+from app.administration.repositories.emploidutemps_repository import EmploiDuTempsRepository
+from app.administration.repositories.evenement_repository import EvenementRepository
+from app.administration.repositories.categorie_repository import CategorieRepository
+from app.administration.repositories.tag_repository import TagRepository
+from app.administration.repositories.affectationenseignant_repository import AffectationEnseignantRepository
+from app.administration.repositories.ressource_repository import RessourceRepository
+from app.administration.repositories.consultationressource_repository import ConsultationRessourceRepository
+from app.administration.repositories.exemplaire_repository import ExemplaireRepository
+from app.administration.repositories.emprunt_repository import EmpruntRepository
+from app.administration.repositories.reservation_repository import ReservationRepository
+from app.administration.repositories.message_repository import MessageRepository
+from app.administration.repositories.forum_repository import ForumRepository
+from app.administration.repositories.sujet_repository import SujetRepository
+from app.administration.repositories.reponse_repository import ReponseRepository
+from app.administration.repositories.reactionreponse_repository import ReactionReponseRepository

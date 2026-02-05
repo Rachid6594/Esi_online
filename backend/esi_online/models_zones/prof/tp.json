@@ -1,0 +1,26 @@
+{
+  "model_name": "TP",
+  "app_name": "espace_prof",
+  "fields": {
+    "chapitre": { "type": "fk", "to": "espace_prof.Chapitre", "related_name": "tps", "on_delete": "CASCADE" },
+    "titre": { "type": "char", "max_length": 300 },
+    "enonce": { "type": "text" },
+    "consignes": { "type": "text", "blank": true, "null": true },
+    "fichier_enonce": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "date_limite": { "type": "datetime" },
+    "accepte_retard": { "type": "bool", "default": false },
+    "penalite_retard": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "default": 0 },
+    "type_rendu": { "type": "char", "max_length": 15, "default": "INDIVIDUEL" },
+    "taille_groupe_max": { "type": "int", "default": 1 },
+    "formats_acceptes": { "type": "char", "max_length": 200, "default": ".pdf,.zip,.py" },
+    "taille_max_fichier": { "type": "int", "default": 10 },
+    "note_sur": { "type": "decimal", "max_digits": 5, "decimal_places": 2, "default": 20 },
+    "bareme": { "type": "text", "blank": true, "null": true },
+    "ordre": { "type": "int", "default": 0 }
+  },
+  "meta": {
+    "db_table": "tps",
+    "verbose_name": "TP",
+    "verbose_name_plural": "TPs"
+  }
+}

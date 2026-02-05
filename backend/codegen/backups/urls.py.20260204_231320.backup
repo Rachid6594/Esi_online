@@ -1,0 +1,66 @@
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+
+    path("anneeacademiques/", views.anneeacademique_list),
+    path("anneeacademiques/<int:pk>/", views.anneeacademique_detail),
+
+    path("niveaus/", views.niveau_list),
+    path("niveaus/<int:pk>/", views.niveau_detail),
+
+    path("filieres/", views.filiere_list),
+    path("filieres/<int:pk>/", views.filiere_detail),
+
+    path("classes/", views.classe_list),
+    path("classes/<int:pk>/", views.classe_detail),
+
+    path("matieres/", views.matiere_list),
+    path("matieres/<int:pk>/", views.matiere_detail),
+
+    path("administrationecoles/", views.administrationecole_list),
+    path("administrationecoles/<int:pk>/", views.administrationecole_detail),
+
+    path("annonces/", views.annonce_list),
+    path("annonces/<int:pk>/", views.annonce_detail),
+
+    path("lectureannonces/", views.lectureannonce_list),
+    path("lectureannonces/<int:pk>/", views.lectureannonce_detail),
+
+    path("emploidutempss/", views.emploidutemps_list),
+    path("emploidutempss/<int:pk>/", views.emploidutemps_detail),
+
+    path("evenements/", views.evenement_list),
+    path("evenements/<int:pk>/", views.evenement_detail),
+
+    path("categories/", views.categorie_list),
+    path("categories/<int:pk>/", views.categorie_detail),
+
+    path("tags/", views.tag_list),
+    path("tags/<int:pk>/", views.tag_detail),
+
+    path("affectationenseignants/", views.affectationenseignant_list),
+    path("affectationenseignants/<int:pk>/", views.affectationenseignant_detail),
+
+    path("ressources/", views.ressource_list),
+    path("ressources/<int:pk>/", views.ressource_detail),
+
+    path("consultationressources/", views.consultationressource_list),
+    path("consultationressources/<int:pk>/", views.consultationressource_detail),
+
+    path("exemplaires/", views.exemplaire_list),
+    path("exemplaires/<int:pk>/", views.exemplaire_detail),
+
+    path("emprunts/", views.emprunt_list),
+    path("emprunts/<int:pk>/", views.emprunt_detail),
+
+    path("reservations/", views.reservation_list),
+    path("reservations/<int:pk>/", views.reservation_detail),
+
+    path("messages/", views.message_list),
+    path("messages/<int:pk>/", views.message_detail),
+
+    path("forums/", views.forum_list),
+    path("forums/<int:pk>/", views.forum_detail),
+]

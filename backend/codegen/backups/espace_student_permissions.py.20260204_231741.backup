@@ -1,0 +1,165 @@
+from rest_framework import permissions
+
+
+# --- Etudiant ---
+class CanViewEtudiant(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_etudiant."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.view_etudiant")
+            )
+        return True
+
+
+class CanCreateEtudiant(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_etudiant."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.add_etudiant")
+            )
+        return True
+
+
+class CanUpdateEtudiant(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_etudiant."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.change_etudiant")
+            )
+        return True
+
+
+class CanDeleteEtudiant(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_etudiant."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.delete_etudiant")
+            )
+        return True
+
+
+# --- RenduTP ---
+class CanViewRenduTP(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_rendutp."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.view_rendutp")
+            )
+        return True
+
+
+class CanCreateRenduTP(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_rendutp."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.add_rendutp")
+            )
+        return True
+
+
+class CanUpdateRenduTP(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_rendutp."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.change_rendutp")
+            )
+        return True
+
+
+class CanDeleteRenduTP(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_rendutp."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.delete_rendutp")
+            )
+        return True
+
+
+# --- TentativeQCM ---
+class CanViewTentativeQCM(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_tentativeqcm."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.view_tentativeqcm")
+            )
+        return True
+
+
+class CanCreateTentativeQCM(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_tentativeqcm."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.add_tentativeqcm")
+            )
+        return True
+
+
+class CanUpdateTentativeQCM(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_tentativeqcm."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.change_tentativeqcm")
+            )
+        return True
+
+
+class CanDeleteTentativeQCM(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_tentativeqcm."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.delete_tentativeqcm")
+            )
+        return True
+
+
+# --- ReponseEtudiantQCM ---
+class CanViewReponseEtudiantQCM(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_reponseetudiantqcm."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.view_reponseetudiantqcm")
+            )
+        return True
+
+
+class CanCreateReponseEtudiantQCM(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_reponseetudiantqcm."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.add_reponseetudiantqcm")
+            )
+        return True
+
+
+class CanUpdateReponseEtudiantQCM(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_reponseetudiantqcm."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.change_reponseetudiantqcm")
+            )
+        return True
+
+
+class CanDeleteReponseEtudiantQCM(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_reponseetudiantqcm."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("espace_student.delete_reponseetudiantqcm")
+            )
+        return True

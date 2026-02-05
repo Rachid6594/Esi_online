@@ -1,0 +1,15 @@
+{
+  "model_name": "PreferenceNotification",
+  "app_name": "admin",
+  "fields": {
+    "user": { "type": "fk", "to": "admin.User", "related_name": "preferences_notifications", "on_delete": "CASCADE" },
+    "source": { "type": "char", "max_length": 20 },
+    "recevoir_application": { "type": "bool", "default": true },
+    "recevoir_email": { "type": "bool", "default": true }
+  },
+  "meta": {
+    "db_table": "preferences_notifications",
+    "verbose_name": "Préférence de notification",
+    "verbose_name_plural": "Préférences de notification"
+  }
+}

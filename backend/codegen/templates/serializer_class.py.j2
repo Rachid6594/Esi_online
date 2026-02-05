@@ -1,0 +1,5 @@
+class {{ model.model_name }}Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = {{ model.model_name }}
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']

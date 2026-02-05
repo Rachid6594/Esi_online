@@ -1,0 +1,27 @@
+from rest_framework import serializers
+from app.espace_student.models import Etudiant, RenduTP, ReponseEtudiantQCM, TentativeQCM
+
+
+class EtudiantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Etudiant
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class RenduTPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RenduTP
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class TentativeQCMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TentativeQCM
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class ReponseEtudiantQCMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReponseEtudiantQCM
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']

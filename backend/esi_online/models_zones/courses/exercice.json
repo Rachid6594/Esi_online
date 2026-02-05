@@ -1,0 +1,19 @@
+{
+  "model_name": "Exercice",
+  "app_name": "courses",
+  "fields": {
+    "chapitre": { "type": "fk", "to": "courses.Chapitre", "related_name": "exercices", "on_delete": "CASCADE" },
+    "titre": { "type": "char", "max_length": 300 },
+    "enonce": { "type": "text" },
+    "fichier_enonce": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "corrige": { "type": "text", "blank": true, "null": true },
+    "fichier_corrige": { "type": "char", "max_length": 500, "blank": true, "null": true },
+    "date_disponibilite_corrige": { "type": "datetime", "blank": true, "null": true },
+    "ordre": { "type": "int", "default": 0 }
+  },
+  "meta": {
+    "db_table": "exercices",
+    "verbose_name": "Exercice",
+    "verbose_name_plural": "Exercices"
+  }
+}
