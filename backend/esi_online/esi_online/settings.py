@@ -135,9 +135,12 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ---------------------------------------------------------------------------
-# Django REST Framework (à affiner : JWT, permissions)
+# Django REST Framework (JWT pour login unique + redirection par rôle)
 # ---------------------------------------------------------------------------
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
@@ -151,6 +154,32 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = env("CORS_ALLOW_ALL_ORIGINS", default=DEBUG)
 if not CORS_ALLOW_ALL_ORIGINS:
     CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+
+# ---------------------------------------------------------------------------
+# Frontend (liens dans les emails)
+# ---------------------------------------------------------------------------
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
+
+# ---------------------------------------------------------------------------
+# Email (envoi identifiants étudiants, invitations, etc.)
+# Par défaut : console (les emails s'affichent dans le terminal).
+# Pour envoyer de vrais emails : utiliser Brevo (ex-Sendinblue) ou un autre SMTP.
+# ---------------------------------------------------------------------------
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@esi.bf")
+
+# Si EMAIL_HOST est défini, utiliser le backend SMTP ; sinon console
+if EMAIL_HOST:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    EMAIL_BACKEND = env(
+        "EMAIL_BACKEND",
+        default="django.core.mail.backends.console.EmailBackend",
+    )
 
 # ---------------------------------------------------------------------------
 # Divers

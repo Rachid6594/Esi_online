@@ -24,6 +24,7 @@ urlpatterns = [
     path("api/auth/", include("app.authentification.api.urls")),
     path("api/admin/", include("app.admin.urls")),
     path("api/administration/", include("app.administration.urls")),
+    path("api/etablissement/", include("app.administration.api.urls")),
     path("api/eleve/", include("app.espace_student.urls")),
     path("api/prof/", include("app.espace_prof.urls")),
     path("api/bibliotheque/", include("app.espace_library.urls")),

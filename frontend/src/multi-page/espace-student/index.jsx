@@ -1,0 +1,6 @@
+export { default as StudentLayout } from './StudentLayout'
+export { default as StudentDashboard } from './StudentDashboard'
+export { default as StudentCours } from './StudentCours'
+export { default as StudentDocuments } from './StudentDocuments'
+export { default as StudentEmploiDuTemps } from './StudentEmploiDuTemps'
+export { default as StudentProfil } from './StudentProfil'
