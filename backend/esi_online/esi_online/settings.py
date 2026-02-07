@@ -97,11 +97,11 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME", default="esi_online"),
-        "USER": env("DB_USER", default="postgres"),
+        "NAME": env("DB_NAME", default="**"),
+        "USER": env("DB_USER", default="*"),
         "PASSWORD": env("DB_PASSWORD", default=""),
-        "HOST": env("DB_HOST", default="127.0.0.1"),
-        "PORT": env("DB_PORT", default="5432"),
+        "HOST": env("DB_HOST", default=""),
+        "PORT": env("DB_PORT", default=""),
         "OPTIONS": env.dict("DB_OPTIONS", default={}),
     }
 }
