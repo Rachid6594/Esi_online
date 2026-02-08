@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, NavLink } from 'react-router-dom'
-import { LayoutDashboard, LogOut } from 'lucide-react'
+import { LayoutDashboard, LogOut, UserCircle } from 'lucide-react'
 import { useEffect } from 'react'
-import { getAuth, clearAuth, isBibliothecaire } from '../../auth'
+import { getAuth, clearAuth, isAdministrationEcole } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { useSidebarState, SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
 
@@ -11,10 +11,10 @@ const navClass = ({ isActive }) =>
     ? 'bg-[var(--color-esi-primary-light)] text-[var(--color-esi-primary)] dark:bg-esi-primary/20 dark:text-esi-primary'
     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white')
 
-export default function BibliothecaireLayout() {
+export default function AdministrationLayout() {
   const navigate = useNavigate()
   const auth = getAuth()
-  const ok = isBibliothecaire()
+  const ok = isAdministrationEcole()
 
   useEffect(() => {
     if (!ok) {
@@ -31,7 +31,9 @@ export default function BibliothecaireLayout() {
     return null
   }
 
-  const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Bibliothécaire'
+  const user = auth?.user
+  const poste = user?.poste
+
   const [sidebarOpen, toggleSidebar] = useSidebarState()
 
   return (
@@ -49,7 +51,7 @@ export default function BibliothecaireLayout() {
         <div className="flex w-56 min-w-56 flex-1 flex-col">
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-5 dark:border-gray-700">
             <span className="truncate font-semibold text-slate-800 dark:text-slate-200">
-              <span className="text-[var(--color-esi-primary)]">ESI</span> Bibliothèque
+              <span className="text-[var(--color-esi-primary)]">ESI</span> Administration
             </span>
             <div className="flex items-center gap-1">
               <ThemeToggle />
@@ -57,15 +59,23 @@ export default function BibliothecaireLayout() {
             </div>
           </div>
           <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-            <NavLink to="/bibliotheque" end className={navClass}>
+            <NavLink to="/administration" end className={navClass}>
               <LayoutDashboard className="h-5 w-5" strokeWidth={1.5} />
               Tableau de bord
             </NavLink>
           </nav>
           <div className="border-t border-slate-200 p-3 dark:border-gray-700">
-            <p className="mb-1 truncate px-3 text-xs text-slate-500 dark:text-slate-400" title={auth?.user?.email}>
-              {userName}
-            </p>
+            <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2 text-slate-600 dark:text-slate-300">
+              <UserCircle className="h-9 w-9 shrink-0 text-slate-400 dark:text-slate-500" strokeWidth={1.5} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
+                  {user?.email || user?.username || 'Administration'}
+                </p>
+                {poste && (
+                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">{poste}</p>
+                )}
+              </div>
+            </div>
             <button
               type="button"
               onClick={handleLogout}

@@ -95,12 +95,24 @@ export function isAuthenticated() {
   return !!getStored()?.user
 }
 
+/** Administrateur du site (superuser) — dashboard /admin */
 export function isAdmin() {
   const auth = getStored()
   return auth?.user?.role === 'admin'
 }
 
+/** Administration de l'école (membres avec poste) — dashboard /administration */
+export function isAdministrationEcole() {
+  const auth = getStored()
+  return auth?.user?.role === 'admin_ecole'
+}
+
 export function isBibliothecaire() {
   const auth = getStored()
   return auth?.user?.role === 'bibliothecaire'
+}
+
+export function isProfesseur() {
+  const auth = getStored()
+  return auth?.user?.role === 'professeur'
 }

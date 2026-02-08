@@ -16,20 +16,20 @@ export default function StudentDashboard() {
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
+        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)] dark:bg-gray-700 dark:text-esi-orange">
           <GraduationCap className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Tableau de bord</h1>
-          <p className="text-slate-600">
-            Bienvenue, <span className="font-medium text-slate-800">{userName}</span>. Accédez à vos ressources ci-dessous.
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Tableau de bord</h1>
+          <p className="text-slate-600 dark:text-slate-300">
+            Bienvenue, <span className="font-medium text-slate-800 dark:text-slate-100">{userName}</span>. Accédez à vos ressources ci-dessous.
           </p>
         </div>
       </div>
 
-      <div className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-2 text-sm font-medium text-slate-500">Votre espace</h2>
-        <p className="text-slate-700">
+      <div className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-600 dark:bg-gray-800">
+        <h2 className="mb-2 text-sm font-medium text-slate-500 dark:text-slate-400">Votre espace</h2>
+        <p className="text-slate-700 dark:text-slate-300">
           Utilisez les cartes ci-dessous pour accéder aux cours, documents, emploi du temps et à votre profil.
         </p>
       </div>
@@ -39,13 +39,13 @@ export default function StudentDashboard() {
           <Link
             key={to}
             to={to}
-            className="flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-[var(--color-esi-primary)]/30 hover:shadow-md"
+            className="flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-[var(--color-esi-primary)]/30 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:hover:border-esi-primary/40"
           >
             <div className={`mb-4 inline-flex rounded-lg p-2.5 ${color}`}>
               <Icon className="h-6 w-6" strokeWidth={1.5} />
             </div>
-            <h2 className="mb-1 text-lg font-semibold text-slate-900">{title}</h2>
-            <p className="mb-4 flex-1 text-sm text-slate-600">{description}</p>
+            <h2 className="mb-1 text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
+            <p className="mb-4 flex-1 text-sm text-slate-600 dark:text-slate-300">{description}</p>
             <span className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-esi-primary)]">
               Accéder <ChevronRight className="h-4 w-4" />
             </span>

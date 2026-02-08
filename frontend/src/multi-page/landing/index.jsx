@@ -1,1 +1,6 @@
 export { default as LandingPage } from './LandingPage'
+export { default as PublicLayout } from './PublicLayout'
+export { default as VieEstudiantinePage } from './VieEstudiantinePage'
+export { default as DocumentsPage } from './DocumentsPage'
+export { default as AProposPage } from './AProposPage'
+export { default as EnseignantsPage } from './EnseignantsPage'

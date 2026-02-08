@@ -16,6 +16,8 @@ urlpatterns = [
     path("students/import-csv/", views.import_students_csv),
     path("bibliothecaires/", views.bibliothecaires_list),
     path("bibliothecaires/create/", views.create_bibliothecaire),
+    path("professeurs/", views.professeurs_list),
+    path("professeurs/create/", views.create_professeur),
     path("invitation/validate/", views.validate_invitation_token),
     path("invitation/set-password/", views.set_password_from_invitation),
 ]

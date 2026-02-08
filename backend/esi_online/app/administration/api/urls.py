@@ -22,6 +22,9 @@ urlpatterns = [
     path("administrationecoles/", views.administrationecole_list),
     path("administrationecoles/<int:pk>/", views.administrationecole_detail),
 
+    path("droitadministrations/", views.droitadministration_list),
+    path("droitadministrations/<int:pk>/", views.droitadministration_detail),
+
     path("annonces/", views.annonce_list),
     path("annonces/<int:pk>/", views.annonce_detail),
 

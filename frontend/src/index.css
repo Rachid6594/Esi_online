@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Mode sombre : basé sur la classe .dark (next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Thème ESI : rouge et orange assagis, pro */
 @theme {
   --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
@@ -25,6 +28,13 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.dark body {
+  background-color: #0f172a;
+  color: #f1f5f9;
 }
 
 #root {

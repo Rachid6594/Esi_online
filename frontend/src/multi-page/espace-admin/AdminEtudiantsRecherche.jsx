@@ -151,7 +151,7 @@ export default function AdminEtudiantsRecherche() {
             >
               <option value="">Toutes</option>
               {classes.map((c) => (
-                <option key={c.id} value={c.id}>{c.code} – {c.libelle}</option>
+                <option key={c.id} value={c.id}>{c.libelle || c.code}</option>
               ))}
             </select>
           </div>

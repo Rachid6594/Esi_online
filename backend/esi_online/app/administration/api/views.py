@@ -32,11 +32,15 @@ from app.administration.permissions.administration_permissions import (
     CanViewMatiere, CanCreateMatiere,
     CanUpdateMatiere, CanDeleteMatiere,
 )
-from app.administration.services import AdministrationEcoleService
-from app.administration.api.serializers import AdministrationEcoleSerializer
+from app.administration.services import AdministrationEcoleService, DroitAdministrationService
+from app.administration.api.serializers import AdministrationEcoleSerializer, DroitAdministrationSerializer
 from app.administration.permissions.administration_permissions import (
     CanViewAdministrationEcole, CanCreateAdministrationEcole,
     CanUpdateAdministrationEcole, CanDeleteAdministrationEcole,
+)
+from app.administration.permissions.administration_permissions import (
+    CanViewDroitAdministration, CanCreateDroitAdministration,
+    CanUpdateDroitAdministration, CanDeleteDroitAdministration,
 )
 from app.administration.services import AnnonceService
 from app.administration.api.serializers import AnnonceSerializer
@@ -340,10 +344,28 @@ def classe_detail(request, pk: int):
     CanCreateMatiere,
 ])
 def matiere_list(request):
-    """GET: liste | POST: création."""
+    """GET: liste (filtres optionnels: semestre, niveau, filiere) | POST: création."""
     if request.method == "GET":
         service = MatiereService()
-        qs = service.list_all()
+        qs = service.list_all().order_by("semestre", "niveau_id", "code")
+        semestre = request.query_params.get("semestre")
+        if semestre is not None and semestre != "":
+            try:
+                qs = qs.filter(semestre=int(semestre))
+            except ValueError:
+                pass
+        niveau = request.query_params.get("niveau")
+        if niveau is not None and niveau != "":
+            try:
+                qs = qs.filter(niveau_id=int(niveau))
+            except ValueError:
+                pass
+        filiere = request.query_params.get("filiere")
+        if filiere is not None and filiere != "":
+            try:
+                qs = qs.filter(filiere_id=int(filiere))
+            except ValueError:
+                pass
         serializer = MatiereSerializer(qs, many=True)
         return Response(serializer.data)
     # POST
@@ -381,6 +403,79 @@ def matiere_detail(request, pk: int):
     updated = service.update(pk, **serializer.validated_data)
     return Response(MatiereSerializer(updated).data)
 
+# --- DroitAdministration (CRUD + permissions) ---
+def _create_4_crud_droits(service, code, libelle, ordre=0):
+    """Crée les 4 sous-droits CRUD (C, R, U, D) pour un rôle."""
+    from app.administration.models import ACTION_CRUD
+    letters = {"create": "C", "read": "R", "update": "U", "delete": "D"}
+    created = []
+    for i, (action_key, _) in enumerate(ACTION_CRUD):
+        sub_code = f"{code}_{action_key}"
+        sub_libelle = f"{libelle} ({letters.get(action_key, action_key)})"
+        created.append(service.create(
+            code=sub_code,
+            libelle=sub_libelle,
+            ordre=ordre * 10 + i,
+            domaine=code,
+            action=action_key,
+        ))
+    return created
+
+
+@api_view(["GET", "POST"])
+@permission_classes([
+    CanViewDroitAdministration,
+    CanCreateDroitAdministration,
+])
+def droitadministration_list(request):
+    """GET: liste | POST: création d'un rôle = 4 sous-droits CRUD (code + libelle)."""
+    if request.method == "GET":
+        service = DroitAdministrationService()
+        qs = service.list_all()
+        serializer = DroitAdministrationSerializer(qs, many=True)
+        return Response(serializer.data)
+    # POST : body { code, libelle, ordre? } -> crée les 4 droits C, R, U, D
+    code = (request.data.get("code") or "").strip()
+    libelle = (request.data.get("libelle") or "").strip()
+    ordre = int(request.data.get("ordre") or 0)
+    if not code or not libelle:
+        return Response(
+            {"detail": "code et libelle sont requis pour créer un rôle (4 sous-droits CRUD)."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    service = DroitAdministrationService()
+    created = _create_4_crud_droits(service, code, libelle, ordre)
+    serializer = DroitAdministrationSerializer(created, many=True)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([
+    CanViewDroitAdministration,
+    CanUpdateDroitAdministration,
+    CanDeleteDroitAdministration,
+])
+def droitadministration_detail(request, pk: int):
+    """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
+    service = DroitAdministrationService()
+    try:
+        obj = service.get_or_raise(pk)
+    except NotFoundError as e:
+        return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = DroitAdministrationSerializer(obj)
+        return Response(serializer.data)
+    if request.method == "DELETE":
+        service.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # PUT / PATCH
+    partial = request.method == "PATCH"
+    serializer = DroitAdministrationSerializer(obj, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    updated = service.update(pk, **serializer.validated_data)
+    return Response(DroitAdministrationSerializer(updated).data)
+
+
 # --- AdministrationEcole (CRUD + permissions) ---
 @api_view(["GET", "POST"])
 @permission_classes([
@@ -388,14 +483,49 @@ def matiere_detail(request, pk: int):
     CanCreateAdministrationEcole,
 ])
 def administrationecole_list(request):
-    """GET: liste | POST: création."""
+    """GET: liste | POST: création. Si body contient user_data (role, phone, is_active), crée d'abord le User puis le profil."""
     if request.method == "GET":
         service = AdministrationEcoleService()
         qs = service.list_all()
         serializer = AdministrationEcoleSerializer(qs, many=True)
         return Response(serializer.data)
     # POST
-    serializer = AdministrationEcoleSerializer(data=request.data)
+    data = dict(request.data)
+    user_data = data.pop("user_data", None)
+    if user_data:
+        from app.admin.models import User as AppUser
+        from app.authentification.services import AuthService
+        from app.core.exceptions import ValidationError as CoreValidationError
+
+        email = (user_data.get("email") or "").strip()
+        password = user_data.get("password") or ""
+
+        if email and password:
+            try:
+                auth_service = AuthService()
+                django_user = auth_service.create_admin_ecole_user(
+                    email=email,
+                    password=password,
+                    first_name=user_data.get("first_name") or "",
+                    last_name=user_data.get("last_name") or "",
+                )
+            except CoreValidationError as e:
+                return Response({"detail": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
+            data["auth_user"] = django_user.id
+        else:
+            return Response(
+                {"detail": "Pour permettre la connexion, user_data doit contenir email et password."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        app_user = AppUser.objects.create(
+            role=user_data.get("role", "admin_ecole"),
+            phone=user_data.get("phone") or "",
+            avatar=user_data.get("avatar") or "",
+            is_active=user_data.get("is_active", True),
+        )
+        data["user"] = app_user.id
+    serializer = AdministrationEcoleSerializer(data=data)
     serializer.is_valid(raise_exception=True)
     service = AdministrationEcoleService()
     obj = service.create(**serializer.validated_data)

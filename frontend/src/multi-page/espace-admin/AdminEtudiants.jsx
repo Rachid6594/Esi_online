@@ -199,7 +199,7 @@ export default function AdminEtudiantsCreation() {
               >
                 <option value="">— Aucune —</option>
                 {classes.map((c) => (
-                  <option key={c.id} value={c.id}>{c.code} – {c.libelle}</option>
+                  <option key={c.id} value={c.id}>{c.libelle || c.code}</option>
                 ))}
               </select>
               <p className="mt-1 text-xs text-slate-500">Définir les classes dans Gestion de l&apos;établissement.</p>

@@ -7,6 +7,7 @@ from app.administration.services.filiere_service import FiliereService
 from app.administration.services.classe_service import ClasseService
 from app.administration.services.matiere_service import MatiereService
 from app.administration.services.administrationecole_service import AdministrationEcoleService
+from app.administration.services.droitadministration_service import DroitAdministrationService
 from app.administration.services.annonce_service import AnnonceService
 from app.administration.services.lectureannonce_service import LectureAnnonceService
 from app.administration.services.emploidutemps_service import EmploiDuTempsService

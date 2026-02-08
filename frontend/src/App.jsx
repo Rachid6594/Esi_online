@@ -1,6 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import {
+  PublicLayout,
   LandingPage,
+  VieEstudiantinePage,
+  DocumentsPage,
+  AProposPage,
+  EnseignantsPage,
   LoginPage,
   ChangerMotDePassePage,
   AdminLayout,
@@ -11,6 +16,8 @@ import {
   AdminEtudiantsListe,
   AdminBibliothecairesListe,
   AdminBibliothecairesCreation,
+  AdminProfesseursListe,
+  AdminProfesseursCreation,
   AdminContenu,
   AdminAdministration,
   AdminParametres,
@@ -23,13 +30,23 @@ import {
   StudentProfil,
   BibliothecaireLayout,
   BibliothecaireDashboard,
+  ProfesseurLayout,
+  ProfesseurDashboard,
+  AdministrationLayout,
+  AdministrationDashboard,
 } from './multi-page'
 import './App.css'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/vie-estudiantine" element={<VieEstudiantinePage />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/a-propos" element={<AProposPage />} />
+        <Route path="/enseignants" element={<EnseignantsPage />} />
+      </Route>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/changer-mot-de-passe" element={<ChangerMotDePassePage />} />
       <Route path="/home" element={<StudentLayout />}>
@@ -44,7 +61,16 @@ function App() {
         <Route index element={<BibliothecaireDashboard />} />
       </Route>
 
-      {/* Une seule connexion : /login ; redirection par rôle (admin / bibliothecaire / home) */}
+      <Route path="/prof" element={<ProfesseurLayout />}>
+        <Route index element={<ProfesseurDashboard />} />
+      </Route>
+
+      {/* Administration de l'école (membres avec poste) — dashboard distinct de l'admin site */}
+      <Route path="/administration" element={<AdministrationLayout />}>
+        <Route index element={<AdministrationDashboard />} />
+      </Route>
+
+      {/* Admin du site (superuser uniquement) */}
       <Route path="/admin/login" element={<Navigate to="/login" replace />} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
@@ -59,6 +85,11 @@ function App() {
           <Route index element={<Navigate to="/admin/bibliothecaires/liste" replace />} />
           <Route path="liste" element={<AdminBibliothecairesListe />} />
           <Route path="creation" element={<AdminBibliothecairesCreation />} />
+        </Route>
+        <Route path="professeurs">
+          <Route index element={<Navigate to="/admin/professeurs/liste" replace />} />
+          <Route path="liste" element={<AdminProfesseursListe />} />
+          <Route path="creation" element={<AdminProfesseursCreation />} />
         </Route>
         <Route path="contenu" element={<AdminContenu />} />
         <Route path="administration" element={<AdminAdministration />} />

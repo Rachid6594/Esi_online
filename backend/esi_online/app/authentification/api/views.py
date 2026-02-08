@@ -26,6 +26,7 @@ from app.authentification.api.serializers import (
     LoginSerializer,
     CreateStudentSerializer,
     CreateBibliothecaireSerializer,
+    CreateProfesseurSerializer,
     SetPasswordInvitationSerializer,
 )
 from app.authentification.models import UserClasse
@@ -332,6 +333,76 @@ def create_bibliothecaire(request):
         )
         return Response(
             {"user": UserSerializer(user).data, "message": "Compte bibliothécaire créé."},
+            status=status.HTTP_201_CREATED,
+        )
+    except ValidationError as e:
+        return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# --- Professeurs (groupe "professeurs") ---
+
+def _get_professeurs_queryset(request):
+    """Queryset des utilisateurs du groupe professeurs."""
+    qs = User.objects.filter(groups__name="professeurs").distinct().order_by("email")
+    search = (request.query_params.get("search") or "").strip()
+    if search:
+        qs = qs.filter(
+            Q(email__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+            | Q(username__icontains=search)
+        )
+    return qs
+
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def professeurs_list(request):
+    """
+    Liste des professeurs (utilisateurs du groupe professeurs) avec leurs matières liées.
+    Query params : search.
+    """
+    from app.authentification.models import ProfesseurMatiere
+
+    qs = _get_professeurs_queryset(request).prefetch_related("professeur_matieres__matiere")
+    result = []
+    for u in qs:
+        matieres = [
+            {"id": pm.matiere.id, "libelle": pm.matiere.libelle, "code": getattr(pm.matiere, "code", "")}
+            for pm in u.professeur_matieres.all()
+        ]
+        result.append({
+            "id": u.id,
+            "email": u.email,
+            "first_name": u.first_name or "",
+            "last_name": u.last_name or "",
+            "username": u.username,
+            "is_active": u.is_active,
+            "date_joined": u.date_joined.isoformat() if u.date_joined else None,
+            "matieres": matieres,
+        })
+    return Response(result)
+
+
+@api_view(["POST"])
+@permission_classes([IsAdminUser])
+def create_professeur(request):
+    """Crée un compte professeur (groupe professeurs) et le lie aux matières choisies."""
+    serializer = CreateProfesseurSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        auth_service = AuthService()
+        user = auth_service.create_professeur(
+            email=serializer.validated_data["email"],
+            password=serializer.validated_data["password"],
+            first_name=serializer.validated_data.get("first_name", ""),
+            last_name=serializer.validated_data.get("last_name", ""),
+        )
+        matiere_ids = serializer.validated_data["matiere_ids"]
+        auth_service.link_professeur_matieres(user, matiere_ids)
+        return Response(
+            {"user": UserSerializer(user).data, "message": "Compte professeur créé."},
             status=status.HTTP_201_CREATED,
         )
     except ValidationError as e:

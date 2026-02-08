@@ -1,5 +1,30 @@
 from rest_framework import serializers
-from app.administration.models import AdministrationEcole, AffectationEnseignant, AnneeAcademique, Annonce, Categorie, Classe, ConsultationRessource, EmploiDuTemps, Emprunt, Evenement, Exemplaire, Filiere, Forum, LectureAnnonce, Matiere, Message, Niveau, ReactionReponse, Reponse, Reservation, Ressource, Sujet, Tag
+from app.administration.models import (
+    AdministrationEcole,
+    AffectationEnseignant,
+    AnneeAcademique,
+    Annonce,
+    Categorie,
+    Classe,
+    ConsultationRessource,
+    DroitAdministration,
+    EmploiDuTemps,
+    Emprunt,
+    Evenement,
+    Exemplaire,
+    Filiere,
+    Forum,
+    LectureAnnonce,
+    Matiere,
+    Message,
+    Niveau,
+    ReactionReponse,
+    Reponse,
+    Reservation,
+    Ressource,
+    Sujet,
+    Tag,
+)
 
 
 class AnneeAcademiqueSerializer(serializers.ModelSerializer):
@@ -32,11 +57,37 @@ class MatiereSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+class DroitAdministrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DroitAdministration
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
 class AdministrationEcoleSerializer(serializers.ModelSerializer):
+    droits = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=DroitAdministration.objects.all(),
+        required=False,
+        allow_empty=True,
+    )
+    droits_detail = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = AdministrationEcole
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_droits_detail(self, obj):
+        return [
+            {"id": d.id, "code": d.code, "libelle": d.libelle, "domaine": d.domaine, "action": d.action}
+            for d in obj.droits.all()
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["droits_detail"] = self.get_droits_detail(instance)
+        return data
 
 class AnnonceSerializer(serializers.ModelSerializer):
     class Meta:

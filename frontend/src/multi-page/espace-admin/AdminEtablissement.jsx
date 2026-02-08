@@ -319,7 +319,7 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
         <tbody>
           {list.map((n) => (
             <tr key={n.id} className="border-b border-slate-100">
-              <td className="py-2">{n.code}</td>
+              <td className="py-2">{n.libelle || n.code}</td>
               <td className="py-2">{n.libelle}</td>
               <td className="py-2">{n.ordre}</td>
             </tr>
@@ -385,7 +385,7 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
         <tbody>
           {list.map((f) => (
             <tr key={f.id} className="border-b border-slate-100">
-              <td className="py-2">{f.code}</td>
+              <td className="py-2">{f.libelle || f.code}</td>
               <td className="py-2">{f.libelle}</td>
             </tr>
           ))}
@@ -471,7 +471,7 @@ function ClassesSection({
         <tbody>
           {list.map((c) => (
             <tr key={c.id} className="border-b border-slate-100">
-              <td className="py-2">{c.code}</td>
+              <td className="py-2">{c.libelle || c.code}</td>
               <td className="py-2">{c.libelle}</td>
               <td className="py-2">{c.effectif_max}</td>
             </tr>
@@ -505,7 +505,7 @@ function ClassesSection({
           >
             <option value="">Niveau</option>
             {niveaux.map((n) => (
-              <option key={n.id} value={n.id}>{n.code} – {n.libelle}</option>
+              <option key={n.id} value={n.id}>{n.libelle || n.code}</option>
             ))}
           </select>
           <select
@@ -516,7 +516,7 @@ function ClassesSection({
           >
             <option value="">Filière</option>
             {filieres.map((f) => (
-              <option key={f.id} value={f.id}>{f.code} – {f.libelle}</option>
+              <option key={f.id} value={f.id}>{f.libelle || f.code}</option>
             ))}
           </select>
           <select
@@ -549,6 +549,8 @@ function ClassesSection({
 function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) {
   const [form, setForm] = useState({ code: '', libelle: '', niveau: '', filiere: '', semestre: 1, coefficient: 1, credit: 3 })
   const [submitting, setSubmitting] = useState(false)
+  const [filterSemestre, setFilterSemestre] = useState(0) // 0 = tous
+
   const handleSubmit = (e) => {
     e.preventDefault()
     setSubmitting(true)
@@ -569,39 +571,105 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
       .catch((err) => onMsg('error', err.message || 'Erreur'))
       .finally(() => setSubmitting(false))
   }
+
+  const filteredList = filterSemestre > 0 ? list.filter((m) => m.semestre === filterSemestre) : list
+  const bySemestre = filteredList.reduce((acc, m) => {
+    const s = m.semestre || 1
+    if (!acc[s]) acc[s] = []
+    acc[s].push(m)
+    return acc
+  }, {})
+  const semestresOrdre = [...new Set(filteredList.map((m) => m.semestre || 1))].sort((a, b) => a - b)
+
   return (
     <>
-      <table className="mb-4 w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-slate-600">
-            <th className="py-2">Code</th>
-            <th className="py-2">Libellé</th>
-            <th className="py-2">Sem.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((m) => (
-            <tr key={m.id} className="border-b border-slate-100">
-              <td className="py-2">{m.code}</td>
-              <td className="py-2">{m.libelle}</td>
-              <td className="py-2">{m.semestre}</td>
-            </tr>
+      <p className="mb-3 text-sm text-slate-600 dark:text-slate-400">
+        Chaque matière est rattachée à un <strong>semestre</strong>. Le programme d&apos;un semestre est l&apos;ensemble des matières de ce semestre (éventuellement par niveau/filière).
+      </p>
+
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Voir le programme du semestre :</label>
+        <select
+          value={filterSemestre}
+          onChange={(e) => setFilterSemestre(Number(e.target.value))}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100"
+        >
+          <option value={0}>Tous les semestres</option>
+          {[1, 2, 3, 4, 5, 6].map((s) => (
+            <option key={s} value={s}>Semestre {s}</option>
           ))}
-        </tbody>
-      </table>
+        </select>
+      </div>
+
+      {semestresOrdre.length === 0 ? (
+        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Aucune matière. Ajoutez des matières ci-dessous en choisissant le semestre.</p>
+      ) : (
+        <div className="mb-6 space-y-6">
+          {semestresOrdre.map((sem) => (
+            <div key={sem}>
+              <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">Programme du semestre {sem}</h3>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-slate-600 dark:text-slate-400">
+                    <th className="py-2">Libellé</th>
+                    <th className="py-2">Code</th>
+                    <th className="py-2">Niveau</th>
+                    <th className="py-2">Filière</th>
+                    <th className="py-2">Coef.</th>
+                    <th className="py-2">Crédits</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(bySemestre[sem] || []).map((m) => (
+                    <tr key={m.id} className="border-b border-slate-100 dark:border-gray-600">
+                      <td className="py-2">{m.libelle}</td>
+                      <td className="py-2">{m.code}</td>
+                      <td className="py-2">{m.niveau ? ((niveaux.find((n) => n.id === m.niveau)?.libelle || niveaux.find((n) => n.id === m.niveau)?.code) ?? m.niveau) : '—'}</td>
+                      <td className="py-2">{m.filiere ? ((filieres.find((f) => f.id === m.filiere)?.libelle || filieres.find((f) => f.id === m.filiere)?.code) ?? m.filiere) : '—'}</td>
+                      <td className="py-2">{m.coefficient ?? '—'}</td>
+                      <td className="py-2">{m.credit ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+        {`Ajouter une matière au programme (choisir le semestre)`}
+      </h3>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
-        <input placeholder="Code" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-24" required />
-        <input placeholder="Libellé" value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm" required />
-        <select value={form.niveau} onChange={(e) => setForm((f) => ({ ...f, niveau: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-500 dark:text-slate-400">Libellé</label>
+          <input placeholder="Ex. Mathématiques" value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[180px] dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" required />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-500 dark:text-slate-400">Code</label>
+          <input placeholder="Ex. MATH01" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-24 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" required />
+        </div>
+        <select value={form.niveau} onChange={(e) => setForm((f) => ({ ...f, niveau: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100">
           <option value="">Niveau</option>
-          {niveaux.map((n) => <option key={n.id} value={n.id}>{n.code}</option>)}
+          {niveaux.map((n) => <option key={n.id} value={n.id}>{n.libelle || n.code}</option>)}
         </select>
-        <select value={form.filiere} onChange={(e) => setForm((f) => ({ ...f, filiere: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <select value={form.filiere} onChange={(e) => setForm((f) => ({ ...f, filiere: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100">
           <option value="">Filière</option>
-          {filieres.map((f) => <option key={f.id} value={f.id}>{f.code}</option>)}
+          {filieres.map((f) => <option key={f.id} value={f.id}>{f.libelle || f.code}</option>)}
         </select>
-        <input type="number" min="1" value={form.semestre} onChange={(e) => setForm((f) => ({ ...f, semestre: parseInt(e.target.value, 10) || 1 }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-20" />
-        <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">Ajouter</button>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-500 dark:text-slate-400">Semestre</label>
+          <input type="number" min="1" max="10" value={form.semestre} onChange={(e) => setForm((f) => ({ ...f, semestre: parseInt(e.target.value, 10) || 1 }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-20 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" title="Programme du semestre" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-500 dark:text-slate-400">Coef.</label>
+          <input type="number" min="0" step="0.5" value={form.coefficient} onChange={(e) => setForm((f) => ({ ...f, coefficient: parseFloat(e.target.value) || 1 }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-16 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-slate-500 dark:text-slate-400">Crédits</label>
+          <input type="number" min="0" value={form.credit} onChange={(e) => setForm((f) => ({ ...f, credit: parseInt(e.target.value, 10) || 3 }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-16 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" />
+        </div>
+        <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">Ajouter la matière</button>
       </form>
     </>
   )

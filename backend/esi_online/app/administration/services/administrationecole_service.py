@@ -22,14 +22,21 @@ class AdministrationEcoleService:
         return self.repository.get_queryset()
 
     def create(self, **kwargs):
-        return self.repository.create(**kwargs)
+        droits = kwargs.pop("droits", [])
+        obj = self.repository.create(**kwargs)
+        if droits is not None:
+            obj.droits.set(droits)
+        return obj
 
     def update(self, pk: int, **kwargs):
+        droits = kwargs.pop("droits", None)
         obj = self.get_or_raise(pk)
         for key, value in kwargs.items():
             if hasattr(obj, key):
                 setattr(obj, key, value)
         obj.save()
+        if droits is not None:
+            obj.droits.set(droits)
         return obj
 
     def delete(self, pk: int) -> bool:

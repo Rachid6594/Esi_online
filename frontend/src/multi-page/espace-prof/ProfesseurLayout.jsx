@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, NavLink } from 'react-router-dom'
 import { LayoutDashboard, LogOut } from 'lucide-react'
 import { useEffect } from 'react'
-import { getAuth, clearAuth, isBibliothecaire } from '../../auth'
+import { getAuth, clearAuth, isProfesseur } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { useSidebarState, SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
 
@@ -11,10 +11,10 @@ const navClass = ({ isActive }) =>
     ? 'bg-[var(--color-esi-primary-light)] text-[var(--color-esi-primary)] dark:bg-esi-primary/20 dark:text-esi-primary'
     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white')
 
-export default function BibliothecaireLayout() {
+export default function ProfesseurLayout() {
   const navigate = useNavigate()
   const auth = getAuth()
-  const ok = isBibliothecaire()
+  const ok = isProfesseur()
 
   useEffect(() => {
     if (!ok) {
@@ -31,7 +31,7 @@ export default function BibliothecaireLayout() {
     return null
   }
 
-  const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Bibliothécaire'
+  const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Professeur'
   const [sidebarOpen, toggleSidebar] = useSidebarState()
 
   return (
@@ -49,7 +49,7 @@ export default function BibliothecaireLayout() {
         <div className="flex w-56 min-w-56 flex-1 flex-col">
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-5 dark:border-gray-700">
             <span className="truncate font-semibold text-slate-800 dark:text-slate-200">
-              <span className="text-[var(--color-esi-primary)]">ESI</span> Bibliothèque
+              <span className="text-[var(--color-esi-primary)]">ESI</span> Professeur
             </span>
             <div className="flex items-center gap-1">
               <ThemeToggle />
@@ -57,7 +57,7 @@ export default function BibliothecaireLayout() {
             </div>
           </div>
           <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-            <NavLink to="/bibliotheque" end className={navClass}>
+            <NavLink to="/prof" end className={navClass}>
               <LayoutDashboard className="h-5 w-5" strokeWidth={1.5} />
               Tableau de bord
             </NavLink>

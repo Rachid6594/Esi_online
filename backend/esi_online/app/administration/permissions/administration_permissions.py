@@ -278,6 +278,47 @@ class CanDeleteAdministrationEcole(permissions.BasePermission):
         return True
 
 
+# --- DroitAdministration ---
+class CanViewDroitAdministration(permissions.BasePermission):
+    """Lecture (GET) : is_staff ou permission view_droitadministration."""
+    def has_permission(self, request, view):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.view_droitadministration")
+            )
+        return True
+
+
+class CanCreateDroitAdministration(permissions.BasePermission):
+    """Création (POST) : is_staff ou permission add_droitadministration."""
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.add_droitadministration")
+            )
+        return True
+
+
+class CanUpdateDroitAdministration(permissions.BasePermission):
+    """Modification (PUT, PATCH) : is_staff ou permission change_droitadministration."""
+    def has_permission(self, request, view):
+        if request.method in ("PUT", "PATCH"):
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.change_droitadministration")
+            )
+        return True
+
+
+class CanDeleteDroitAdministration(permissions.BasePermission):
+    """Suppression (DELETE) : is_staff ou permission delete_droitadministration."""
+    def has_permission(self, request, view):
+        if request.method == "DELETE":
+            return request.user.is_authenticated and (
+                request.user.is_staff or request.user.has_perm("administration.delete_droitadministration")
+            )
+        return True
+
+
 # --- Annonce ---
 class CanViewAnnonce(permissions.BasePermission):
     """Lecture (GET) : is_staff ou permission view_annonce."""

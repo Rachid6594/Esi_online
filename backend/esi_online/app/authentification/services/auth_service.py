@@ -6,6 +6,7 @@ import secrets
 import re
 
 from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth.models import Group
 
 from app.authentification.repositories import UserRepository
 from app.core.exceptions import ValidationError
@@ -125,3 +126,80 @@ class AuthService:
             is_superuser=False,
         )
         return user
+
+    def create_professeur(
+        self,
+        email: str,
+        password: str,
+        first_name: str = "",
+        last_name: str = "",
+    ) -> User:
+        """
+        Crée un utilisateur professeur (is_staff=True, groupe "professeurs").
+        Lève ValidationError si l'email est déjà utilisé.
+        """
+        if self.user_repository.get_by_email(email):
+            raise ValidationError(f"L'email '{email}' est déjà utilisé.")
+        base_username = _username_from_email(email)
+        username = base_username
+        counter = 0
+        while self.user_repository.get_by_username(username):
+            counter += 1
+            username = f"{base_username}{counter}"
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name or "",
+            last_name=last_name or "",
+            is_staff=True,
+            is_superuser=False,
+        )
+        group, _ = Group.objects.get_or_create(name="professeurs")
+        user.groups.add(group)
+        return user
+
+    def create_admin_ecole_user(
+        self,
+        email: str,
+        password: str,
+        first_name: str = "",
+        last_name: str = "",
+    ) -> User:
+        """
+        Crée un utilisateur Django pour un compte Administration École (connexion email + mot de passe).
+        is_staff=True pour accès aux vues admin ; le rôle "admin_ecole" vient du profil AdministrationEcole.
+        Lève ValidationError si l'email est déjà utilisé.
+        """
+        if self.user_repository.get_by_email(email):
+            raise ValidationError(f"L'email '{email}' est déjà utilisé.")
+        base_username = _username_from_email(email)
+        username = base_username
+        counter = 0
+        while self.user_repository.get_by_username(username):
+            counter += 1
+            username = f"{base_username}{counter}"
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name or "",
+            last_name=last_name or "",
+            is_staff=True,
+            is_superuser=False,
+        )
+        return user
+
+    def link_professeur_matieres(self, user, matiere_ids: list[int]) -> None:
+        """
+        Associe un professeur (User) à des matières.
+        matiere_ids: liste d'id (administration.Matiere).
+        Ne fait rien si matiere_ids est vide.
+        """
+        if not matiere_ids:
+            return
+        from app.administration.models import Matiere
+        from app.authentification.models import ProfesseurMatiere
+        for mid in matiere_ids:
+            if Matiere.objects.filter(pk=mid).exists():
+                ProfesseurMatiere.objects.get_or_create(user=user, matiere_id=mid)

@@ -1,6 +1,7 @@
 """
 Modèles pour l'application administration.
 """
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -129,20 +130,79 @@ class Matiere(models.Model):
     def __str__(self):
         return str(self.title if hasattr(self, 'title') else self.id)
 
+ACTION_CRUD = [
+    ("create", "Créer (C)"),
+    ("read", "Lire (R)"),
+    ("update", "Modifier (U)"),
+    ("delete", "Supprimer (D)"),
+]
+
+
+class DroitAdministration(models.Model):
+    """
+    Droits (rôles / permissions) attribuables aux comptes Administration École.
+    Chaque rôle créé dans Paramètres génère 4 sous-droits CRUD (C, R, U, D).
+    """
+    code = models.CharField(max_length=80, unique=True, verbose_name="Code")
+    libelle = models.CharField(max_length=200, verbose_name="Libellé")
+    ordre = models.IntegerField(default=0, verbose_name="Ordre d'affichage")
+    # Regroupement : domaine = rôle parent (ex. peut_gerer_prof), action = C/R/U/D
+    domaine = models.CharField(
+        max_length=80, null=True, blank=True,
+        verbose_name="Domaine (rôle parent)",
+        help_text="Ex. peut_gerer_prof pour regrouper les 4 actions CRUD",
+    )
+    action = models.CharField(
+        max_length=10, null=True, blank=True,
+        choices=ACTION_CRUD,
+        verbose_name="Action CRUD",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'droits_administration'
+        verbose_name = "Droit d'administration"
+        verbose_name_plural = "Droits d'administration"
+        ordering = ['ordre', 'domaine', 'action']
+        constraints = [
+            models.UniqueConstraint(
+                fields=["domaine", "action"],
+                condition=models.Q(domaine__isnull=False),
+                name="droits_admin_domaine_action_unique",
+            ),
+        ]
+
+    def __str__(self):
+        return self.libelle or self.code
+
+
 class AdministrationEcole(models.Model):
-    """AdministrationEcole."""
+    """
+    AdministrationEcole. Droits gérés via la table DroitAdministration (M2M).
+    auth_user : compte Django (email + mot de passe) pour se connecter à la plateforme.
+    """
 
     user = models.OneToOneField(to='app_admin.User', on_delete=models.CASCADE, related_name='admin_ecole_profile')
+    auth_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='administration_ecole_auth_profile',
+        verbose_name="Compte de connexion (email + mot de passe)",
+    )
     matricule = models.CharField(max_length=20)
     poste = models.CharField(max_length=30)
     departement = models.CharField(max_length=200, null=True, blank=True)
     bureau = models.CharField(max_length=50, null=True, blank=True)
-    peut_gerer_etudiants = models.BooleanField(default=True)
-    peut_gerer_enseignants = models.BooleanField(default=False)
-    peut_gerer_structure_academique = models.BooleanField(default=False)
-    peut_envoyer_annonces = models.BooleanField(default=True)
-    peut_gerer_bibliotheque = models.BooleanField(default=False)
-    peut_voir_statistiques = models.BooleanField(default=True)
+    droits = models.ManyToManyField(
+        DroitAdministration,
+        related_name='admins_ecole',
+        blank=True,
+        verbose_name="Droits",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

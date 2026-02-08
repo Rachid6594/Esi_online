@@ -24,3 +24,28 @@ class UserClasse(models.Model):
         db_table = "auth_user_classe"
         verbose_name = "Affectation utilisateur – classe"
         verbose_name_plural = "Affectations utilisateur – classe"
+
+
+class ProfesseurMatiere(models.Model):
+    """
+    Lien entre un compte professeur (auth.User du groupe professeurs) et une matière.
+    Un professeur peut être lié à une ou plusieurs matières.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="professeur_matieres",
+    )
+    matiere = models.ForeignKey(
+        "administration.Matiere",
+        on_delete=models.CASCADE,
+        related_name="professeurs_lies",
+    )
+
+    class Meta:
+        db_table = "auth_professeur_matiere"
+        verbose_name = "Professeur – matière"
+        verbose_name_plural = "Professeur – matières"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "matiere"], name="auth_professeur_matiere_unique"),
+        ]
