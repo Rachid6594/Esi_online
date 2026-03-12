@@ -30,3 +30,22 @@ class CanDeleteEspaceBibliotheque(permissions.BasePermission):
         return request.user.is_authenticated and (
             request.user.is_staff or request.user.has_perm("espace_library.delete_espacebibliotheque")
         )
+
+class IsBibliothecaire(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+
+        # lecture autorisee pour tout user connecte 
+        if request.method == "GET":
+
+            return request.user.is_authenticated
+
+        #seul le bibliothecaire a les autres droits
+        return (
+
+            request.user.is_authenticated
+
+            and
+
+            request.user.role == "BIBLIOTHECAIRE"
+        )
