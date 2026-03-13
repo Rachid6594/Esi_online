@@ -19,3 +19,29 @@ class EspaceBibliotheque(models.Model):
 
     def __str__(self):
         return self.name
+
+class Auteur(models.Model):
+    """Modèle Auteur."""
+
+class Categorie(models.Model):
+    """Modèle Categorie."""
+
+class Collection(models.Model):
+    """Modèle Collection."""
+
+
+class Livre(models.Model):
+    """Modèle Livre."""
+
+    
+class RapportSoutenance(models.Model):
+    """Modèle RapportSoutenance."""
+
+    
+class DocumentDevoir(models.Model):
+    """Modèle DocumentDevoir."""
+
+
+
+class Signalement(models.Model):
+    """Modèle Signalement."""
