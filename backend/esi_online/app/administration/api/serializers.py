@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from app.administration.models import (
     AdministrationEcole,
     AffectationEnseignant,
@@ -78,6 +79,7 @@ class AdministrationEcoleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_droits_detail(self, obj):
         return [
             {"id": d.id, "code": d.code, "libelle": d.libelle, "domaine": d.domaine, "action": d.action}

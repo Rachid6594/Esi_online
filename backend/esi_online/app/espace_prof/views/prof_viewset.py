@@ -4,6 +4,7 @@ ViewSet CRUD pour prof.
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 
 from app.espace_prof.models import Prof
 from app.espace_prof.serializers import ProfSerializer
@@ -16,6 +17,7 @@ from app.espace_prof.permissions.prof_permissions import (
 )
 
 
+@extend_schema(tags=["Espace Prof"])
 class ProfViewSet(viewsets.ModelViewSet):
     queryset = Prof.objects.all()
     serializer_class = ProfSerializer

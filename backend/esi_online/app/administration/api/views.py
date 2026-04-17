@@ -1,6 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import serializers
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from app.administration.services import AnneeAcademiqueService
 from app.administration.api.serializers import AnneeAcademiqueSerializer
 from app.core.exceptions import NotFoundError
@@ -1374,4 +1377,134 @@ def reactionreponse_detail(request, pk: int):
     serializer.is_valid(raise_exception=True)
     updated = service.update(pk, **serializer.validated_data)
     return Response(ReactionReponseSerializer(updated).data)
+
+
+def _decorate_crud_endpoints(resource_name: str, serializer_class):
+    """Ajoute une documentation OpenAPI homogène aux endpoints list/detail."""
+    list_view_name = f"{resource_name}_list"
+    detail_view_name = f"{resource_name}_detail"
+    list_view = globals()[list_view_name]
+    detail_view = globals()[detail_view_name]
+
+    list_view = extend_schema(
+        methods=["GET"],
+        tags=["Administration API"],
+        summary=f"Lister {resource_name}",
+        responses={200: serializer_class(many=True)},
+    )(list_view)
+    list_view = extend_schema(
+        methods=["POST"],
+        tags=["Administration API"],
+        summary=f"Creer {resource_name}",
+        request=serializer_class,
+        responses={201: serializer_class, 400: OpenApiTypes.OBJECT},
+    )(list_view)
+
+    detail_view = extend_schema(
+        methods=["GET"],
+        tags=["Administration API"],
+        summary=f"Detail {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        responses={200: serializer_class, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+    detail_view = extend_schema(
+        methods=["PUT"],
+        tags=["Administration API"],
+        summary=f"Remplacer {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        request=serializer_class,
+        responses={200: serializer_class, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+    detail_view = extend_schema(
+        methods=["PATCH"],
+        tags=["Administration API"],
+        summary=f"Modifier partiellement {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        request=serializer_class,
+        responses={200: serializer_class, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+    detail_view = extend_schema(
+        methods=["DELETE"],
+        tags=["Administration API"],
+        summary=f"Supprimer {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        responses={204: None, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+
+    globals()[list_view_name] = list_view
+    globals()[detail_view_name] = detail_view
+
+
+_decorate_crud_endpoints("anneeacademique", AnneeAcademiqueSerializer)
+_decorate_crud_endpoints("niveau", NiveauSerializer)
+_decorate_crud_endpoints("filiere", FiliereSerializer)
+_decorate_crud_endpoints("classe", ClasseSerializer)
+_decorate_crud_endpoints("matiere", MatiereSerializer)
+_decorate_crud_endpoints("droitadministration", DroitAdministrationSerializer)
+_decorate_crud_endpoints("administrationecole", AdministrationEcoleSerializer)
+_decorate_crud_endpoints("annonce", AnnonceSerializer)
+_decorate_crud_endpoints("lectureannonce", LectureAnnonceSerializer)
+_decorate_crud_endpoints("emploidutemps", EmploiDuTempsSerializer)
+_decorate_crud_endpoints("evenement", EvenementSerializer)
+_decorate_crud_endpoints("categorie", CategorieSerializer)
+_decorate_crud_endpoints("tag", TagSerializer)
+_decorate_crud_endpoints("affectationenseignant", AffectationEnseignantSerializer)
+_decorate_crud_endpoints("ressource", RessourceSerializer)
+_decorate_crud_endpoints("consultationressource", ConsultationRessourceSerializer)
+_decorate_crud_endpoints("exemplaire", ExemplaireSerializer)
+_decorate_crud_endpoints("emprunt", EmpruntSerializer)
+_decorate_crud_endpoints("reservation", ReservationSerializer)
+_decorate_crud_endpoints("message", MessageSerializer)
+_decorate_crud_endpoints("forum", ForumSerializer)
+_decorate_crud_endpoints("sujet", SujetSerializer)
+_decorate_crud_endpoints("reponse", ReponseSerializer)
+_decorate_crud_endpoints("reactionreponse", ReactionReponseSerializer)
+
+# Documentation détaillée pour les endpoints avec logique spécifique.
+matiere_list = extend_schema(
+    methods=["GET"],
+    tags=["Administration API"],
+    summary="Lister matieres",
+    parameters=[
+        OpenApiParameter("semestre", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("niveau", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("filiere", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False),
+    ],
+    responses={200: MatiereSerializer(many=True)},
+)(matiere_list)
+
+droitadministration_list = extend_schema(
+    methods=["POST"],
+    tags=["Administration API"],
+    summary="Creer un role de droits CRUD",
+    description="Crée automatiquement les 4 sous-droits CRUD (create/read/update/delete) à partir de code/libelle.",
+    request=inline_serializer(
+        name="DroitAdministrationRoleCreateRequest",
+        fields={
+            "code": serializers.CharField(),
+            "libelle": serializers.CharField(),
+            "ordre": serializers.IntegerField(required=False),
+        },
+    ),
+    responses={201: DroitAdministrationSerializer(many=True), 400: OpenApiTypes.OBJECT},
+)(droitadministration_list)
+
+administrationecole_list = extend_schema(
+    methods=["POST"],
+    tags=["Administration API"],
+    summary="Creer une administration ecole",
+    description="Crée un profil administration école. Optionnellement, user_data permet de créer aussi un compte de connexion.",
+    request=inline_serializer(
+        name="AdministrationEcoleCreateRequest",
+        fields={
+            "matricule": serializers.CharField(required=False),
+            "poste": serializers.CharField(required=False),
+            "droits": serializers.ListField(child=serializers.IntegerField(), required=False),
+            "user": serializers.IntegerField(required=False),
+            "auth_user": serializers.IntegerField(required=False),
+            "user_data": serializers.JSONField(required=False),
+        },
+    ),
+    responses={201: AdministrationEcoleSerializer, 400: OpenApiTypes.OBJECT},
+)(administrationecole_list)
 

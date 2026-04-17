@@ -4,6 +4,7 @@ ViewSet CRUD pour administration.
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 
 from app.administration.models import Administration
 from app.administration.serializers import AdministrationSerializer
@@ -16,6 +17,7 @@ from app.administration.permissions.administration_permissions import (
 )
 
 
+@extend_schema(tags=["Administration"])
 class AdministrationViewSet(viewsets.ModelViewSet):
     queryset = Administration.objects.all()
     serializer_class = AdministrationSerializer

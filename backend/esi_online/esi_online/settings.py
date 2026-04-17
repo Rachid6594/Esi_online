@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Apps tierces
     "rest_framework",
+    "drf_spectacular",
     "corsheaders",
     # Nos applications (dossier app/) — app.admin via AdminConfig pour label unique
     "app.admin.apps.AdminConfig",
@@ -141,11 +142,25 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "ESI-Online API",
+    "DESCRIPTION": "Documentation OpenAPI des endpoints backend ESI-Online.",
+    "VERSION": "1.0.0",
+    "SCHEMA_PATH_PREFIX": r"/api",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+}
+
+SWAGGER_UI_SETTINGS = {
+    "persistAuthorization": True,
 }
 
 # ---------------------------------------------------------------------------

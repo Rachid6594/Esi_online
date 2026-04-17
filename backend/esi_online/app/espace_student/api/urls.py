@@ -3,28 +3,12 @@ from . import views
 
 
 urlpatterns = [
-
     path("etudiants/", views.etudiant_list),
     path("etudiants/<int:pk>/", views.etudiant_detail),
-
     path("rendutps/", views.rendutp_list),
     path("rendutps/<int:pk>/", views.rendutp_detail),
-
     path("tentativeqcms/", views.tentativeqcm_list),
     path("tentativeqcms/<int:pk>/", views.tentativeqcm_detail),
-
-    path("reponseetudiantqcms/", views.reponseetudiantqcm_list),
-    path("reponseetudiantqcms/<int:pk>/", views.reponseetudiantqcm_detail),
-
-    path("etudiants/", views.etudiant_list),
-    path("etudiants/<int:pk>/", views.etudiant_detail),
-
-    path("rendutps/", views.rendutp_list),
-    path("rendutps/<int:pk>/", views.rendutp_detail),
-
-    path("tentativeqcms/", views.tentativeqcm_list),
-    path("tentativeqcms/<int:pk>/", views.tentativeqcm_detail),
-
     path("reponseetudiantqcms/", views.reponseetudiantqcm_list),
     path("reponseetudiantqcms/<int:pk>/", views.reponseetudiantqcm_detail),
 ]

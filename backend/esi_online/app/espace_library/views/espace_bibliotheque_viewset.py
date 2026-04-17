@@ -4,6 +4,7 @@ ViewSet CRUD pour espace_bibliotheque.
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 
 from app.espace_library.models import EspaceBibliotheque
 from app.espace_library.serializers import EspaceBibliothequeSerializer
@@ -16,6 +17,7 @@ from app.espace_library.permissions.espace_bibliotheque_permissions import (
 )
 
 
+@extend_schema(tags=["Espace Bibliotheque"])
 class EspaceBibliothequeViewSet(viewsets.ModelViewSet):
     queryset = EspaceBibliotheque.objects.all()
     serializer_class = EspaceBibliothequeSerializer

@@ -4,6 +4,7 @@ ViewSet CRUD pour eleve.
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 
 from app.espace_student.models import Eleve
 from app.espace_student.serializers import EleveSerializer
@@ -16,6 +17,7 @@ from app.espace_student.permissions.eleve_permissions import (
 )
 
 
+@extend_schema(tags=["Espace Eleve"])
 class EleveViewSet(viewsets.ModelViewSet):
     queryset = Eleve.objects.all()
     serializer_class = EleveSerializer

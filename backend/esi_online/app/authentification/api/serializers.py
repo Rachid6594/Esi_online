@@ -4,6 +4,7 @@ User + rôle pour redirection selon le type de compte.
 """
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 
 User = get_user_model()
 
@@ -34,10 +35,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email", "is_active", "date_joined", "role", "poste"]
         read_only_fields = ["id", "date_joined", "role", "poste"]
 
-    def get_role(self, obj):
+    @extend_schema_field(serializers.CharField())
+    def get_role(self, obj) -> str:
         return get_user_role(obj)
 
-    def get_poste(self, obj):
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_poste(self, obj) -> str | None:
         """Pour les comptes Administration École : afficher le poste dans la sidebar."""
         try:
             from app.administration.models import AdministrationEcole
@@ -99,3 +102,85 @@ class SetPasswordInvitationSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()
     new_password = serializers.CharField(min_length=8, trim_whitespace=False)
+
+
+class ErrorDetailSerializer(serializers.Serializer):
+    detail = serializers.CharField()
+
+
+class LoginResponseSerializer(serializers.Serializer):
+    user = UserSerializer()
+    access = serializers.CharField()
+    refresh = serializers.CharField()
+
+
+class UserWithMessageSerializer(serializers.Serializer):
+    user = UserSerializer()
+    message = serializers.CharField()
+
+
+class StudentListItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    username = serializers.CharField()
+    is_active = serializers.BooleanField()
+    date_joined = serializers.DateTimeField(allow_null=True)
+    classe_id = serializers.IntegerField(allow_null=True)
+    classe_code = serializers.CharField(allow_null=True)
+    classe_libelle = serializers.CharField(allow_null=True)
+
+
+class StaffListItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    username = serializers.CharField()
+    is_active = serializers.BooleanField()
+    date_joined = serializers.DateTimeField(allow_null=True)
+
+
+class MatiereMiniSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    libelle = serializers.CharField()
+    code = serializers.CharField(allow_blank=True)
+
+
+class ProfesseurListItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    username = serializers.CharField()
+    is_active = serializers.BooleanField()
+    date_joined = serializers.DateTimeField(allow_null=True)
+    matieres = MatiereMiniSerializer(many=True)
+
+
+class InvitationValidationSerializer(serializers.Serializer):
+    valid = serializers.BooleanField()
+    email = serializers.EmailField(required=False)
+    detail = serializers.CharField(required=False)
+
+
+class StudentImportErrorSerializer(serializers.Serializer):
+    ligne = serializers.IntegerField()
+    email = serializers.CharField(required=False)
+    erreur = serializers.CharField()
+
+
+class StudentImportDetailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    id = serializers.IntegerField()
+
+
+class ImportStudentsResponseSerializer(serializers.Serializer):
+    created = serializers.IntegerField()
+    errors = StudentImportErrorSerializer(many=True)
+    details = StudentImportDetailSerializer(many=True)
+
+
+class ApiMessageSerializer(serializers.Serializer):
+    message = serializers.CharField()

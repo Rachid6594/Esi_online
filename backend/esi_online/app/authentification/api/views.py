@@ -19,6 +19,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, inline_serializer
+from rest_framework import serializers
 
 from app.authentification.api.serializers import (
     UserSerializer,
@@ -28,6 +31,15 @@ from app.authentification.api.serializers import (
     CreateBibliothecaireSerializer,
     CreateProfesseurSerializer,
     SetPasswordInvitationSerializer,
+    LoginResponseSerializer,
+    UserWithMessageSerializer,
+    StudentListItemSerializer,
+    StaffListItemSerializer,
+    ProfesseurListItemSerializer,
+    InvitationValidationSerializer,
+    ImportStudentsResponseSerializer,
+    ErrorDetailSerializer,
+    ApiMessageSerializer,
 )
 from app.authentification.models import UserClasse
 from app.authentification.services import AuthService
@@ -37,6 +49,15 @@ from app.core.exceptions import ValidationError
 User = get_user_model()
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Profil utilisateur courant",
+    description="Retourne l'utilisateur authentifié via JWT.",
+    responses={
+        200: UserSerializer,
+        401: OpenApiResponse(response=ErrorDetailSerializer, description="Utilisateur non authentifié."),
+    },
+)
 @api_view(["GET"])
 def current_user(request):
     """Utilisateur connecté (à utiliser avec auth JWT)."""
@@ -46,6 +67,17 @@ def current_user(request):
     return Response(serializer.data)
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Connexion par email",
+    description="Authentifie un utilisateur et retourne les tokens JWT access/refresh.",
+    request=LoginSerializer,
+    responses={
+        200: LoginResponseSerializer,
+        400: OpenApiResponse(response=OpenApiTypes.OBJECT, description="Données invalides."),
+        401: OpenApiResponse(response=ErrorDetailSerializer, description="Identifiants invalides."),
+    },
+)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def login_view(request):
@@ -73,6 +105,16 @@ def login_view(request):
     })
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Inscription utilisateur",
+    description="Crée un utilisateur standard.",
+    request=UserCreateSerializer,
+    responses={
+        201: UserSerializer,
+        400: OpenApiResponse(response=OpenApiTypes.OBJECT, description="Données invalides."),
+    },
+)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register(request):
@@ -94,6 +136,16 @@ def register(request):
 
 # --- Création étudiants (admin) + lien changer mot de passe ---
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Créer un étudiant",
+    description="Crée un compte étudiant et envoie ses identifiants par email.",
+    request=CreateStudentSerializer,
+    responses={
+        201: UserWithMessageSerializer,
+        400: OpenApiResponse(response=OpenApiTypes.OBJECT, description="Données invalides."),
+    },
+)
 @api_view(["POST"])
 @permission_classes([IsAdminUser])
 def create_student(request):
@@ -129,6 +181,22 @@ def create_student(request):
         return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Importer des étudiants via CSV",
+    description="Importe des comptes étudiants à partir d'un fichier CSV (file ou csv).",
+    request=inline_serializer(
+        name="ImportStudentsCsvRequest",
+        fields={
+            "file": serializers.FileField(required=False),
+            "csv": serializers.FileField(required=False),
+        },
+    ),
+    responses={
+        200: ImportStudentsResponseSerializer,
+        400: OpenApiResponse(response=ErrorDetailSerializer, description="Fichier manquant ou invalide."),
+    },
+)
 @api_view(["POST"])
 @permission_classes([IsAdminUser])
 def import_students_csv(request):
@@ -220,6 +288,18 @@ def _get_students_queryset(request):
     return qs
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Lister les étudiants",
+    description="Liste les utilisateurs étudiants avec filtres de recherche.",
+    parameters=[
+        OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("classe_id", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("is_active", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("ordering", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+    ],
+    responses={200: StudentListItemSerializer(many=True)},
+)
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
 def students_list(request):
@@ -249,6 +329,20 @@ def students_list(request):
     return Response(result)
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Exporter les étudiants en CSV",
+    description="Exporte la liste des étudiants en fichier CSV avec les mêmes filtres que students_list.",
+    parameters=[
+        OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("classe_id", OpenApiTypes.INT, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("is_active", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("ordering", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+    ],
+    responses={
+        200: OpenApiResponse(response=OpenApiTypes.BINARY, description="Fichier CSV des étudiants."),
+    },
+)
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
 def students_export(request):
@@ -293,6 +387,15 @@ def _get_bibliothecaires_queryset(request):
     return qs
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Lister les bibliothécaires",
+    description="Liste les utilisateurs staff non superuser.",
+    parameters=[
+        OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+    ],
+    responses={200: StaffListItemSerializer(many=True)},
+)
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
 def bibliothecaires_list(request):
@@ -316,6 +419,16 @@ def bibliothecaires_list(request):
     return Response(result)
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Créer un bibliothécaire",
+    description="Crée un compte bibliothécaire (staff).",
+    request=CreateBibliothecaireSerializer,
+    responses={
+        201: UserWithMessageSerializer,
+        400: OpenApiResponse(response=OpenApiTypes.OBJECT, description="Données invalides."),
+    },
+)
 @api_view(["POST"])
 @permission_classes([IsAdminUser])
 def create_bibliothecaire(request):
@@ -355,6 +468,15 @@ def _get_professeurs_queryset(request):
     return qs
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Lister les professeurs",
+    description="Liste les comptes du groupe professeurs avec leurs matières.",
+    parameters=[
+        OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+    ],
+    responses={200: ProfesseurListItemSerializer(many=True)},
+)
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
 def professeurs_list(request):
@@ -384,6 +506,16 @@ def professeurs_list(request):
     return Response(result)
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Créer un professeur",
+    description="Crée un compte professeur et l'associe aux matières demandées.",
+    request=CreateProfesseurSerializer,
+    responses={
+        201: UserWithMessageSerializer,
+        400: OpenApiResponse(response=OpenApiTypes.OBJECT, description="Données invalides."),
+    },
+)
 @api_view(["POST"])
 @permission_classes([IsAdminUser])
 def create_professeur(request):
@@ -409,6 +541,19 @@ def create_professeur(request):
         return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Valider un token d'invitation",
+    description="Vérifie que le couple uid/token est valide pour définir un mot de passe.",
+    parameters=[
+        OpenApiParameter("uid", OpenApiTypes.STR, OpenApiParameter.QUERY, required=True),
+        OpenApiParameter("token", OpenApiTypes.STR, OpenApiParameter.QUERY, required=True),
+    ],
+    responses={
+        200: InvitationValidationSerializer,
+        400: InvitationValidationSerializer,
+    },
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def validate_invitation_token(request):
@@ -430,6 +575,16 @@ def validate_invitation_token(request):
     return Response({"valid": True, "email": user.email})
 
 
+@extend_schema(
+    tags=["Authentification"],
+    summary="Définir le mot de passe via invitation",
+    description="Met à jour le mot de passe utilisateur à partir du lien uid/token.",
+    request=SetPasswordInvitationSerializer,
+    responses={
+        200: ApiMessageSerializer,
+        400: OpenApiResponse(response=ErrorDetailSerializer, description="Lien invalide ou données incorrectes."),
+    },
+)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def set_password_from_invitation(request):

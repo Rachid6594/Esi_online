@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from app.espace_prof.services import EnseignantService
 from app.espace_prof.api.serializers import EnseignantSerializer
 from app.core.exceptions import NotFoundError
@@ -542,4 +544,72 @@ def reponseqcm_detail(request, pk: int):
     serializer.is_valid(raise_exception=True)
     updated = service.update(pk, **serializer.validated_data)
     return Response(ReponseQCMSerializer(updated).data)
+
+
+def _decorate_crud_endpoints(resource_name: str, serializer_class):
+    """Ajoute une documentation OpenAPI homogène aux endpoints list/detail."""
+    list_view_name = f"{resource_name}_list"
+    detail_view_name = f"{resource_name}_detail"
+    list_view = globals()[list_view_name]
+    detail_view = globals()[detail_view_name]
+
+    list_view = extend_schema(
+        methods=["GET"],
+        tags=["Espace Prof API"],
+        summary=f"Lister {resource_name}",
+        responses={200: serializer_class(many=True)},
+    )(list_view)
+    list_view = extend_schema(
+        methods=["POST"],
+        tags=["Espace Prof API"],
+        summary=f"Creer {resource_name}",
+        request=serializer_class,
+        responses={201: serializer_class, 400: OpenApiTypes.OBJECT},
+    )(list_view)
+
+    detail_view = extend_schema(
+        methods=["GET"],
+        tags=["Espace Prof API"],
+        summary=f"Detail {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        responses={200: serializer_class, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+    detail_view = extend_schema(
+        methods=["PUT"],
+        tags=["Espace Prof API"],
+        summary=f"Remplacer {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        request=serializer_class,
+        responses={200: serializer_class, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+    detail_view = extend_schema(
+        methods=["PATCH"],
+        tags=["Espace Prof API"],
+        summary=f"Modifier partiellement {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        request=serializer_class,
+        responses={200: serializer_class, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+    detail_view = extend_schema(
+        methods=["DELETE"],
+        tags=["Espace Prof API"],
+        summary=f"Supprimer {resource_name}",
+        parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+        responses={204: None, 404: OpenApiTypes.OBJECT},
+    )(detail_view)
+
+    globals()[list_view_name] = list_view
+    globals()[detail_view_name] = detail_view
+
+
+_decorate_crud_endpoints("enseignant", EnseignantSerializer)
+_decorate_crud_endpoints("cours", CoursSerializer)
+_decorate_crud_endpoints("chapitre", ChapitreSerializer)
+_decorate_crud_endpoints("ressourcecours", RessourceCoursSerializer)
+_decorate_crud_endpoints("exercice", ExerciceSerializer)
+_decorate_crud_endpoints("tp", TPSerializer)
+_decorate_crud_endpoints("fichiersupporttp", FichierSupportTPSerializer)
+_decorate_crud_endpoints("qcm", QCMSerializer)
+_decorate_crud_endpoints("questionqcm", QuestionQCMSerializer)
+_decorate_crud_endpoints("reponseqcm", ReponseQCMSerializer)
 
