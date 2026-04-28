@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react'
+import DataTable from '../../components/DataTable'
+import CsvImportZone from '../../components/CsvImportZone'
+import Modal from '../../components/Modal'
 import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import {
   Building2,
@@ -216,8 +219,25 @@ export default function AdminEtablissement() {
 }
 
 function AnneesSection({ list, onReload, onMsg, apiPost }) {
+    // Import CSV
+    async function handleImport(file) {
+      const formData = new FormData()
+      formData.append('file', file)
+      try {
+        const res = await fetch('/api/etablissement/users/import-csv', {
+          method: 'POST',
+          body: formData,
+        })
+        if (!res.ok) throw new Error('Erreur import')
+        onMsg('success', 'Import CSV réussi')
+        onReload()
+      } catch (e) {
+        onMsg('error', e.message)
+      }
+    }
   const [form, setForm] = useState({ libelle: '', date_debut: '', date_fin: '', is_active: false })
   const [submitting, setSubmitting] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
   const handleSubmit = (e) => {
     e.preventDefault()
     setSubmitting(true)
@@ -232,60 +252,59 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
   }
   return (
     <>
-      <table className="mb-4 w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-slate-600">
-            <th className="py-2">Libellé</th>
-            <th className="py-2">Début</th>
-            <th className="py-2">Fin</th>
-            <th className="py-2">Active</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((a) => (
-            <tr key={a.id} className="border-b border-slate-100">
-              <td className="py-2">{a.libelle}</td>
-              <td className="py-2">{a.date_debut}</td>
-              <td className="py-2">{a.date_fin}</td>
-              <td className="py-2">{a.is_active ? 'Oui' : 'Non'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
-        <input
-          placeholder="Libellé (ex. 2024-2025)"
-          value={form.libelle}
-          onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          required
-        />
-        <input
-          type="date"
-          value={form.date_debut}
-          onChange={(e) => setForm((f) => ({ ...f, date_debut: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          required
-        />
-        <input
-          type="date"
-          value={form.date_fin}
-          onChange={(e) => setForm((f) => ({ ...f, date_fin: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          required
-        />
-        <label className="flex items-center gap-2 text-sm">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <CsvImportZone onImport={handleImport} />
+        <button onClick={() => setModalOpen(true)} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)]">Nouvelle année</button>
+      </div>
+      {/* DataTable avec tri/pagination */}
+      <DataTable
+        columns={[
+          { key: 'libelle', label: 'Libellé' },
+          { key: 'date_debut', label: 'Début' },
+          { key: 'date_fin', label: 'Fin' },
+          { key: 'is_active', label: 'Active', render: (v) => (v ? 'Oui' : 'Non') },
+        ]}
+        data={list.map((a) => ({ ...a, is_active: a.is_active ? 'Oui' : 'Non' }))}
+        pageSize={5}
+      />
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <h2 className="text-lg font-semibold mb-4">Nouvelle année académique</h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
-            type="checkbox"
-            checked={form.is_active}
-            onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
+            placeholder="Libellé (ex. 2024-2025)"
+            value={form.libelle}
+            onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            required
           />
-          Active
-        </label>
-        <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">
-          Ajouter
-        </button>
-      </form>
+          <input
+            type="date"
+            value={form.date_debut}
+            onChange={(e) => setForm((f) => ({ ...f, date_debut: e.target.value }))}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            required
+          />
+          <input
+            type="date"
+            value={form.date_fin}
+            onChange={(e) => setForm((f) => ({ ...f, date_fin: e.target.value }))}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            required
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.is_active}
+              onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
+            />
+            Active
+          </label>
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={() => setModalOpen(false)} className="rounded-lg border px-4 py-2 text-sm">Annuler</button>
+            <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">Ajouter</button>
+          </div>
+        </form>
+      </Modal>
     </>
   )
 }
@@ -308,24 +327,15 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
   }
   return (
     <>
-      <table className="mb-4 w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-slate-600">
-            <th className="py-2">Code</th>
-            <th className="py-2">Libellé</th>
-            <th className="py-2">Ordre</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((n) => (
-            <tr key={n.id} className="border-b border-slate-100">
-              <td className="py-2">{n.libelle || n.code}</td>
-              <td className="py-2">{n.libelle}</td>
-              <td className="py-2">{n.ordre}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <DataTable
+        columns={[
+          { key: 'code', label: 'Code' },
+          { key: 'libelle', label: 'Libellé' },
+          { key: 'ordre', label: 'Ordre' },
+        ]}
+        data={list}
+        pageSize={5}
+      />
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <input
           placeholder="Code (ex. L1)"
@@ -375,22 +385,14 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
   }
   return (
     <>
-      <table className="mb-4 w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-slate-600">
-            <th className="py-2">Code</th>
-            <th className="py-2">Libellé</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((f) => (
-            <tr key={f.id} className="border-b border-slate-100">
-              <td className="py-2">{f.libelle || f.code}</td>
-              <td className="py-2">{f.libelle}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <DataTable
+        columns={[
+          { key: 'code', label: 'Code' },
+          { key: 'libelle', label: 'Libellé' },
+        ]}
+        data={list}
+        pageSize={5}
+      />
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <input
           placeholder="Code (ex. GL)"

@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "miragejs": "^0.1.48",
+    "papaparse": "^5.5.3"
+  }
+}
