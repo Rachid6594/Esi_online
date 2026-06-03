@@ -29,10 +29,10 @@ if env_file.exists():
 # ---------------------------------------------------------------------------
 SECRET_KEY = env(
     "SECRET_KEY",
-    default="django-insecure-change-me-in-production-use-env",
+    default="forgot-key",
 )
 DEBUG = env("DEBUG", default=True)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "192.168.1.65"])
 
 # ---------------------------------------------------------------------------
 # Applications : Django + nos apps dans le dossier app/

@@ -1,23 +1,22 @@
 /**
  * Centralisation de tous les endpoints API de l'espace étudiant.
+ * Pointe vers les endpoints réels du backend Django (OpenAPI).
  */
 export const ENDPOINTS = {
-  // Cours
-  COURSES: '/api/student/courses',
-  COURSE_DETAIL: (id) => `/api/student/courses/${id}`,
-  COURSE_CONTENT: (id) => `/api/student/courses/${id}/content`,
+  // Cours (Matières)
+  COURSES: '/api/etablissement/matieres/',
+  COURSE_DETAIL: (id) => `/api/etablissement/matieres/${id}/`,
 
   // Emploi du temps
-  TIMETABLE: '/api/student/timetable',
+  TIMETABLE: '/api/etablissement/emploidutempss/',
 
   // Ressources / Documents
-  RESOURCES: '/api/resources',
-  RESOURCE_DETAIL: (id) => `/api/resources/${id}`,
-  RESOURCE_DOWNLOAD: (id) => `/api/resources/${id}/download`,
+  RESOURCES: '/api/etablissement/ressources/',
+  RESOURCE_DETAIL: (id) => `/api/etablissement/ressources/${id}/`,
 
-  // Notifications
-  NOTIFICATIONS: '/api/notifications',
+  // Notifications (Annonces)
+  NOTIFICATIONS: '/api/etablissement/annonces/',
 
-  // Profil
-  PROFILE_UPDATE: '/api/student/profile',
+  // Profil utilisateur courant
+  PROFILE: '/api/auth/me/',
 }
