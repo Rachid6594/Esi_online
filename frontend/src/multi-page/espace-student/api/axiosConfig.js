@@ -8,7 +8,7 @@ const BASE_URL = '' // Proxy Vite ou URL directe
 
 /**
  * Effectue un fetch authentifié.
- * @param {string} url - Endpoint relatif (ex: '/api/student/courses')
+ * @param {string} url - Endpoint relatif (ex: '/api/etablissement/matieres/')
  * @param {RequestInit} options - Options fetch
  * @param {boolean} _isRetry - Interne, ne pas utiliser
  * @returns {Promise<Response|null>}
@@ -53,6 +53,21 @@ export async function apiGet(url) {
 export async function apiPost(url, body) {
   const res = await apiClient(url, {
     method: 'POST',
+    body: JSON.stringify(body),
+  })
+  if (!res || !res.ok) return null
+  return res.json()
+}
+
+/**
+ * Raccourci PATCH JSON.
+ * @param {string} url
+ * @param {any} body
+ * @returns {Promise<any|null>}
+ */
+export async function apiPatch(url, body) {
+  const res = await apiClient(url, {
+    method: 'PATCH',
     body: JSON.stringify(body),
   })
   if (!res || !res.ok) return null

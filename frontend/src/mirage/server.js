@@ -292,6 +292,8 @@ export function makeServer({ environment = 'development' } = {}) {
       this.post('/users/import-csv', () => new Response(200, {}, { message: 'Import mock réussi' }))
 
       // ── Auth ─────────────────────────────────────────────────────────────────
+      // Les routes Auth sont commentées pour permettre la connexion au vrai backend Django
+      /*
       this.namespace = 'api/auth'
       this.post('/login/', (schema, request) => {
         const body = JSON.parse(request.requestBody)
@@ -310,6 +312,7 @@ export function makeServer({ environment = 'development' } = {}) {
         }
       })
       this.post('/token/refresh/', () => ({ access: 'mock-access-token-refreshed' }))
+      */
 
       // ── Étudiant ─────────────────────────────────────────────────────────────
       this.namespace = 'api/student'
