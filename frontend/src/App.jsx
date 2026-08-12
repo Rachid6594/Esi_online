@@ -7,6 +7,7 @@ import {
   AProposPage,
   EnseignantsPage,
   LoginPage,
+  RegisterPage,
   ChangerMotDePassePage,
   AdminLayout,
   AdminDashboard,
@@ -48,6 +49,7 @@ function App() {
         <Route path="/enseignants" element={<EnseignantsPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/inscription" element={<RegisterPage />} />
       <Route path="/changer-mot-de-passe" element={<ChangerMotDePassePage />} />
       <Route path="/home" element={<StudentLayout />}>
         <Route index element={<StudentDashboard />} />

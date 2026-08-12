@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { LogIn } from 'lucide-react'
+import { LogIn, GraduationCap } from 'lucide-react'
 import { ThemeToggle } from '../../components/ThemeToggle'
 
 const navLinkClass = ({ isActive }) =>
@@ -12,7 +12,12 @@ export default function PublicLayout() {
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-gray-700 dark:bg-gray-900/95">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
-            <span className="text-[var(--color-esi-primary)]">ESI</span> Online
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-esi-primary)] text-white">
+              <GraduationCap className="h-5 w-5" />
+            </span>
+            <span>
+              <span className="text-[var(--color-esi-primary)]">ESI</span> Online
+            </span>
           </Link>
           <nav className="flex items-center gap-4 md:gap-8">
             <div className="hidden md:flex md:items-center md:gap-8">
@@ -30,6 +35,12 @@ export default function PublicLayout() {
               </NavLink>
             </div>
             <ThemeToggle />
+            <Link
+              to="/inscription"
+              className="hidden text-sm font-medium text-slate-600 hover:text-[var(--color-esi-primary)] md:inline dark:text-slate-300 dark:hover:text-white"
+            >
+              S&apos;inscrire
+            </Link>
             <Link
               to="/login"
               className="hidden md:inline-flex items-center gap-2 rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)]"

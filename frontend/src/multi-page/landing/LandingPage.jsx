@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { GraduationCap, BookOpen, Info, Users, LogIn, ChevronRight } from 'lucide-react'
+import { GraduationCap, BookOpen, Info, Users, LogIn, UserPlus, ChevronRight } from 'lucide-react'
 
 const pages = [
   { to: '/vie-estudiantine', icon: GraduationCap, title: 'Vie estudiantine', description: 'Activités, communauté et infos pratiques.' },
@@ -24,16 +24,16 @@ export default function LandingPage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
-                to="/login"
+                to="/inscription"
                 className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-esi-primary)] px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-[var(--color-esi-primary-hover)]"
               >
-                <LogIn className="h-4 w-4" /> Se connecter
+                <UserPlus className="h-4 w-4" /> S&apos;inscrire
               </Link>
               <Link
-                to="/documents"
+                to="/login"
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-200 dark:hover:bg-gray-600"
               >
-                <BookOpen className="h-4 w-4" /> Documents
+                <LogIn className="h-4 w-4" /> Se connecter
               </Link>
             </div>
           </div>
@@ -73,10 +73,16 @@ export default function LandingPage() {
           <p className="mx-auto mt-2 max-w-md text-slate-600 dark:text-slate-300">
             Étudiants, enseignants ou administration : connectez-vous pour accéder à vos ressources.
           </p>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link
+              to="/inscription"
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-esi-primary)] px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-[var(--color-esi-primary-hover)]"
+            >
+              <UserPlus className="h-4 w-4" /> S&apos;inscrire
+            </Link>
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-esi-primary)] px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-[var(--color-esi-primary-hover)]"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-200 dark:hover:bg-gray-600"
             >
               <LogIn className="h-4 w-4" /> Se connecter
             </Link>
