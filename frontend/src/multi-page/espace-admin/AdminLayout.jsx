@@ -14,10 +14,10 @@ import {
   BookOpen,
   Users,
   BookMarked as BookMarkedIcon,
-  UserPlus,
-  Search,
   List,
   UserCircle,
+  Menu,
+  X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getAuth, clearAuth, isAdmin } from '../../auth'
@@ -40,20 +40,15 @@ const etablissementSections = [
 ]
 
 const etudiantsSections = [
-  { key: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-  { key: 'creation', label: 'Création', icon: UserPlus },
-  { key: 'recherche', label: 'Recherche avancée', icon: Search },
-  { key: 'liste', label: 'Liste', icon: List },
+  { key: 'dashboard', label: 'Liste des étudiants', icon: List },
 ]
 
 const bibliothecairesSections = [
   { key: 'liste', label: 'Liste', icon: List },
-  { key: 'creation', label: 'Créer un compte', icon: UserPlus },
 ]
 
 const professeursSections = [
   { key: 'liste', label: 'Liste', icon: List },
-  { key: 'creation', label: 'Créer un compte', icon: UserPlus },
 ]
 
 const contenuSections = [
@@ -74,6 +69,8 @@ export default function AdminLayout() {
   const [bibliothecairesOpen, setBibliothecairesOpen] = useState(isBibliothecaires)
   const [professeursOpen, setProfesseursOpen] = useState(isProfesseurs)
   const [contenuOpen, setContenuOpen] = useState(isContenu)
+  const [sidebarOpen, toggleSidebar] = useSidebarState()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     if (isEtablissement) setEtablissementOpen(true)
@@ -97,6 +94,10 @@ export default function AdminLayout() {
     }
   }, [ok, navigate])
 
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
+
   function handleLogout() {
     clearAuth()
     navigate('/login', { replace: true })
@@ -106,31 +107,27 @@ export default function AdminLayout() {
     return null
   }
 
-  const [sidebarOpen, toggleSidebar] = useSidebarState()
-
-  return (
-    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-800 dark:bg-gray-900 dark:text-slate-200">
-      {!sidebarOpen && (
-        <div className="fixed left-4 top-4 z-40">
-          <SidebarOpenButton onClick={toggleSidebar} className="bg-white shadow-md dark:bg-gray-800" />
-        </div>
-      )}
-      {/* Sidebar */}
-      <aside
-        className={`flex shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-200 dark:border-gray-700 dark:bg-gray-800 ${
-          sidebarOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'
-        }`}
-      >
-        <div className="flex w-56 min-w-56 flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-5 dark:border-gray-700">
-            <span className="truncate font-semibold text-slate-800 dark:text-slate-200">
-              <span className="text-[var(--color-esi-primary)]">ESI</span> Admin
-            </span>
-            <div className="flex items-center gap-1">
-              <ThemeToggle />
-              <SidebarCloseButton onClick={toggleSidebar} />
-            </div>
+  const sidebarContent = (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-5 dark:border-gray-700">
+        <span className="truncate font-semibold text-slate-800 dark:text-slate-200">
+          <span className="text-[var(--color-esi-primary)]">ESI</span> Admin
+        </span>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white md:hidden"
+            aria-label="Fermer le menu"
+          >
+            <X className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+          <div className="hidden md:block">
+            <SidebarCloseButton onClick={toggleSidebar} />
           </div>
+        </div>
+      </div>
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
           <NavLink to="/admin" end className={navClass}>
             <LayoutDashboard className="h-5 w-5" strokeWidth={1.5} />
@@ -264,6 +261,10 @@ export default function AdminLayout() {
               </div>
             )}
           </div>
+          <NavLink to="/admin/utilisateurs" className={navClass}>
+            <Users className="h-5 w-5" strokeWidth={1.5} />
+            Gestion des utilisateurs
+          </NavLink>
           <NavLink to="/admin/administration" className={navClass}>
             <Building2 className="h-5 w-5" strokeWidth={1.5} />
             Gestion de l&apos;administration
@@ -387,12 +388,47 @@ export default function AdminLayout() {
               <LogOut className="h-5 w-5" strokeWidth={1.5} />
               Déconnexion
             </button>
-          </div>
         </div>
+      </div>
+      )
+  return (
+    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-800 dark:bg-gray-900 dark:text-slate-200">
+      {!sidebarOpen && (
+        <div className="fixed left-4 top-4 z-40 hidden md:block">
+          <SidebarOpenButton onClick={toggleSidebar} className="bg-white shadow-md dark:bg-gray-800" />
+        </div>
+      )}
+      {/* Bouton hamburger mobile */}
+      <div className="fixed left-3 top-3 z-50 md:hidden">
+        {!mobileOpen && (
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className="rounded-lg bg-white p-2 shadow-md transition hover:bg-slate-50 dark:bg-gray-800 dark:hover:bg-gray-700"
+            aria-label="Ouvrir le menu"
+          >
+            <Menu className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+          </button>
+        )}
+      </div>
+
+      {/* Overlay mobile */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* Sidebar mobile (drawer) */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r border-slate-200 bg-white transition-transform duration-300 ease-in-out md:hidden dark:border-gray-700 dark:bg-gray-800 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {sidebarContent}
+      </aside>
+
+      {/* Sidebar desktop */}
+      <aside className={`hidden md:flex shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-200 dark:border-gray-700 dark:bg-gray-800 ${sidebarOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'}`}>
+        {sidebarOpen && <div className="w-56 min-w-56 flex-1 flex-col">{sidebarContent}</div>}
       </aside>
 
       {/* Contenu principal */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pt-14 md:pt-0">
         <Outlet />
       </main>
     </div>

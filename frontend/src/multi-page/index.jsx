@@ -24,6 +24,7 @@ export {
   AdminProfesseursListe,
   AdminProfesseursCreation,
   AdminContenu,
+  AdminUtilisateurs,
   AdminAdministration,
   AdminParametres,
   AdminEtablissement,

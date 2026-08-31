@@ -75,19 +75,19 @@ export default function AdminBibliothecairesCreation() {
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
+        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)] dark:bg-esi-orange/20 dark:text-esi-orange">
           <UserPlus className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Créer un compte bibliothécaire</h1>
-          <p className="text-slate-600">Saisissez l&apos;email, le nom et un mot de passe pour le nouveau compte.</p>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Créer un compte bibliothécaire</h1>
+          <p className="text-slate-600 dark:text-slate-400">Saisissez l&apos;email, le nom et un mot de passe pour le nouveau compte.</p>
         </div>
       </div>
 
-      <div className="max-w-xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="max-w-xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <Link
           to="/admin/bibliothecaires/liste"
-          className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-[var(--color-esi-primary)]"
+          className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-[var(--color-esi-primary)] dark:text-slate-300"
         >
           <ArrowLeft className="h-4 w-4" />
           Retour à la liste
@@ -95,18 +95,18 @@ export default function AdminBibliothecairesCreation() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/40 dark:text-red-300">
               {error}
             </div>
           )}
           {success && (
-            <div className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">
+            <div className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700 dark:bg-green-900/40 dark:text-green-300">
               {success}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="email"               className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Email <span className="text-red-500">*</span>
             </label>
             <input
@@ -115,14 +115,14 @@ export default function AdminBibliothecairesCreation() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-slate-100"
               placeholder="bibliothecaire@exemple.com"
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="first_name" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="first_name"               className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Prénom
               </label>
               <input
@@ -130,12 +130,12 @@ export default function AdminBibliothecairesCreation() {
                 type="text"
                 value={first_name}
                 onChange={(e) => setFirst_name(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-slate-100"
                 placeholder="Prénom"
               />
             </div>
             <div>
-              <label htmlFor="last_name" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="last_name"               className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Nom
               </label>
               <input
@@ -143,14 +143,14 @@ export default function AdminBibliothecairesCreation() {
                 type="text"
                 value={last_name}
                 onChange={(e) => setLast_name(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-slate-100"
                 placeholder="Nom"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="password"               className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Mot de passe <span className="text-red-500">*</span>
             </label>
             <input
@@ -160,13 +160,13 @@ export default function AdminBibliothecairesCreation() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-slate-100"
               placeholder="Au moins 8 caractères"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="confirmPassword"               className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Confirmer le mot de passe <span className="text-red-500">*</span>
             </label>
             <input
@@ -176,7 +176,7 @@ export default function AdminBibliothecairesCreation() {
               minLength={8}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-slate-100"
               placeholder="Repéter le mot de passe"
             />
           </div>
@@ -191,7 +191,7 @@ export default function AdminBibliothecairesCreation() {
             </button>
             <Link
               to="/admin/bibliothecaires/liste"
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:bg-gray-900 dark:text-slate-200 dark:hover:bg-gray-700"
             >
               Annuler
             </Link>

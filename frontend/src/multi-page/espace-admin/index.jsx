@@ -10,6 +10,7 @@ export { default as AdminBibliothecairesCreation } from './AdminBibliothecairesC
 export { default as AdminProfesseursListe } from './AdminProfesseursListe'
 export { default as AdminProfesseursCreation } from './AdminProfesseursCreation'
 export { default as AdminContenu } from './AdminContenu'
+export { default as AdminUtilisateurs } from './AdminUtilisateurs'
 export { default as AdminAdministration } from './AdminAdministration'
 export { default as AdminParametres } from './AdminParametres'
 export { default as AdminEtablissement } from './AdminEtablissement'
