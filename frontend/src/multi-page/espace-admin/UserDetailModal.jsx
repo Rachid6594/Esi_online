@@ -1,6 +1,19 @@
-import { useState } from 'react'
-import { X, Pencil, Save } from 'lucide-react'
+﻿import { useState } from 'react'
+import { Pencil, Save } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
@@ -83,48 +96,32 @@ export default function UserDetailModal({ user, onClose, onSaved }) {
     }
   }
 
-  const fieldClass =
-    'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-slate-100'
-  const labelClass = 'mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300'
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+    <Dialog open={!!user} onOpenChange={(open) => !open && onClose?.()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>
             {editing ? `Modifier ${current.email}` : 'Détails du compte'}
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-gray-700 dark:hover:text-slate-200"
-            aria-label="Fermer"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
 
         {current.role && (
-          <div className="mt-3">
-            <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-slate-200">
-              {ROLE_LABELS[current.role] || current.role}
-            </span>
-          </div>
+          <Badge variant="secondary">{ROLE_LABELS[current.role] || current.role}</Badge>
         )}
 
         {error && (
-          <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/40 dark:text-red-300">
-            {error}
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         {msg && (
-          <div className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700 dark:bg-green-900/40 dark:text-green-300">
-            {msg}
-          </div>
+          <Alert>
+            <AlertDescription>{msg}</AlertDescription>
+          </Alert>
         )}
 
         {!editing ? (
-          <div className="mt-4 divide-y divide-slate-100 dark:divide-gray-700">
+          <div className="divide-y divide-border">
             <Row label="ID" value={current.id} />
             <Row label="Nom" value={current.last_name} />
             <Row label="Prénom" value={current.first_name} />
@@ -135,9 +132,9 @@ export default function UserDetailModal({ user, onClose, onSaved }) {
             <Row
               label="Statut"
               value={
-                <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${current.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-slate-100 text-slate-600 dark:bg-gray-700 dark:text-slate-400'}`}>
+                <Badge variant={current.is_active ? 'secondary' : 'outline'}>
                   {current.is_active ? 'Actif' : 'Inactif'}
-                </span>
+                </Badge>
               }
             />
             {current.date_joined && (
@@ -145,95 +142,81 @@ export default function UserDetailModal({ user, onClose, onSaved }) {
             )}
           </div>
         ) : (
-          <form onSubmit={handleSave} className="mt-4 space-y-4">
-            <div>
-              <label className={labelClass}>Nom</label>
-              <input className={fieldClass} value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} />
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="last_name">Nom</Label>
+              <Input id="last_name" value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} />
             </div>
-            <div>
-              <label className={labelClass}>Prénom</label>
-              <input className={fieldClass} value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} />
+            <div className="space-y-2">
+              <Label htmlFor="first_name">Prénom</Label>
+              <Input id="first_name" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} />
             </div>
-            <div>
-              <label className={labelClass}>Email</label>
-              <input className={fieldClass} type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
             </div>
-            <div>
-              <label className={labelClass}>Nom d'utilisateur</label>
-              <input className={fieldClass} value={form.username} onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))} />
+            <div className="space-y-2">
+              <Label htmlFor="username">Nom d&apos;utilisateur</Label>
+              <Input id="username" value={form.username} onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))} />
             </div>
-            <div>
-              <label className={labelClass}>Mot de passe</label>
-              <input
-                className={fieldClass}
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
                 type="password"
                 placeholder="Laisser vide pour ne pas changer"
                 value={form.password}
                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-              <input
-                type="checkbox"
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="is_active"
                 checked={form.is_active}
-                onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
-                className="rounded border-slate-300 text-[var(--color-esi-primary)] focus:ring-[var(--color-esi-primary)]"
+                onCheckedChange={(checked) => setForm((f) => ({ ...f, is_active: !!checked }))}
               />
-              Compte actif
-            </label>
+              <Label htmlFor="is_active" className="font-normal">Compte actif</Label>
+            </div>
           </form>
         )}
 
-        <div className="mt-5 flex justify-end gap-2">
+        <DialogFooter>
           {!editing ? (
             <>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:text-slate-200 dark:hover:bg-gray-700"
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Fermer
-              </button>
-              <button
-                type="button"
-                onClick={startEdit}
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-esi-primary)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)]"
-              >
+              </Button>
+              <Button type="button" onClick={startEdit}>
                 <Pencil className="h-4 w-4" />
                 Modifier
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => { setEditing(false); setError(''); setMsg('') }}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:text-slate-200 dark:hover:bg-gray-700"
               >
                 Annuler
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={busy}
-                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-70"
-              >
+              </Button>
+              <Button type="button" onClick={handleSave} disabled={busy}>
                 <Save className="h-4 w-4" />
                 {busy ? 'Enregistrement…' : 'Enregistrer'}
-              </button>
+              </Button>
             </>
           )}
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
 function Row({ label, value }) {
   return (
     <div className="flex justify-between gap-4 py-2 text-sm">
-      <span className="text-slate-500 dark:text-slate-400">{label}</span>
-      <span className="text-right text-slate-800 dark:text-slate-200">{value || '—'}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right text-foreground">{value || '—'}</span>
     </div>
   )
 }

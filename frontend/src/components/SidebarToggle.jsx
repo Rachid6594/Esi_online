@@ -1,35 +1,34 @@
 import { useState, useCallback } from 'react'
 import { PanelLeftClose, PanelLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
-/**
- * Bouton pour replier la sidebar (à placer dans le header de la sidebar).
- */
 export function SidebarCloseButton({ onClick, className = '' }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       onClick={onClick}
       aria-label="Replier le menu"
-      className={`rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white ${className}`}
+      className={className}
     >
       <PanelLeftClose className="h-5 w-5" strokeWidth={1.5} />
-    </button>
+    </Button>
   )
 }
 
-/**
- * Bouton pour afficher la sidebar (à placer dans la zone contenu quand la sidebar est repliée).
- */
 export function SidebarOpenButton({ onClick, className = '' }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       onClick={onClick}
       aria-label="Afficher le menu"
-      className={`rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white ${className}`}
+      className={className}
     >
       <PanelLeft className="h-5 w-5" strokeWidth={1.5} />
-    </button>
+    </Button>
   )
 }
 

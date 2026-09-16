@@ -13,6 +13,12 @@ import {
   Users,
 } from 'lucide-react'
 import { getAccessToken, refreshAccessToken, clearAuthAndRedirectToLogin } from '../../auth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 const ETABLISSEMENT = `${API_BASE}/api/etablissement`
@@ -54,7 +60,7 @@ function apiPost(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }).then(async (r) => {
-    if (!r) throw new Error('Non autorisé')
+    if (!r) throw new Error('Non autorisÃ©')
     const data = await r.json().catch(() => ({}))
     if (!r.ok) {
       const msg = data.detail ?? data.message ?? formatValidationErrors(data) ?? 'Erreur'
@@ -67,17 +73,17 @@ function apiPost(path, body) {
 function formatValidationErrors(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return null
   const parts = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v[0] : v}`)
-  return parts.length ? parts.join(' — ') : null
+  return parts.length ? parts.join(' â ') : null
 }
 
 const VALID_SECTIONS = ['annees', 'niveaux', 'filieres', 'classes', 'matieres', 'adminEcoles']
 const SECTION_TITLES = {
-  annees: 'Années académiques',
+  annees: 'AnnÃ©es acadÃ©miques',
   niveaux: 'Niveaux',
-  filieres: 'Filières',
+  filieres: 'FiliÃ¨res',
   classes: 'Classes',
-  matieres: 'Matières',
-  adminEcoles: 'Administration École',
+  matieres: 'MatiÃ¨res',
+  adminEcoles: 'Administration Ãcole',
 }
 const SECTION_ICONS = { annees: Calendar, niveaux: Layers, filieres: BookOpen, classes: GraduationCap, matieres: BookMarked, adminEcoles: Users }
 
@@ -147,21 +153,23 @@ export default function AdminEtablissement() {
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
+        <div className="rounded-xl bg-muted p-2.5 text-foreground">
           {Icon ? <Icon className="h-7 w-7" strokeWidth={1.5} /> : <Building2 className="h-7 w-7" strokeWidth={1.5} />}
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{SECTION_TITLES[section]}</h1>
-          <p className="text-slate-600">
-            Gestion de l&apos;établissement — {SECTION_TITLES[section].toLowerCase()}.
+          <h1 className="text-2xl font-semibold text-foreground">{SECTION_TITLES[section]}</h1>
+          <p className="text-muted-foreground">
+            Gestion de l&apos;Ã©tablissement â {SECTION_TITLES[section].toLowerCase()}.
           </p>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        {loading[section] && <p className="text-sm text-slate-500">Chargement…</p>}
+      <Card className="p-4 text-card-foreground">
+        {loading[section] && <p className="text-sm text-muted-foreground">Chargementâ¦</p>}
         {msg.section === section && (
-          <p className={`mb-2 text-sm ${msg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{msg.text}</p>
+          <Alert variant={msg.type === 'error' ? 'destructive' : 'default'} className="mb-2">
+            <AlertDescription>{msg.text}</AlertDescription>
+          </Alert>
         )}
 
         {section === 'annees' && (
@@ -213,7 +221,7 @@ export default function AdminEtablissement() {
           />
         )}
         {section === 'adminEcoles' && <AdminEcolesSection list={adminEcoles} />}
-      </div>
+      </Card>
     </div>
   )
 }
@@ -229,7 +237,7 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
           body: formData,
         })
         if (!res.ok) throw new Error('Erreur import')
-        onMsg('success', 'Import CSV réussi')
+        onMsg('success', 'Import CSV rÃ©ussi')
         onReload()
       } catch (e) {
         onMsg('error', e.message)
@@ -243,7 +251,7 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
     setSubmitting(true)
     apiPost('/anneeacademiques/', form)
       .then(() => {
-        onMsg('success', 'Année académique créée.')
+        onMsg('success', 'AnnÃ©e acadÃ©mique crÃ©Ã©e.')
         setForm({ libelle: '', date_debut: '', date_fin: '', is_active: false })
         onReload()
       })
@@ -254,13 +262,13 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
     <>
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <CsvImportZone onImport={handleImport} />
-        <button onClick={() => setModalOpen(true)} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)]">Nouvelle année</button>
+        <Button type="button" onClick={() => setModalOpen(true)}>Nouvelle annÃ©e</Button>
       </div>
       {/* DataTable avec tri/pagination */}
       <DataTable
         columns={[
-          { key: 'libelle', label: 'Libellé' },
-          { key: 'date_debut', label: 'Début' },
+          { key: 'libelle', label: 'LibellÃ©' },
+          { key: 'date_debut', label: 'DÃ©but' },
           { key: 'date_fin', label: 'Fin' },
           { key: 'is_active', label: 'Active', render: (v) => (v ? 'Oui' : 'Non') },
         ]}
@@ -268,40 +276,37 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
         pageSize={5}
       />
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <h2 className="text-lg font-semibold mb-4">Nouvelle année académique</h2>
+        <h2 className="text-lg font-semibold mb-4">Nouvelle annÃ©e acadÃ©mique</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input
-            placeholder="Libellé (ex. 2024-2025)"
+          <Input
+            placeholder="LibellÃ© (ex. 2024-2025)"
             value={form.libelle}
             onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
             required
           />
-          <input
+          <Input
             type="date"
             value={form.date_debut}
             onChange={(e) => setForm((f) => ({ ...f, date_debut: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
             required
           />
-          <input
+          <Input
             type="date"
             value={form.date_fin}
             onChange={(e) => setForm((f) => ({ ...f, date_fin: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
             required
           />
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="annee_active"
               checked={form.is_active}
-              onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
+              onCheckedChange={(checked) => setForm((f) => ({ ...f, is_active: !!checked }))}
             />
-            Active
-          </label>
-          <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => setModalOpen(false)} className="rounded-lg border px-4 py-2 text-sm">Annuler</button>
-            <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">Ajouter</button>
+            <Label htmlFor="annee_active" className="font-normal">Active</Label>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Annuler</Button>
+            <Button type="submit" disabled={submitting}>Ajouter</Button>
           </div>
         </form>
       </Modal>
@@ -318,7 +323,7 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
     const payload = { code: form.code.trim(), libelle: form.libelle.trim(), ordre: Number(form.ordre) || 0 }
     apiPost('/niveaus/', payload)
       .then(() => {
-        onMsg('success', 'Niveau créé.')
+        onMsg('success', 'Niveau crÃ©Ã©.')
         setForm({ code: '', libelle: '', ordre: 0 })
         onReload()
       })
@@ -330,7 +335,7 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
       <DataTable
         columns={[
           { key: 'code', label: 'Code' },
-          { key: 'libelle', label: 'Libellé' },
+          { key: 'libelle', label: 'LibellÃ©' },
           { key: 'ordre', label: 'Ordre' },
         ]}
         data={list}
@@ -342,15 +347,15 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
           value={form.code}
           onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.slice(0, 2) }))}
           maxLength={2}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-20"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-20"
           required
-          title="2 caractères max (ex. L1, M2)"
+          title="2 caractÃ¨res max (ex. L1, M2)"
         />
         <input
-          placeholder="Libellé (ex. Licence 1)"
+          placeholder="LibellÃ© (ex. Licence 1)"
           value={form.libelle}
           onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
           required
         />
         <input
@@ -358,11 +363,9 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
           placeholder="Ordre"
           value={form.ordre}
           onChange={(e) => setForm((f) => ({ ...f, ordre: parseInt(e.target.value, 10) || 0 }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-20"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-20"
         />
-        <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">
-          Ajouter
-        </button>
+        <Button type="submit" disabled={submitting}>Ajouter</Button>
       </form>
     </>
   )
@@ -376,7 +379,7 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
     setSubmitting(true)
     apiPost('/filieres/', form)
       .then(() => {
-        onMsg('success', 'Filière créée.')
+        onMsg('success', 'FiliÃ¨re crÃ©Ã©e.')
         setForm({ code: '', libelle: '', description: '' })
         onReload()
       })
@@ -388,7 +391,7 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
       <DataTable
         columns={[
           { key: 'code', label: 'Code' },
-          { key: 'libelle', label: 'Libellé' },
+          { key: 'libelle', label: 'LibellÃ©' },
         ]}
         data={list}
         pageSize={5}
@@ -398,19 +401,17 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
           placeholder="Code (ex. GL)"
           value={form.code}
           onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-24"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-24"
           required
         />
         <input
-          placeholder="Libellé (ex. Génie Logiciel)"
+          placeholder="LibellÃ© (ex. GÃ©nie Logiciel)"
           value={form.libelle}
           onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm flex-1 min-w-[200px]"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground flex-1 min-w-[200px]"
           required
         />
-        <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">
-          Ajouter
-        </button>
+        <Button type="submit" disabled={submitting}>Ajouter</Button>
       </form>
     </>
   )
@@ -440,7 +441,7 @@ function ClassesSection({
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.niveau || !form.filiere || !form.annee_academique) {
-      onMsg('error', 'Choisissez niveau, filière et année académique.')
+      onMsg('error', 'Choisissez niveau, filiÃ¨re et annÃ©e acadÃ©mique.')
       return
     }
     setSubmitting(true)
@@ -453,7 +454,7 @@ function ClassesSection({
       effectif_max: form.effectif_max || 50,
     })
       .then(() => {
-        onMsg('success', 'Classe créée.')
+        onMsg('success', 'Classe crÃ©Ã©e.')
         setForm({ code: '', libelle: '', niveau: '', filiere: '', annee_academique: '', effectif_max: 50 })
         onReload()
       })
@@ -464,15 +465,15 @@ function ClassesSection({
     <>
       <table className="mb-4 w-full text-sm">
         <thead>
-          <tr className="border-b text-left text-slate-600">
+          <tr className="border-b border-border text-left text-muted-foreground">
             <th className="py-2">Code</th>
-            <th className="py-2">Libellé</th>
+            <th className="py-2">LibellÃ©</th>
             <th className="py-2">Effectif max</th>
           </tr>
         </thead>
         <tbody>
           {list.map((c) => (
-            <tr key={c.id} className="border-b border-slate-100">
+            <tr key={c.id} className="border-b border-border">
               <td className="py-2">{c.libelle || c.code}</td>
               <td className="py-2">{c.libelle}</td>
               <td className="py-2">{c.effectif_max}</td>
@@ -480,8 +481,8 @@ function ClassesSection({
           ))}
         </tbody>
       </table>
-      <p className="mb-2 text-xs text-slate-500">
-        Créez d&apos;abord des <button type="button" onClick={onOpenAnnees} className="text-[var(--color-esi-primary)] underline">années académiques</button>, des <button type="button" onClick={onOpenNiveaux} className="text-[var(--color-esi-primary)] underline">niveaux</button> et des <button type="button" onClick={onOpenFilieres} className="text-[var(--color-esi-primary)] underline">filières</button>.
+      <p className="mb-2 text-xs text-muted-foreground">
+        CrÃ©ez d&apos;abord des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenAnnees}>annÃ©es acadÃ©miques</Button>, des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenNiveaux}>niveaux</Button> et des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenFilieres}>filiÃ¨res</Button>.
       </p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex flex-wrap gap-3">
@@ -489,20 +490,20 @@ function ClassesSection({
             placeholder="Code (ex. L1-GL-24)"
             value={form.code}
             onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-32"
+            className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-32"
             required
           />
           <input
-            placeholder="Libellé"
+            placeholder="LibellÃ©"
             value={form.libelle}
             onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm flex-1 min-w-[180px]"
+            className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground flex-1 min-w-[180px]"
             required
           />
           <select
             value={form.niveau}
             onChange={(e) => setForm((f) => ({ ...f, niveau: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
             required
           >
             <option value="">Niveau</option>
@@ -513,10 +514,10 @@ function ClassesSection({
           <select
             value={form.filiere}
             onChange={(e) => setForm((f) => ({ ...f, filiere: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
             required
           >
-            <option value="">Filière</option>
+            <option value="">FiliÃ¨re</option>
             {filieres.map((f) => (
               <option key={f.id} value={f.id}>{f.libelle || f.code}</option>
             ))}
@@ -524,10 +525,10 @@ function ClassesSection({
           <select
             value={form.annee_academique}
             onChange={(e) => setForm((f) => ({ ...f, annee_academique: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
             required
           >
-            <option value="">Année académique</option>
+            <option value="">AnnÃ©e acadÃ©mique</option>
             {annees.map((a) => (
               <option key={a.id} value={a.id}>{a.libelle}</option>
             ))}
@@ -537,12 +538,10 @@ function ClassesSection({
             min="1"
             value={form.effectif_max}
             onChange={(e) => setForm((f) => ({ ...f, effectif_max: parseInt(e.target.value, 10) || 50 }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-24"
+            className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-24"
           />
         </div>
-        <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">
-          Ajouter la classe
-        </button>
+        <Button type="submit" disabled={submitting}>Ajouter la classe</Button>
       </form>
     </>
   )
@@ -566,7 +565,7 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
       credit: form.credit || 3,
     })
       .then(() => {
-        onMsg('success', 'Matière créée.')
+        onMsg('success', 'MatiÃ¨re crÃ©Ã©e.')
         setForm({ code: '', libelle: '', niveau: '', filiere: '', semestre: 1, coefficient: 1, credit: 3 })
         onReload()
       })
@@ -585,16 +584,16 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
 
   return (
     <>
-      <p className="mb-3 text-sm text-slate-600 dark:text-slate-400">
-        Chaque matière est rattachée à un <strong>semestre</strong>. Le programme d&apos;un semestre est l&apos;ensemble des matières de ce semestre (éventuellement par niveau/filière).
+      <p className="mb-3 text-sm text-muted-foreground">
+        Chaque matiÃ¨re est rattachÃ©e Ã  un <strong>semestre</strong>. Le programme d&apos;un semestre est l&apos;ensemble des matiÃ¨res de ce semestre (âventuellement par niveau/filiÃ¨re).
       </p>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Voir le programme du semestre :</label>
+        <label className="text-sm font-medium text-foreground">Voir le programme du semestre :</label>
         <select
           value={filterSemestre}
           onChange={(e) => setFilterSemestre(Number(e.target.value))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
         >
           <option value={0}>Tous les semestres</option>
           {[1, 2, 3, 4, 5, 6].map((s) => (
@@ -604,32 +603,32 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
       </div>
 
       {semestresOrdre.length === 0 ? (
-        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Aucune matière. Ajoutez des matières ci-dessous en choisissant le semestre.</p>
+        <p className="mb-4 text-sm text-muted-foreground">Aucune matiÃ¨re. Ajoutez des matiÃ¨res ci-dessous en choisissant le semestre.</p>
       ) : (
         <div className="mb-6 space-y-6">
           {semestresOrdre.map((sem) => (
             <div key={sem}>
-              <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">Programme du semestre {sem}</h3>
-              <table className="w-full text-sm">
+              <h3 className="mb-2 text-sm font-semibold text-foreground">Programme du semestre {sem}</h3>
+              <table className="w-full text-sm text-foreground">
                 <thead>
-                  <tr className="border-b text-left text-slate-600 dark:text-slate-400">
-                    <th className="py-2">Libellé</th>
+                  <tr className="border-b border-border text-left text-muted-foreground">
+                    <th className="py-2">LibellÃ©</th>
                     <th className="py-2">Code</th>
                     <th className="py-2">Niveau</th>
-                    <th className="py-2">Filière</th>
+                    <th className="py-2">FiliÃ¨re</th>
                     <th className="py-2">Coef.</th>
-                    <th className="py-2">Crédits</th>
+                    <th className="py-2">CrÃ©dits</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(bySemestre[sem] || []).map((m) => (
-                    <tr key={m.id} className="border-b border-slate-100 dark:border-gray-600">
+                    <tr key={m.id} className="border-b border-border">
                       <td className="py-2">{m.libelle}</td>
                       <td className="py-2">{m.code}</td>
-                      <td className="py-2">{m.niveau ? ((niveaux.find((n) => n.id === m.niveau)?.libelle || niveaux.find((n) => n.id === m.niveau)?.code) ?? m.niveau) : '—'}</td>
-                      <td className="py-2">{m.filiere ? ((filieres.find((f) => f.id === m.filiere)?.libelle || filieres.find((f) => f.id === m.filiere)?.code) ?? m.filiere) : '—'}</td>
-                      <td className="py-2">{m.coefficient ?? '—'}</td>
-                      <td className="py-2">{m.credit ?? '—'}</td>
+                      <td className="py-2">{m.niveau ? ((niveaux.find((n) => n.id === m.niveau)?.libelle || niveaux.find((n) => n.id === m.niveau)?.code) ?? m.niveau) : 'â'}</td>
+                      <td className="py-2">{m.filiere ? ((filieres.find((f) => f.id === m.filiere)?.libelle || filieres.find((f) => f.id === m.filiere)?.code) ?? m.filiere) : 'â'}</td>
+                      <td className="py-2">{m.coefficient ?? 'â'}</td>
+                      <td className="py-2">{m.credit ?? 'â'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -639,39 +638,39 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
         </div>
       )}
 
-      <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
-        {`Ajouter une matière au programme (choisir le semestre)`}
+      <h3 className="mb-2 text-sm font-semibold text-foreground">
+        {`Ajouter une matiÃ¨re au programme (choisir le semestre)`}
       </h3>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-500 dark:text-slate-400">Libellé</label>
-          <input placeholder="Ex. Mathématiques" value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[180px] dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" required />
+          <label className="text-xs text-muted-foreground">LibellÃ©</label>
+          <input placeholder="Ex. MathÃ©matiques" value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground min-w-[180px]" required />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-500 dark:text-slate-400">Code</label>
-          <input placeholder="Ex. MATH01" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-24 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" required />
+          <label className="text-xs text-muted-foreground">Code</label>
+          <input placeholder="Ex. MATH01" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-24" required />
         </div>
-        <select value={form.niveau} onChange={(e) => setForm((f) => ({ ...f, niveau: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100">
+        <select value={form.niveau} onChange={(e) => setForm((f) => ({ ...f, niveau: e.target.value }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground">
           <option value="">Niveau</option>
           {niveaux.map((n) => <option key={n.id} value={n.id}>{n.libelle || n.code}</option>)}
         </select>
-        <select value={form.filiere} onChange={(e) => setForm((f) => ({ ...f, filiere: e.target.value }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100">
-          <option value="">Filière</option>
+        <select value={form.filiere} onChange={(e) => setForm((f) => ({ ...f, filiere: e.target.value }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground">
+          <option value="">FiliÃ¨re</option>
           {filieres.map((f) => <option key={f.id} value={f.id}>{f.libelle || f.code}</option>)}
         </select>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-500 dark:text-slate-400">Semestre</label>
-          <input type="number" min="1" max="10" value={form.semestre} onChange={(e) => setForm((f) => ({ ...f, semestre: parseInt(e.target.value, 10) || 1 }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-20 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" title="Programme du semestre" />
+          <label className="text-xs text-muted-foreground">Semestre</label>
+          <input type="number" min="1" max="10" value={form.semestre} onChange={(e) => setForm((f) => ({ ...f, semestre: parseInt(e.target.value, 10) || 1 }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-20" title="Programme du semestre" />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-500 dark:text-slate-400">Coef.</label>
-          <input type="number" min="0" step="0.5" value={form.coefficient} onChange={(e) => setForm((f) => ({ ...f, coefficient: parseFloat(e.target.value) || 1 }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-16 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" />
+          <label className="text-xs text-muted-foreground">Coef.</label>
+          <input type="number" min="0" step="0.5" value={form.coefficient} onChange={(e) => setForm((f) => ({ ...f, coefficient: parseFloat(e.target.value) || 1 }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-16" />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-slate-500 dark:text-slate-400">Crédits</label>
-          <input type="number" min="0" value={form.credit} onChange={(e) => setForm((f) => ({ ...f, credit: parseInt(e.target.value, 10) || 3 }))} className="rounded-lg border border-slate-300 px-3 py-2 text-sm w-16 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100" />
+          <label className="text-xs text-muted-foreground">CrÃ©dits</label>
+          <input type="number" min="0" value={form.credit} onChange={(e) => setForm((f) => ({ ...f, credit: parseInt(e.target.value, 10) || 3 }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-16" />
         </div>
-        <button type="submit" disabled={submitting} className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70">Ajouter la matière</button>
+        <Button type="submit" disabled={submitting}>Ajouter la matiÃ¨re</Button>
       </form>
     </>
   )
@@ -679,8 +678,8 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
 
 function AdminEcolesSection({ list }) {
   return (
-    <p className="text-sm text-slate-500">
-      Liste des comptes Administration École ({list.length}). La création se fait via la gestion des utilisateurs (lien avec un compte utilisateur).
+    <p className="text-sm text-muted-foreground">
+      Liste des comptes Administration Ãcole ({list.length}). La crÃ©ation se fait via la gestion des utilisateurs (lien avec un compte utilisateur).
     </p>
   )
 }

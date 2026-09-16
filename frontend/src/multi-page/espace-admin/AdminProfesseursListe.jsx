@@ -1,7 +1,21 @@
 import { useState, useEffect } from 'react'
-import { List, UserPlus, RefreshCw, X, Eye } from 'lucide-react'
+import { List, UserPlus, RefreshCw, Eye } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
 import UserDetailModal from './UserDetailModal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 const ETABLISSEMENT = `${API_BASE}/api/etablissement`
@@ -84,7 +98,7 @@ export default function AdminProfesseursListe() {
     setError('')
     setSuccess('')
     if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.')
+      setError('Le mot de passe doit contenir au moins 8 caract�res.')
       return
     }
     if (password !== confirmPassword) {
@@ -92,7 +106,7 @@ export default function AdminProfesseursListe() {
       return
     }
     if (matiereIds.length === 0) {
-      setError('Veuillez sélectionner au moins une matière pour ce professeur.')
+      setError('Veuillez s�lectionner au moins une mati�re pour ce professeur.')
       return
     }
     setBusy(true)
@@ -112,12 +126,12 @@ export default function AdminProfesseursListe() {
         return r.ok ? r.json() : r.json().then((data) => Promise.reject(data))
       })
       .catch((err) => {
-        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la création.')
+        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la cr�ation.')
         return null
       })
       .finally(() => setBusy(false))
     if (!res) return
-    setSuccess(res?.message || 'Compte professeur créé.')
+    setSuccess(res?.message || 'Compte professeur cr��.')
     setEmail('')
     setFirstName('')
     setLastName('')
@@ -130,93 +144,76 @@ export default function AdminProfesseursListe() {
     }, 1200)
   }
 
-  const fieldClass =
-    'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-slate-100'
-  const labelClass = 'mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300'
-
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)] dark:bg-gray-700 dark:text-esi-orange">
+          <div className="rounded-xl bg-muted p-2.5 text-foreground">
             <List className="h-7 w-7" strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Gestion des professeurs</h1>
-            <p className="text-slate-600 dark:text-slate-300">Comptes ayant accès à l&apos;espace professeur.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Gestion des professeurs</h1>
+            <p className="text-muted-foreground">Comptes ayant acc�s � l&apos;espace professeur.</p>
           </div>
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-          <input
+          <Input
             type="search"
-            placeholder="Rechercher…"
+            placeholder="Rechercher�"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100 sm:flex-none"
+            className="w-full flex-1 sm:flex-none sm:max-w-xs"
           />
-          <button
-            type="button"
-            onClick={load}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-70 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-200 dark:hover:bg-gray-700"
-          >
+          <Button type="button" variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Rafraîchir
-          </button>
-          <button
-            type="button"
-            onClick={openModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-esi-primary)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)]"
-          >
+            Rafra�chir
+          </Button>
+          <Button type="button" onClick={openModal}>
             <UserPlus className="h-4 w-4" />
-            Créer
-          </button>
+            Cr�er
+          </Button>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-gray-600 dark:bg-gray-800">
+      <Card className="shadow-sm">
         {loading ? (
-          <div className="p-8 text-center text-slate-500 dark:text-slate-400">Chargement…</div>
+          <div className="p-8 text-center text-muted-foreground">Chargement�</div>
         ) : list.length === 0 ? (
-          <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-            Aucun professeur. Cliquez sur « Créer » pour en ajouter un.
+          <div className="p-8 text-center text-muted-foreground">
+            Aucun professeur. Cliquez sur � Cr�er � pour en ajouter un.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-600 dark:border-gray-600 dark:bg-gray-700/50 dark:text-slate-300">
+                <tr className="border-b border-border bg-background text-left text-muted-foreground">
                   <th className="px-4 py-3 font-medium">Nom</th>
-                  <th className="px-4 py-3 font-medium">Prénom</th>
+                  <th className="px-4 py-3 font-medium">Pr�nom</th>
                   <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Matière(s)</th>
+                  <th className="px-4 py-3 font-medium">Mati�re(s)</th>
                   <th className="px-4 py-3 font-medium">Statut</th>
                   <th className="px-4 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {list.map((p) => (
-                  <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50 dark:border-gray-600 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-slate-800 dark:text-slate-200">{p.last_name || '—'}</td>
-                    <td className="px-4 py-3 text-slate-800 dark:text-slate-200">{p.first_name || '—'}</td>
-                    <td className="px-4 py-3 text-[var(--color-esi-primary)] dark:text-esi-primary">{p.email}</td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
-                      {p.matieres?.length ? p.matieres.map((m) => m.libelle).join(', ') : '—'}
+                  <tr key={p.id} className="border-b border-border hover:bg-background">
+                    <td className="px-4 py-3 text-foreground">{p.last_name || '�'}</td>
+                    <td className="px-4 py-3 text-foreground">{p.first_name || '�'}</td>
+                    <td className="px-4 py-3 text-foreground text-foreground">{p.email}</td>
+                    <td className="px-4 py-3 text-foreground">
+                      {p.matieres?.length ? p.matieres.map((m) => m.libelle).join(', ') : '�'}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${p.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-slate-100 text-slate-600 dark:bg-gray-700 dark:text-slate-400'}`}>
+                      <Badge variant={p.is_active ? 'secondary' : 'outline'}>
                         {p.is_active ? 'Actif' : 'Inactif'}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setViewing(p)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-200 dark:hover:bg-gray-700"
-                      >
+                      <Button type="button" variant="outline" size="sm" onClick={() => setViewing(p)}>
                         <Eye className="h-3.5 w-3.5" />
                         Voir
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -224,96 +221,85 @@ export default function AdminProfesseursListe() {
             </table>
           </div>
         )}
-      </div>
+      </Card>
 
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-            <button
-              type="button"
-              onClick={() => setModalOpen(false)}
-              className="absolute right-3 top-3 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-gray-700 dark:hover:text-slate-200"
-              aria-label="Fermer"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              Créer un professeur
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/40 dark:text-red-300">{error}</div>
-              )}
-              {success && (
-                <div className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700 dark:bg-green-900/40 dark:text-green-300">{success}</div>
-              )}
-              <div>
-                <label className={labelClass}>Email <span className="text-red-500">*</span></label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={fieldClass} placeholder="professeur@esi.bf" />
-              </div>
-              <div>
-                <label className={labelClass}>Matière(s) <span className="text-red-500">*</span></label>
-                {loadingMatieres ? (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des matières…</p>
-                ) : matieres.length === 0 ? (
-                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-                    Aucune matière disponible. Créez des matières dans Établissement → Matières.
-                  </p>
-                ) : (
-                  <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-slate-300 p-3 dark:border-gray-600 dark:bg-gray-700/50">
-                    {matieres.map((m) => (
-                      <label key={m.id} className="flex cursor-pointer items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={matiereIds.includes(m.id)}
-                          onChange={() => toggleMatiere(m.id)}
-                          className="rounded border-slate-300 text-[var(--color-esi-primary)] focus:ring-[var(--color-esi-primary)]"
-                        />
-                        <span className="text-sm text-slate-700 dark:text-slate-300">{m.libelle}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass}>Prénom</label>
-                  <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={fieldClass} placeholder="Prénom" />
+              Cr�er un professeur
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {success && (
+              <Alert>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="prof_email">Email <span className="text-destructive">*</span></Label>
+              <Input id="prof_email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="professeur@esi.bf" />
+            </div>
+            <div className="space-y-2">
+              <Label>Mati�re(s) <span className="text-destructive">*</span></Label>
+              {loadingMatieres ? (
+                <p className="text-sm text-muted-foreground">Chargement des mati�res�</p>
+              ) : matieres.length === 0 ? (
+                <Alert>
+                  <AlertDescription>
+                    Aucune mati�re disponible. Cr�ez des mati�res dans �tablissement ? Mati�res.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border p-3">
+                  {matieres.map((m) => (
+                    <div key={m.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`matiere-${m.id}`}
+                        checked={matiereIds.includes(m.id)}
+                        onCheckedChange={() => toggleMatiere(m.id)}
+                      />
+                      <Label htmlFor={`matiere-${m.id}`} className="font-normal">{m.libelle}</Label>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <label className={labelClass}>Nom</label>
-                  <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className={fieldClass} placeholder="Nom" />
-                </div>
+              )}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="prof_first">Pr�nom</Label>
+                <Input id="prof_first" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Pr�nom" />
               </div>
-              <div>
-                <label className={labelClass}>Mot de passe <span className="text-red-500">*</span></label>
-                <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className={fieldClass} placeholder="Au moins 8 caractères" />
+              <div className="space-y-2">
+                <Label htmlFor="prof_last">Nom</Label>
+                <Input id="prof_last" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" />
               </div>
-              <div>
-                <label className={labelClass}>Confirmer le mot de passe <span className="text-red-500">*</span></label>
-                <input type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={fieldClass} placeholder="Repéter le mot de passe" />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:text-slate-200 dark:hover:bg-gray-700"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={busy}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70"
-                >
-                  {busy ? 'Création…' : 'Créer le compte'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="prof_pass">Mot de passe <span className="text-destructive">*</span></Label>
+              <Input id="prof_pass" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Au moins 8 caract�res" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="prof_confirm">Confirmer le mot de passe <span className="text-destructive">*</span></Label>
+              <Input id="prof_confirm" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Rep�ter le mot de passe" />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={busy}>
+                {busy ? 'Cr�ation�' : 'Cr�er le compte'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <UserDetailModal
         user={viewing}

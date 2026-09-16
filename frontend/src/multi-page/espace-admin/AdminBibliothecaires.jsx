@@ -4,16 +4,16 @@ export default function AdminBibliothecaires() {
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
+        <div className="rounded-xl bg-muted p-2.5 text-foreground">
           <BookMarked className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Gestion des bibliothÃ©caires</h1>
-          <p className="text-slate-600">Comptes et accÃ¨s des bibliothÃ©caires Ã  l&apos;espace bibliothÃ¨que.</p>
+          <h1 className="text-2xl font-semibold text-foreground">Gestion des bibliothécaires</h1>
+          <p className="text-muted-foreground">Comptes et accès des bibliothécaires à l&apos;espace bibliothèque.</p>
         </div>
       </div>
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-slate-500">Contenu Ã  venir : liste des bibliothÃ©caires, crÃ©ation de comptes et permissions.</p>
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <p className="text-muted-foreground">Contenu à venir : liste des bibliothécaires, création de comptes et permissions.</p>
       </div>
     </div>
   )

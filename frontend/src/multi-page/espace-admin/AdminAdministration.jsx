@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Building2, UserPlus } from 'lucide-react'
 import { getAccessToken, refreshAccessToken, clearAuthAndRedirectToLogin } from '../../auth'
+import { Button } from '@/components/ui/button'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 const ETABLISSEMENT = `${API_BASE}/api/etablissement`
@@ -40,7 +41,7 @@ function apiPost(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }).then(async (r) => {
-    if (!r) throw new Error('Non autorisé')
+    if (!r) throw new Error('Non autoris�')
     const data = await r.json().catch(() => ({}))
     if (!r.ok) {
       const msg = data.detail ?? data.message ?? (data.droits && data.droits[0]) ?? 'Erreur'
@@ -89,7 +90,7 @@ export default function AdminAdministration() {
       return
     }
     if (!form.password || form.password.length < 8) {
-      setMsg({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caractères.' })
+      setMsg({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caract�res.' })
       return
     }
     if (form.password !== form.passwordConfirm) {
@@ -117,12 +118,12 @@ export default function AdminAdministration() {
       droits: form.droitIds,
     })
       .then(() => {
-        setMsg({ type: 'success', text: 'Compte administration créé. La personne peut se connecter avec cet email et ce mot de passe.' })
+        setMsg({ type: 'success', text: 'Compte administration cr��. La personne peut se connecter avec cet email et ce mot de passe.' })
         setForm((f) => ({ ...f, email: '', password: '', passwordConfirm: '', phone: '', matricule: '', poste: '', departement: '', bureau: '', droitIds: [] }))
         return apiGet('/administrationecoles/')
       })
       .then((admins) => setList(Array.isArray(admins) ? admins : []))
-      .catch((err) => setMsg({ type: 'error', text: err?.message || 'Erreur création.' }))
+      .catch((err) => setMsg({ type: 'error', text: err?.message || 'Erreur cr�ation.' }))
       .finally(() => setSubmitting(false))
   }
 
@@ -153,7 +154,7 @@ export default function AdminAdministration() {
     setForm((f) => ({ ...f, droitIds: f.droitIds.filter((id) => !ids.includes(id)) }))
   }
 
-  // Grouper par domaine pour afficher C, R, U, D par rôle
+  // Grouper par domaine pour afficher C, R, U, D par r�le
   const ACTION_ORDER = ['create', 'read', 'update', 'delete']
   const droitsByDomaine = droits
     .filter((d) => d.domaine)
@@ -174,12 +175,12 @@ export default function AdminAdministration() {
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
+        <div className="rounded-xl bg-muted p-2.5 text-foreground">
           <Building2 className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Gestion de l&apos;administration</h1>
-          <p className="text-slate-600 dark:text-slate-400">Créer et gérer les comptes administration (écoles, services) et leurs droits.</p>
+          <h1 className="text-2xl font-semibold text-foreground">Gestion de l&apos;administration</h1>
+          <p className="text-muted-foreground">Cr�er et g�rer les comptes administration (�coles, services) et leurs droits.</p>
         </div>
       </div>
 
@@ -187,45 +188,45 @@ export default function AdminAdministration() {
         <div
           className={`mb-4 rounded-lg border px-4 py-2 text-sm ${
             msg.type === 'error'
-              ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200'
-              : 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200'
+              ? 'border-destructive/30 bg-destructive/10 text-destructive'
+              : 'border-border bg-muted text-foreground'
           }`}
         >
           {msg.text}
         </div>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-slate-200 p-4 dark:border-gray-700">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-200">
+      <div className="rounded-xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border p-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <UserPlus className="h-5 w-5" />
-            Créer un compte administration
+            Cr�er un compte administration
           </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Saisissez l&apos;email et le mot de passe pour que la personne puisse se connecter. Pour chaque rôle, cochez C (Créer), R (Lire), U (Modifier), D (Supprimer) selon les besoins.
+          <p className="mt-1 text-sm text-muted-foreground">
+            Saisissez l&apos;email et le mot de passe pour que la personne puisse se connecter. Pour chaque r�le, cochez C (Cr�er), R (Lire), U (Modifier), D (Supprimer) selon les besoins.
           </p>
         </div>
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Email de connexion *</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Email de connexion *</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                 placeholder="exemple@esi.dz"
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Mot de passe * (min. 8 caractères)</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Mot de passe * (min. 8 caract�res)</label>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
-                placeholder="••••••••"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                placeholder="��������"
                 minLength={8}
                 required
               />
@@ -233,33 +234,33 @@ export default function AdminAdministration() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Confirmer le mot de passe *</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Confirmer le mot de passe *</label>
               <input
                 type="password"
                 value={form.passwordConfirm}
                 onChange={(e) => setForm((f) => ({ ...f, passwordConfirm: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
-                placeholder="••••••••"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                placeholder="��������"
                 minLength={8}
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Téléphone (optionnel)</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">T�l�phone (optionnel)</label>
               <input
                 type="text"
                 value={form.phone}
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                 placeholder="+33..."
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Matricule *</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Matricule *</label>
               <input
                 value={form.matricule}
                 onChange={(e) => setForm((f) => ({ ...f, matricule: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                 placeholder="Ex. ADM001"
                 required
               />
@@ -267,72 +268,72 @@ export default function AdminAdministration() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Poste *</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Poste *</label>
               <input
                 value={form.poste}
                 onChange={(e) => setForm((f) => ({ ...f, poste: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
-                placeholder="Ex. Secrétariat"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                placeholder="Ex. Secr�tariat"
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Département (optionnel)</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">D�partement (optionnel)</label>
               <input
                 value={form.departement}
                 onChange={(e) => setForm((f) => ({ ...f, departement: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
-                placeholder="Ex. Scolarité"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                placeholder="Ex. Scolarit�"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Bureau (optionnel)</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Bureau (optionnel)</label>
             <input
               value={form.bureau}
               onChange={(e) => setForm((f) => ({ ...f, bureau: e.target.value }))}
-              className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
-              placeholder="Ex. Bât. A"
+              className="w-full max-w-xs rounded-lg border border-border px-3 py-2 text-sm"
+              placeholder="Ex. B�t. A"
             />
           </div>
           {domainesList.length > 0 && (
             <div>
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Droits par rôle (C = Créer, R = Lire, U = Modifier, D = Supprimer)</span>
+                <span className="text-xs font-medium text-muted-foreground">Droits par r�le (C = Cr�er, R = Lire, U = Modifier, D = Supprimer)</span>
                 <button
                   type="button"
                   onClick={selectAllDroits}
-                  className="rounded border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-300 dark:hover:bg-gray-600"
+                  className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground hover:bg-muted"
                 >
-                  Tout sélectionner (tous les rôles)
+                  Tout s�lectionner (tous les r�les)
                 </button>
                 <button
                   type="button"
                   onClick={deselectAllDroits}
-                  className="rounded border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-300 dark:hover:bg-gray-600"
+                  className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground hover:bg-muted"
                 >
-                  Tout désélectionner (tous les rôles)
+                  Tout d�s�lectionner (tous les r�les)
                 </button>
               </div>
               <div className="space-y-3">
                 {domainesList.map(({ domaine, libelleBase, items }) => (
-                  <div key={domaine} className="rounded-lg border border-slate-200 p-3 dark:border-gray-600">
+                  <div key={domaine} className="rounded-lg border border-border p-3">
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{libelleBase}</span>
+                      <span className="text-sm font-medium text-foreground">{libelleBase}</span>
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => selectAllCrudForDomaine(items)}
-                          className="rounded border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-400 dark:hover:bg-gray-600"
+                          className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted "
                         >
-                          Tout sélectionner (C,R,U,D)
+                          Tout s�lectionner (C,R,U,D)
                         </button>
                         <button
                           type="button"
                           onClick={() => deselectAllCrudForDomaine(items)}
-                          className="rounded border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-400 dark:hover:bg-gray-600"
+                          className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted "
                         >
-                          Tout désélectionner
+                          Tout d�s�lectionner
                         </button>
                       </div>
                     </div>
@@ -345,9 +346,9 @@ export default function AdminAdministration() {
                               type="checkbox"
                               checked={form.droitIds.includes(d.id)}
                               onChange={() => toggleDroit(d.id)}
-                              className="rounded border-slate-300 text-[var(--color-esi-primary)]"
+                              className="rounded border-border text-foreground"
                             />
-                            <span className="text-slate-600 dark:text-slate-400">{letter}</span>
+                            <span className="text-muted-foreground">{letter}</span>
                           </label>
                         )
                       })}
@@ -357,43 +358,39 @@ export default function AdminAdministration() {
               </div>
             </div>
           )}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70"
-          >
-            {submitting ? 'Création...' : 'Créer le compte'}
-          </button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? 'Cr�ation...' : 'Cr�er le compte'}
+          </Button>
         </form>
       </div>
 
-      <div className="mt-8 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-slate-200 p-4 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Comptes administration ({list.length})</h2>
+      <div className="mt-8 rounded-xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border p-4">
+          <h2 className="text-lg font-semibold text-foreground">Comptes administration ({list.length})</h2>
         </div>
         <div className="overflow-x-auto p-4">
           {loading ? (
-            <p className="text-sm text-slate-500">Chargement...</p>
+            <p className="text-sm text-muted-foreground">Chargement...</p>
           ) : list.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">Aucun compte. Créez-en un ci-dessus.</p>
+            <p className="text-sm text-muted-foreground">Aucun compte. Cr�ez-en un ci-dessus.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-slate-600 dark:text-slate-400">
+                <tr className="border-b text-left text-muted-foreground">
                   <th className="py-2">ID</th>
                   <th className="py-2">Matricule</th>
                   <th className="py-2">Poste</th>
-                  <th className="py-2">Département</th>
+                  <th className="py-2">D�partement</th>
                   <th className="py-2">Droits</th>
                 </tr>
               </thead>
               <tbody>
                 {list.map((a) => (
-                  <tr key={a.id} className="border-b border-slate-100 dark:border-gray-600">
+                  <tr key={a.id} className="border-b border-border">
                     <td className="py-2">{a.id}</td>
-                    <td className="py-2">{a.matricule ?? '—'}</td>
-                    <td className="py-2">{a.poste ?? '—'}</td>
-                    <td className="py-2">{a.departement ?? '—'}</td>
+                    <td className="py-2">{a.matricule ?? '�'}</td>
+                    <td className="py-2">{a.poste ?? '�'}</td>
+                    <td className="py-2">{a.departement ?? '�'}</td>
                     <td className="py-2">
                       {(a.droits_detail || []).length
                         ? (() => {
@@ -405,7 +402,7 @@ export default function AdminAdministration() {
                             }, {})
                             return Object.entries(byDomaine).map(([dom, letters]) => `${dom}: ${letters.filter(Boolean).join(', ')}`).join(' ; ')
                           })()
-                        : '—'}
+                        : '�'}
                     </td>
                   </tr>
                 ))}

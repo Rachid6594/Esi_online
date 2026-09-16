@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { GraduationCap, UserPlus, Upload, FileSpreadsheet, Download } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
@@ -54,17 +59,17 @@ export default function AdminEtudiantsCreation() {
       }
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setFormMsg({ type: 'error', text: data.detail || 'Erreur lors de la création.' })
+        setFormMsg({ type: 'error', text: data.detail || 'Erreur lors de la cr�ation.' })
         return
       }
-      const isEmailFailed = (data.message || '').toLowerCase().includes('échoué')
+      const isEmailFailed = (data.message || '').toLowerCase().includes('�chou�')
       setFormMsg({
         type: isEmailFailed ? 'warning' : 'success',
-        text: data.message || 'Compte créé. Les identifiants ont été envoyés par email.',
+        text: data.message || 'Compte cr��. Les identifiants ont �t� envoy�s par email.',
       })
       setForm({ email: '', first_name: '', last_name: '', classe_id: '' })
     } catch (err) {
-      setFormMsg({ type: 'error', text: 'Erreur réseau.' })
+      setFormMsg({ type: 'error', text: 'Erreur r�seau.' })
     } finally {
       setFormLoading(false)
     }
@@ -98,13 +103,13 @@ export default function AdminEtudiantsCreation() {
       const created = data.created ?? 0
       setCsvMsg({
         type: errCount ? (created ? 'warning' : 'error') : 'success',
-        text: `${created} compte(s) créé(s). Identifiants envoyés par email.${errCount ? ` ${errCount} erreur(s).` : ''}`,
+        text: `${created} compte(s) cr��(s). Identifiants envoy�s par email.${errCount ? ` ${errCount} erreur(s).` : ''}`,
         details: data.errors?.length ? data.errors : null,
       })
       setCsvFile(null)
       if (e.target?.reset) e.target.reset()
     } catch (err) {
-      setCsvMsg({ type: 'error', text: 'Erreur réseau.' })
+      setCsvMsg({ type: 'error', text: 'Erreur r�seau.' })
     } finally {
       setCsvLoading(false)
     }
@@ -113,45 +118,45 @@ export default function AdminEtudiantsCreation() {
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
+        <div className="rounded-xl bg-muted p-2.5 text-foreground">
           <GraduationCap className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Création d&apos;étudiants</h1>
-          <p className="text-slate-600">
-            Créez des comptes étudiants (un par un ou import CSV). Mot de passe aléatoire, identifiants envoyés par email avec lien pour changer le mot de passe.
+          <h1 className="text-2xl font-semibold text-foreground">Cr�ation d&apos;�tudiants</h1>
+          <p className="text-muted-foreground">
+            Cr�ez des comptes �tudiants (un par un ou import CSV). Mot de passe al�atoire, identifiants envoy�s par email avec lien pour changer le mot de passe.
           </p>
         </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Formulaire : créer un étudiant */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
+        {/* Formulaire : cr�er un �tudiant */}
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
             <UserPlus className="h-5 w-5" strokeWidth={1.5} />
-            Créer un étudiant
+            Cr�er un �tudiant
           </h2>
-          <p className="mb-3 text-xs text-slate-500">
-            L&apos;email avec les identifiants est envoyé à l&apos;<strong>adresse email de l&apos;étudiant</strong> (celle que vous saisissez ci‑dessous). Vérifiez aussi les spams.
+          <p className="mb-3 text-xs text-muted-foreground">
+            L&apos;email avec les identifiants est envoy� � l&apos;<strong>adresse email de l&apos;�tudiant</strong> (celle que vous saisissez ci-dessous). V�rifiez aussi les spams.
           </p>
           <form onSubmit={handleCreateStudent} className="space-y-4">
             {formMsg.text && (
               <div
                 className={`rounded-lg px-4 py-2.5 text-sm ${
                   formMsg.type === 'success'
-                    ? 'bg-green-50 text-green-800'
+                    ? 'bg-muted text-foreground'
                     : formMsg.type === 'warning'
-                    ? 'bg-amber-50 text-amber-800'
+                    ? 'bg-muted text-foreground'
                     : formMsg.type === 'error'
                     ? 'bg-red-50 text-red-700'
-                    : 'bg-slate-100 text-slate-700'
+                    : 'bg-muted text-foreground'
                 }`}
               >
                 {formMsg.text}
               </div>
             )}
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
                 Email <span className="text-red-500">*</span>
               </label>
               <input
@@ -160,23 +165,23 @@ export default function AdminEtudiantsCreation() {
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:border-[var(--color-esi-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-esi-primary)]/20"
+                className="w-full rounded-lg border border-border px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </div>
             <div>
-              <label htmlFor="first_name" className="mb-1 block text-sm font-medium text-slate-700">
-                Prénom
+              <label htmlFor="first_name" className="mb-1 block text-sm font-medium text-foreground">
+                Pr�nom
               </label>
               <input
                 id="first_name"
                 type="text"
                 value={form.first_name}
                 onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:border-[var(--color-esi-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-esi-primary)]/20"
+                className="w-full rounded-lg border border-border px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </div>
             <div>
-              <label htmlFor="last_name" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="last_name" className="mb-1 block text-sm font-medium text-foreground">
                 Nom
               </label>
               <input
@@ -184,53 +189,49 @@ export default function AdminEtudiantsCreation() {
                 type="text"
                 value={form.last_name}
                 onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:border-[var(--color-esi-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-esi-primary)]/20"
+                className="w-full rounded-lg border border-border px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </div>
             <div>
-              <label htmlFor="classe" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="classe" className="mb-1 block text-sm font-medium text-foreground">
                 Classe (optionnel)
               </label>
               <select
                 id="classe"
                 value={form.classe_id}
                 onChange={(e) => setForm((f) => ({ ...f, classe_id: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:border-[var(--color-esi-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-esi-primary)]/20"
+                className="w-full rounded-lg border border-border px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
               >
-                <option value="">— Aucune —</option>
+                <option value="">� Aucune �</option>
                 {classes.map((c) => (
                   <option key={c.id} value={c.id}>{c.libelle || c.code}</option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-slate-500">Définir les classes dans Gestion de l&apos;établissement.</p>
+              <p className="mt-1 text-xs text-muted-foreground">D�finir les classes dans Gestion de l&apos;�tablissement.</p>
             </div>
-            <button
-              type="submit"
-              disabled={formLoading}
-              className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70"
-            >
-              {formLoading ? 'Création…' : 'Créer et envoyer les identifiants par email'}
-            </button>
+            <Button type="submit" disabled={formLoading}>
+              {formLoading ? 'Cr�ation�' : 'Cr�er et envoyer les identifiants par email'}
+            </Button>
           </form>
         </div>
 
         {/* Import CSV */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
             <Upload className="h-5 w-5" strokeWidth={1.5} />
             Importer un CSV
           </h2>
-          <p className="mb-3 text-sm text-slate-600">
-            Format attendu : une ligne d’en-tête optionnelle <code className="rounded bg-slate-100 px-1">email,prenom,nom,classe_id</code> (classe_id optionnel). Encodage UTF-8.
+          <p className="mb-3 text-sm text-muted-foreground">
+            Format attendu : une ligne d�en-t�te optionnelle <code className="rounded bg-muted px-1">email,prenom,nom,classe_id</code> (classe_id optionnel). Encodage UTF-8.
           </p>
           <div className="mb-4 flex items-center gap-2">
             <button
               type="button"
               onClick={downloadExampleCsv}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground hover:bg-background"
             >
               <Download className="h-4 w-4" />
-              Télécharger un exemple
+              T�l�charger un exemple
             </button>
           </div>
           <form onSubmit={handleImportCsv} className="space-y-4">
@@ -238,10 +239,10 @@ export default function AdminEtudiantsCreation() {
               <div
                 className={`rounded-lg px-4 py-2.5 text-sm ${
                   csvMsg.type === 'success'
-                    ? 'bg-green-50 text-green-800'
+                    ? 'bg-muted text-foreground'
                     : csvMsg.type === 'error'
                     ? 'bg-red-50 text-red-700'
-                    : 'bg-amber-50 text-amber-800'
+                    : 'bg-muted text-foreground'
                 }`}
               >
                 {csvMsg.text}
@@ -253,7 +254,7 @@ export default function AdminEtudiantsCreation() {
                       </li>
                     ))}
                     {csvMsg.details.length > 5 && (
-                      <li>… et {csvMsg.details.length - 5} autre(s) erreur(s)</li>
+                      <li>� et {csvMsg.details.length - 5} autre(s) erreur(s)</li>
                     )}
                   </ul>
                 )}
@@ -264,17 +265,13 @@ export default function AdminEtudiantsCreation() {
                 type="file"
                 accept=".csv"
                 onChange={(e) => setCsvFile(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm text-slate-600 file:mr-2 file:rounded-lg file:border-0 file:bg-[var(--color-esi-primary-light)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[var(--color-esi-primary)]"
+                className="block w-full text-sm text-muted-foreground file:mr-2 file:rounded-lg file:border-0 file:bg-muted file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground"
               />
             </div>
-            <button
-              type="submit"
-              disabled={csvLoading || !csvFile}
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-esi-primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70"
-            >
+            <Button type="submit" disabled={csvLoading || !csvFile}>
               <FileSpreadsheet className="h-4 w-4" />
-              {csvLoading ? 'Import en cours…' : 'Importer et envoyer les emails'}
-            </button>
+              {csvLoading ? 'Import en cours�' : 'Importer et envoyer les emails'}
+            </Button>
           </form>
         </div>
       </div>

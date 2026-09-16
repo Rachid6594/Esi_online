@@ -1,4 +1,13 @@
 import { useState } from 'react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 
 export default function DataTable({ columns, data, pageSize = 10, sortable = true }) {
   const [sortBy, setSortBy] = useState(null)
@@ -26,36 +35,54 @@ export default function DataTable({ columns, data, pageSize = 10, sortable = tru
   const paged = sorted.slice((page - 1) * pageSize, page * pageSize)
 
   return (
-    <div>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-slate-600">
+    <div className="space-y-3">
+      <Table>
+        <TableHeader>
+          <TableRow>
             {columns.map((col) => (
-              <th
+              <TableHead
                 key={col.key}
-                className="py-2 cursor-pointer select-none"
+                className={sortable ? 'cursor-pointer select-none' : undefined}
                 onClick={() => handleSort(col.key)}
               >
                 {col.label}
                 {sortable && sortBy === col.key && (sortDir === 'asc' ? ' ▲' : ' ▼')}
-              </th>
+              </TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {paged.map((row, i) => (
-            <tr key={row.id || i} className="border-b border-slate-100">
+            <TableRow key={row.id || i}>
               {columns.map((col) => (
-                <td key={col.key} className="py-2">{row[col.key]}</td>
+                <TableCell key={col.key}>{row[col.key]}</TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-      <div className="flex items-center gap-2 mt-2">
-        <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-2 py-1 rounded border text-xs disabled:opacity-50">Préc.</button>
-        <span className="text-xs">Page {page} / {totalPages || 1}</span>
-        <button disabled={page === totalPages || totalPages === 0} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-2 py-1 rounded border text-xs disabled:opacity-50">Suiv.</button>
+        </TableBody>
+      </Table>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={page === 1}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+        >
+          Préc.
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          Page {page} / {totalPages || 1}
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={page === totalPages || totalPages === 0}
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+        >
+          Suiv.
+        </Button>
       </div>
     </div>
   )

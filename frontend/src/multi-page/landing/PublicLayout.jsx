@@ -1,53 +1,118 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
-import { LogIn, GraduationCap } from 'lucide-react'
+import { Link, useLocation, Outlet } from 'react-router-dom'
+import { LogIn, GraduationCap, Menu } from 'lucide-react'
 import { ThemeToggle } from '../../components/ThemeToggle'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
 
-const navLinkClass = ({ isActive }) =>
-  'text-slate-600 hover:text-[var(--color-esi-primary)] dark:text-slate-300 dark:hover:text-white ' +
-  (isActive ? 'font-medium text-[var(--color-esi-primary)] dark:text-white' : '')
+const LINKS = [
+  { to: '/vie-estudiantine', label: 'Vie estudiantine' },
+  { to: '/documents', label: 'Documents' },
+  { to: '/a-propos', label: 'À propos' },
+  { to: '/enseignants', label: 'Enseignants' },
+]
+
+function Brand() {
+  return (
+    <Link to="/" className="flex items-center gap-2 font-semibold">
+      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <GraduationCap className="h-5 w-5" />
+      </span>
+      <span>ESI Online</span>
+    </Link>
+  )
+}
 
 export default function PublicLayout() {
+  const { pathname } = useLocation()
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 dark:bg-gray-900 dark:text-slate-200">
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-gray-700 dark:bg-gray-900/95">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-esi-primary)] text-white">
-              <GraduationCap className="h-5 w-5" />
-            </span>
-            <span>
-              <span className="text-[var(--color-esi-primary)]">ESI</span> Online
-            </span>
-          </Link>
-          <nav className="flex items-center gap-4 md:gap-8">
-            <div className="hidden md:flex md:items-center md:gap-8">
-              <NavLink to="/vie-estudiantine" className={navLinkClass}>
-                Vie estudiantine
-              </NavLink>
-              <NavLink to="/documents" className={navLinkClass}>
-                Documents
-              </NavLink>
-              <NavLink to="/a-propos" className={navLinkClass}>
-                À propos
-              </NavLink>
-              <NavLink to="/enseignants" className={navLinkClass}>
-                Enseignants
-              </NavLink>
-            </div>
+    <div className="min-h-screen bg-background font-sans text-foreground">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Brand />
+
+          <NavigationMenu className="hidden md:flex" viewport={false}>
+            <NavigationMenuList>
+              {LINKS.map(({ to, label }) => (
+                <NavigationMenuItem key={to}>
+                  <NavigationMenuLink
+                    asChild
+                    active={pathname === to}
+                    className={cn(navigationMenuTriggerStyle(), 'bg-transparent')}
+                  >
+                    <Link to={to}>{label}</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          <div className="flex items-center gap-1 sm:gap-2">
             <ThemeToggle />
-            <Link
-              to="/inscription"
-              className="hidden text-sm font-medium text-slate-600 hover:text-[var(--color-esi-primary)] md:inline dark:text-slate-300 dark:hover:text-white"
-            >
-              S&apos;inscrire
-            </Link>
-            <Link
-              to="/login"
-              className="hidden md:inline-flex items-center gap-2 rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)]"
-            >
-              <LogIn className="h-4 w-4" /> Connexion
-            </Link>
-          </nav>
+            <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+              <Link to="/inscription">S&apos;inscrire</Link>
+            </Button>
+            <Button size="sm" asChild className="hidden md:inline-flex">
+              <Link to="/login">
+                <LogIn className="h-4 w-4" /> Connexion
+              </Link>
+            </Button>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden" aria-label="Menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] p-0">
+                <SheetHeader className="border-b p-4 text-left">
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-1 p-3">
+                  {LINKS.map(({ to, label }) => (
+                    <SheetClose asChild key={to}>
+                      <Button
+                        variant={pathname === to ? 'secondary' : 'ghost'}
+                        className="justify-start"
+                        asChild
+                      >
+                        <Link to={to}>{label}</Link>
+                      </Button>
+                    </SheetClose>
+                  ))}
+                  <Separator className="my-2" />
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="justify-start" asChild>
+                      <Link to="/inscription">S&apos;inscrire</Link>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button className="justify-start" asChild>
+                      <Link to="/login">
+                        <LogIn className="h-4 w-4" /> Connexion
+                      </Link>
+                    </Button>
+                  </SheetClose>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
@@ -55,12 +120,12 @@ export default function PublicLayout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-slate-200 bg-slate-800 py-10 text-white dark:border-gray-700 dark:bg-gray-950">
+      <footer className="border-t bg-primary py-10 text-primary-foreground">
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-          <p className="text-slate-300">© ESI Online — École Supérieure d&apos;Informatique</p>
-          <Link to="/login" className="mt-2 inline-block text-sm text-slate-400 hover:text-white">
-            Connexion / Espace admin
-          </Link>
+          <p className="text-primary-foreground/80">© ESI Online — École Supérieure d&apos;Informatique</p>
+          <Button variant="link" asChild className="mt-2 text-primary-foreground/70 hover:text-primary-foreground">
+            <Link to="/login">Connexion / Espace admin</Link>
+          </Button>
         </div>
       </footer>
     </div>

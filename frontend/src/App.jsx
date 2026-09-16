@@ -15,10 +15,10 @@ import {
   AdminBibliothecairesListe,
   AdminProfesseursListe,
   AdminContenu,
-  AdminUtilisateurs,
   AdminAdministration,
   AdminParametres,
   AdminEtablissement,
+  AdminUploadPermissions,
   StudentLayout,
   StudentDashboard,
   StudentCours,
@@ -75,6 +75,8 @@ function App() {
         <Route path="etudiants">
           <Route index element={<Navigate to="/admin/etudiants/dashboard" replace />} />
           <Route path="dashboard" element={<AdminEtudiantsDashboard />} />
+          <Route path="promouvoir" element={<AdminUploadPermissions />} />
+          <Route path="upload" element={<Navigate to="/admin/etudiants/promouvoir" replace />} />
           <Route path="creation" element={<Navigate to="/admin/etudiants/dashboard" replace />} />
           <Route path="recherche" element={<Navigate to="/admin/etudiants/dashboard" replace />} />
           <Route path="liste" element={<Navigate to="/admin/etudiants/dashboard" replace />} />
@@ -90,9 +92,12 @@ function App() {
           <Route path="creation" element={<Navigate to="/admin/professeurs/liste" replace />} />
         </Route>
         <Route path="contenu" element={<AdminContenu />} />
-        <Route path="utilisateurs" element={<AdminUtilisateurs />} />
+        <Route path="utilisateurs" element={<Navigate to="/admin/parametres/utilisateurs" replace />} />
         <Route path="administration" element={<AdminAdministration />} />
-        <Route path="parametres" element={<AdminParametres />} />
+        <Route path="parametres">
+          <Route index element={<Navigate to="/admin/parametres/utilisateurs" replace />} />
+          <Route path=":section" element={<AdminParametres />} />
+        </Route>
         <Route path="etablissement">
           <Route index element={<Navigate to="/admin/etablissement/annees" replace />} />
           <Route path=":section" element={<AdminEtablissement />} />

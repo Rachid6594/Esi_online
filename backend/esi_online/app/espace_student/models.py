@@ -115,3 +115,63 @@ class ReponseEtudiantQCM(models.Model):
     def __str__(self):
         return str(self.title if hasattr(self, 'title') else self.id)
 
+
+TYPE_UPLOAD_CHOICES = [
+    ("Cours", "Cours"),
+    ("TD", "TD"),
+    ("TP", "TP"),
+    ("Devoir", "Devoir"),
+    ("Examen", "Examen"),
+    ("Autre", "Autre"),
+]
+
+TYPES_UPLOAD_VALIDES = {c[0] for c in TYPE_UPLOAD_CHOICES}
+
+
+class PermissionUploadEtudiant(models.Model):
+    """
+    Droit d'upload accordé par un admin à un étudiant précis.
+    Seuls les étudiants avec is_active=True peuvent uploader,
+    et uniquement les types listés dans types_autorises.
+    """
+
+    etudiant = models.OneToOneField(
+        to="espace_student.Etudiant",
+        on_delete=models.CASCADE,
+        related_name="permission_upload",
+    )
+    types_autorises = models.JSONField(
+        default=list,
+        help_text="Liste de types : Cours, TD, TP, Devoir, Examen, Autre",
+    )
+    is_active = models.BooleanField(default=True)
+    note = models.CharField(max_length=255, blank=True, default="")
+    accorde_par = models.ForeignKey(
+        to="auth.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="permissions_upload_accordees",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "permissions_upload_etudiant"
+        verbose_name = "Permission upload étudiant"
+        verbose_name_plural = "Permissions upload étudiants"
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"Upload #{self.pk} — actif={self.is_active}"
+
+    def types_normes(self):
+        raw = self.types_autorises or []
+        return [t for t in raw if t in TYPES_UPLOAD_VALIDES]
+
+    def peut_uploader_type(self, type_ressource: str) -> bool:
+        if not self.is_active:
+            return False
+        return type_ressource in self.types_normes()
+

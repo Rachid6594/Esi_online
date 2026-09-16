@@ -10,23 +10,23 @@ export default function AdministrationDashboard() {
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-primary-light)] p-2.5 text-[var(--color-esi-primary)] dark:bg-gray-700 dark:text-esi-primary">
+        <div className="rounded-xl bg-muted p-2.5 text-foreground">
           <Building2 className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
-            Tableau de bord — Administration de l&apos;école
+          <h1 className="text-2xl font-semibold text-foreground">
+            Tableau de bord � Administration de l&apos;�cole
           </h1>
-          <p className="text-slate-600 dark:text-slate-300">
-            Bienvenue, <span className="font-medium text-slate-800 dark:text-slate-100">{displayName}</span>
+          <p className="text-muted-foreground">
+            Bienvenue, <span className="font-medium text-foreground">{displayName}</span>
             {poste && (
-              <> — <span className="text-slate-600 dark:text-slate-400">{poste}</span></>
+              <> � <span className="text-muted-foreground">{poste}</span></>
             )}.
           </p>
         </div>
       </div>
-      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-400">
-        Espace réservé à l&apos;administration de l&apos;école. Contenu du tableau de bord à définir.
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
+        Espace r�serv� � l&apos;administration de l&apos;�cole. Contenu du tableau de bord � d�finir.
       </div>
     </div>
   )

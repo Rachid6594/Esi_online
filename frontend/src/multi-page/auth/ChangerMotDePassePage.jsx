@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Lock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
@@ -9,7 +14,7 @@ export default function ChangerMotDePassePage() {
   const uid = searchParams.get('uid') ?? ''
   const token = searchParams.get('token') ?? ''
 
-  const [status, setStatus] = useState('loading') // loading | valid | invalid | success | error
+  const [status, setStatus] = useState('loading')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -72,109 +77,107 @@ export default function ChangerMotDePassePage() {
 
   if (status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-        <p className="text-slate-600">Vérification du lien…</p>
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <p className="text-muted-foreground">Vérification du lien…</p>
       </div>
     )
   }
 
   if (status === 'invalid') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-slate-800">Ce lien est invalide ou a expiré.</p>
-          <p className="mt-2 text-sm text-slate-600">
-            Demandez un nouveau lien à l&apos;administrateur ou connectez-vous si vous avez déjà défini votre mot de passe.
-          </p>
-          <Link
-            to="/login"
-            className="mt-6 inline-block rounded-xl bg-[var(--color-esi-primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)]"
-          >
-            Aller à la connexion
-          </Link>
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md text-center shadow-sm">
+          <CardContent className="pt-8">
+            <p className="text-foreground">Ce lien est invalide ou a expiré.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Demandez un nouveau lien à l&apos;administrateur ou connectez-vous si vous avez déjà défini votre mot de passe.
+            </p>
+            <Button className="mt-6" asChild>
+              <Link to="/login">Aller à la connexion</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   if (status === 'success') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <p className="font-medium text-green-700">Mot de passe mis à jour.</p>
-          <p className="mt-2 text-sm text-slate-600">Vous pouvez maintenant vous connecter avec votre email et ce mot de passe.</p>
-          <Link
-            to="/login"
-            className="mt-6 inline-block rounded-xl bg-[var(--color-esi-primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)]"
-          >
-            Se connecter
-          </Link>
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md text-center shadow-sm">
+          <CardContent className="pt-8">
+            <p className="font-medium text-foreground">Mot de passe mis à jour.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Vous pouvez maintenant vous connecter avec votre email et ce mot de passe.</p>
+            <Button className="mt-6" asChild>
+              <Link to="/login">Se connecter</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
-            <Lock className="h-6 w-6" strokeWidth={1.5} />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md shadow-sm">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-muted p-2.5 text-foreground">
+              <Lock className="h-6 w-6" strokeWidth={1.5} />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Changer votre mot de passe</CardTitle>
+              <CardDescription>{email}</CardDescription>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-semibold text-slate-900">Changer votre mot de passe</h1>
-            <p className="text-sm text-slate-600">{email}</p>
-          </div>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {message && (
-            <div className="rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700">{message}</div>
-          )}
-          <div>
-            <label htmlFor="new_password" className="mb-1 block text-sm font-medium text-slate-700">
-              Nouveau mot de passe <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="new_password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-              className="w-full rounded-xl border border-slate-300 py-2.5 pl-4 pr-4 text-slate-800 focus:border-[var(--color-esi-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-esi-primary)]/20"
-            />
-            <p className="mt-1 text-xs text-slate-500">Minimum 8 caractères.</p>
-          </div>
-          <div>
-            <label htmlFor="confirm" className="mb-1 block text-sm font-medium text-slate-700">
-              Confirmer le mot de passe <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="confirm"
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-              className="w-full rounded-xl border border-slate-300 py-2.5 pl-4 pr-4 text-slate-800 focus:border-[var(--color-esi-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-esi-primary)]/20"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-[var(--color-esi-primary)] py-3 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70"
-          >
-            {loading ? 'Enregistrement…' : 'Enregistrer le mot de passe'}
-          </button>
-        </form>
-        <p className="mt-4 text-center text-sm text-slate-500">
-          <Link to="/login" className="text-[var(--color-esi-primary)] hover:underline">
-            Retour à la connexion
-          </Link>
-        </p>
-      </div>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {message && (
+              <Alert variant="destructive">
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="new_password">
+                Nouveau mot de passe <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="new_password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-muted-foreground">Minimum 8 caractères.</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm">
+                Confirmer le mot de passe <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="confirm"
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+            </div>
+            <Button type="submit" disabled={loading} className="w-full" size="lg">
+              {loading ? 'Enregistrement…' : 'Enregistrer le mot de passe'}
+            </Button>
+          </form>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            <Link to="/login" className="text-primary hover:underline">
+              Retour à la connexion
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

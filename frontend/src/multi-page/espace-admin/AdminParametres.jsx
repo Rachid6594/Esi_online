@@ -1,9 +1,36 @@
-import { useState, useEffect } from 'react'
-import { Settings, Shield } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { useParams, Navigate, Link } from 'react-router-dom'
+import { Shield, KeyRound, Plus, Trash2, Search } from 'lucide-react'
 import { getAccessToken, refreshAccessToken, clearAuthAndRedirectToLogin } from '../../auth'
+import AdminUtilisateurs from './AdminUtilisateurs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 const ETABLISSEMENT = `${API_BASE}/api/etablissement`
+
+const VALID_SECTIONS = ['utilisateurs', 'roles', 'permissions']
+
+const ACTION_LABELS = {
+  create: 'Créer (C)',
+  read: 'Lire (R)',
+  update: 'Modifier (U)',
+  delete: 'Supprimer (D)',
+}
+
+const ACTION_ORDER = ['create', 'read', 'update', 'delete']
 
 async function fetchWithAuth(url, options = {}, isRetry = false) {
   const token = getAccessToken()
@@ -46,19 +73,6 @@ function apiPost(path, body) {
   })
 }
 
-function apiPatch(path, body) {
-  return fetchWithAuth(`${ETABLISSEMENT}${path}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }).then(async (r) => {
-    if (!r) throw new Error('Non autorisé')
-    const data = await r.json().catch(() => ({}))
-    if (!r.ok) throw new Error(data.detail ?? data.message ?? 'Erreur')
-    return data
-  })
-}
-
 function apiDelete(path) {
   return fetchWithAuth(`${ETABLISSEMENT}${path}`, { method: 'DELETE' }).then((r) => {
     if (!r) throw new Error('Non autorisé')
@@ -67,14 +81,30 @@ function apiDelete(path) {
   })
 }
 
-export default function AdminParametres() {
+function groupRoles(droits) {
+  const byDomaine = droits
+    .filter((d) => d.domaine)
+    .reduce((acc, d) => {
+      const key = d.domaine
+      if (!acc[key]) acc[key] = []
+      acc[key].push(d)
+      return acc
+    }, {})
+  Object.keys(byDomaine).forEach((key) => {
+    byDomaine[key].sort((a, b) => ACTION_ORDER.indexOf(a.action) - ACTION_ORDER.indexOf(b.action))
+  })
+  return Object.entries(byDomaine).map(([domaine, items]) => {
+    const libelleBase = (items[0]?.libelle || domaine).replace(/\s*\((C|R|U|D)\)\s*$/, '').trim()
+    return { domaine, libelleBase, items, ordre: items[0]?.ordre ?? 0 }
+  }).sort((a, b) => a.ordre - b.ordre || a.libelleBase.localeCompare(b.libelleBase))
+}
+
+function useDroits() {
   const [droits, setDroits] = useState([])
   const [loading, setLoading] = useState(true)
   const [msg, setMsg] = useState({ type: '', text: '' })
-  const [form, setForm] = useState({ code: '', libelle: '', ordre: 0 })
-  const [submitting, setSubmitting] = useState(false)
 
-  function loadDroits() {
+  function load() {
     setLoading(true)
     apiGet('/droitadministrations/')
       .then((data) => setDroits(Array.isArray(data) ? data : []))
@@ -83,8 +113,32 @@ export default function AdminParametres() {
   }
 
   useEffect(() => {
-    loadDroits()
+    load()
   }, [])
+
+  return { droits, loading, msg, setMsg, load }
+}
+
+function IamHeader({ icon: Icon, title, description }) {
+  return (
+    <div className="mb-8 flex items-center gap-3">
+      <div className="rounded-xl bg-muted p-2.5 text-foreground">
+        <Icon className="h-7 w-7" strokeWidth={1.5} />
+      </div>
+      <div>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">IAM · Paramètres</p>
+        <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
+        <p className="text-muted-foreground">{description}</p>
+      </div>
+    </div>
+  )
+}
+
+function RolesPage() {
+  const { droits, loading, msg, setMsg, load } = useDroits()
+  const [form, setForm] = useState({ code: '', libelle: '', ordre: 0 })
+  const [submitting, setSubmitting] = useState(false)
+  const roles = useMemo(() => groupRoles(droits), [droits])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -100,171 +154,307 @@ export default function AdminParametres() {
       ordre: form.ordre || 0,
     })
       .then(() => {
-        setMsg({ type: 'success', text: 'Rôle créé (4 sous-droits C, R, U, D).' })
-        setForm({ code: '', libelle: '', ordre: droits.length * 10 })
-        loadDroits()
+        setMsg({ type: 'success', text: 'Rôle créé avec 4 permissions CRUD (C, R, U, D).' })
+        setForm({ code: '', libelle: '', ordre: roles.length * 10 })
+        load()
       })
       .catch((err) => setMsg({ type: 'error', text: err?.message ?? 'Erreur.' }))
       .finally(() => setSubmitting(false))
   }
 
-  const handleDeleteOne = (id) => {
-    if (!window.confirm('Supprimer ce droit ?')) return
-    apiDelete(`/droitadministrations/${id}/`)
-      .then(() => {
-        setMsg({ type: 'success', text: 'Droit supprimé.' })
-        loadDroits()
-      })
-      .catch((err) => setMsg({ type: 'error', text: err?.message ?? 'Erreur.' }))
-  }
-
   const handleDeleteRole = (ids) => {
-    if (!window.confirm('Supprimer tout le rôle (les 4 sous-droits C, R, U, D) ?')) return
+    if (!window.confirm('Supprimer tout le rôle (les 4 permissions C, R, U, D) ?')) return
     Promise.all(ids.map((id) => apiDelete(`/droitadministrations/${id}/`)))
       .then(() => {
         setMsg({ type: 'success', text: 'Rôle supprimé.' })
-        loadDroits()
+        load()
       })
       .catch((err) => setMsg({ type: 'error', text: err?.message ?? 'Erreur.' }))
   }
 
-  const ACTION_ORDER = ['create', 'read', 'update', 'delete']
-  const droitsByDomaine = droits
-    .filter((d) => d.domaine)
-    .reduce((acc, d) => {
-      const key = d.domaine
-      if (!acc[key]) acc[key] = []
-      acc[key].push(d)
-      return acc
-    }, {})
-  Object.keys(droitsByDomaine || {}).forEach((key) => {
-    droitsByDomaine[key].sort((a, b) => ACTION_ORDER.indexOf(a.action) - ACTION_ORDER.indexOf(b.action))
-  })
-  const domainesList = Object.entries(droitsByDomaine || {}).map(([domaine, items]) => {
-    const libelleBase = (items[0]?.libelle || domaine).replace(/\s*\((C|R|U|D)\)\s*$/, '').trim()
-    return { domaine, libelleBase, items }
-  })
-
   return (
     <div className="p-6 sm:p-8">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
-          <Settings className="h-7 w-7" strokeWidth={1.5} />
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Paramètres</h1>
-          <p className="text-slate-600 dark:text-slate-400">Configuration générale de la plateforme ESI Online.</p>
-        </div>
-      </div>
+      <IamHeader
+        icon={Shield}
+        title="Rôles"
+        description="Créez des rôles métier. Chaque rôle génère automatiquement 4 permissions CRUD."
+      />
 
       {msg.text && (
-        <div
-          className={`mb-4 rounded-lg border px-4 py-2 text-sm ${
-            msg.type === 'error'
-              ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200'
-              : 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200'
-          }`}
-        >
-          {msg.text}
-        </div>
+        <Alert variant={msg.type === 'error' ? 'destructive' : 'default'} className="mb-4">
+          <AlertDescription>{msg.text}</AlertDescription>
+        </Alert>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="border-b border-slate-200 p-4 dark:border-gray-700">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-200">
-            <Shield className="h-5 w-5" />
-            Droits d&apos;administration
-          </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Chaque rôle créé génère 4 sous-droits CRUD (C = Créer, R = Lire, U = Modifier, D = Supprimer) que vous pourrez attribuer finement aux comptes administration.
-          </p>
-        </div>
-        <div className="p-4">
-          <form onSubmit={handleSubmit} className="mb-6 flex flex-wrap items-end gap-3">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Code du rôle *</label>
-              <input
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Plus className="h-4 w-4" />
+            Créer un nouveau rôle
+          </CardTitle>
+          <CardDescription>
+            Le code sert d’identifiant technique (domaine). Le libellé apparaît dans l’attribution des droits.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="role-code">Code *</Label>
+              <Input
+                id="role-code"
                 value={form.code}
                 onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-                placeholder="Ex. peut_gerer_prof"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[200px] dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
+                placeholder="Ex. peut_gerer_emploi"
+                className="min-w-[200px]"
                 required
               />
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Libellé *</label>
-              <input
+            <div className="space-y-1.5">
+              <Label htmlFor="role-libelle">Libellé *</Label>
+              <Input
+                id="role-libelle"
                 value={form.libelle}
                 onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
                 placeholder="Ex. Gérer les emplois du temps"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[220px] dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
+                className="min-w-[240px]"
                 required
               />
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Ordre</label>
-              <input
+            <div className="space-y-1.5">
+              <Label htmlFor="role-ordre">Ordre</Label>
+              <Input
+                id="role-ordre"
                 type="number"
                 value={form.ordre}
                 onChange={(e) => setForm((f) => ({ ...f, ordre: parseInt(e.target.value, 10) || 0 }))}
-                className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100"
+                className="w-24"
               />
             </div>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70"
-            >
-              {submitting ? 'Création...' : 'Créer le rôle (4 sous-droits C, R, U, D)'}
-            </button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Création…' : 'Créer le rôle'}
+            </Button>
           </form>
+        </CardContent>
+      </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Rôles définis</CardTitle>
+          <CardDescription>
+            Consultez les permissions associées dans{' '}
+            <Link to="/admin/parametres/permissions" className="underline underline-offset-2">
+              Permissions
+            </Link>
+            .
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           {loading ? (
-            <p className="text-sm text-slate-500">Chargement...</p>
-          ) : domainesList.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">Aucun rôle défini. Créez-en un ci-dessus (4 sous-droits C, R, U, D seront créés).</p>
+            <p className="text-sm text-muted-foreground">Chargement…</p>
+          ) : roles.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucun rôle. Créez-en un ci-dessus.</p>
           ) : (
-            <div className="space-y-4">
-              {domainesList.map(({ domaine, libelleBase, items }) => (
-                <div key={domaine} className="rounded-lg border border-slate-200 p-3 dark:border-gray-600">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="font-medium text-slate-800 dark:text-slate-200">{libelleBase}</span>
-                    <span className="font-mono text-xs text-slate-500 dark:text-slate-400">{domaine}</span>
+            <div className="space-y-3">
+              {roles.map(({ domaine, libelleBase, items }) => (
+                <div
+                  key={domaine}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">{libelleBase}</p>
+                    <p className="font-mono text-xs text-muted-foreground">{domaine}</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {items.map((d) => (
+                        <Badge key={d.id} variant="secondary">
+                          {ACTION_LABELS[d.action] || d.action}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-4">
-                    {items.map((d) => (
-                      <span key={d.id} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        {d.action === 'create' ? 'C' : d.action === 'read' ? 'R' : d.action === 'update' ? 'U' : 'D'}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteOne(d.id)}
-                          className="text-red-500 hover:underline"
-                          title="Supprimer ce sous-droit"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteRole(items.map((i) => i.id))}
-                      className="text-red-600 hover:underline dark:text-red-400"
-                    >
-                      Supprimer le rôle
-                    </button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => handleDeleteRole(items.map((i) => i.id))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Supprimer
+                  </Button>
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </div>
-
-      <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Autres paramètres (préférences, notifications, maintenance) à venir.
-        </p>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
+}
+
+function PermissionsPage() {
+  const { droits, loading, msg, setMsg, load } = useDroits()
+  const [search, setSearch] = useState('')
+  const [actionFilter, setActionFilter] = useState('')
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return droits
+      .filter((d) => {
+        if (actionFilter && d.action !== actionFilter) return false
+        if (!q) return true
+        return (
+          (d.code || '').toLowerCase().includes(q) ||
+          (d.libelle || '').toLowerCase().includes(q) ||
+          (d.domaine || '').toLowerCase().includes(q)
+        )
+      })
+      .sort((a, b) => {
+        const da = (a.domaine || '').localeCompare(b.domaine || '')
+        if (da !== 0) return da
+        return ACTION_ORDER.indexOf(a.action) - ACTION_ORDER.indexOf(b.action)
+      })
+  }, [droits, search, actionFilter])
+
+  const handleDeleteOne = (id) => {
+    if (!window.confirm('Supprimer cette permission ?')) return
+    apiDelete(`/droitadministrations/${id}/`)
+      .then(() => {
+        setMsg({ type: 'success', text: 'Permission supprimée.' })
+        load()
+      })
+      .catch((err) => setMsg({ type: 'error', text: err?.message ?? 'Erreur.' }))
+  }
+
+  return (
+    <div className="p-6 sm:p-8">
+      <IamHeader
+        icon={KeyRound}
+        title="Permissions"
+        description="Catalogue des permissions CRUD attribuables aux comptes administration."
+      />
+
+      {msg.text && (
+        <Alert variant={msg.type === 'error' ? 'destructive' : 'default'} className="mb-4">
+          <AlertDescription>{msg.text}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative max-w-sm flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Rechercher code, libellé, domaine…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <Button
+            type="button"
+            size="sm"
+            variant={actionFilter === '' ? 'default' : 'outline'}
+            onClick={() => setActionFilter('')}
+          >
+            Toutes
+          </Button>
+          {ACTION_ORDER.map((a) => (
+            <Button
+              key={a}
+              type="button"
+              size="sm"
+              variant={actionFilter === a ? 'default' : 'outline'}
+              onClick={() => setActionFilter(a)}
+            >
+              {ACTION_LABELS[a]}
+            </Button>
+          ))}
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {filtered.length} permission{filtered.length > 1 ? 's' : ''}
+        </span>
+        <Button type="button" variant="outline" size="sm" asChild>
+          <Link to="/admin/parametres/roles">Créer un rôle</Link>
+        </Button>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          {loading ? (
+            <p className="p-6 text-sm text-muted-foreground">Chargement…</p>
+          ) : filtered.length === 0 ? (
+            <p className="p-6 text-sm text-muted-foreground">
+              Aucune permission. Créez un rôle pour générer des permissions CRUD.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Libellé</TableHead>
+                  <TableHead>Domaine / rôle</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((d) => (
+                  <TableRow key={d.id}>
+                    <TableCell className="font-mono text-xs">{d.code}</TableCell>
+                    <TableCell>{d.libelle}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{d.domaine || '—'}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{ACTION_LABELS[d.action] || d.action}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => handleDeleteOne(d.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function UtilisateursPage() {
+  return (
+    <div>
+      <div className="border-b border-border bg-muted/30 px-6 py-2 sm:px-8">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          IAM · Paramètres · Utilisateurs
+        </p>
+      </div>
+      <AdminUtilisateurs />
+    </div>
+  )
+}
+
+export default function AdminParametres() {
+  const { section } = useParams()
+
+  if (!section) {
+    return <Navigate to="/admin/parametres/utilisateurs" replace />
+  }
+  if (!VALID_SECTIONS.includes(section)) {
+    return <Navigate to="/admin/parametres/utilisateurs" replace />
+  }
+  if (section === 'utilisateurs') return <UtilisateursPage />
+  if (section === 'roles') return <RolesPage />
+  if (section === 'permissions') return <PermissionsPage />
+  return <Navigate to="/admin/parametres/utilisateurs" replace />
 }

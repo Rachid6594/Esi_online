@@ -1,4 +1,6 @@
 import { useRef } from 'react'
+import { Upload } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 
 export default function CsvImportZone({ onImport, disabled }) {
   const inputRef = useRef()
@@ -17,23 +19,28 @@ export default function CsvImportZone({ onImport, disabled }) {
       onImport(file)
     }
   }
+
   return (
-    <div
+    <Card
+      className={`cursor-pointer border-dashed shadow-none transition-colors ${disabled ? 'opacity-50' : 'hover:bg-muted/50'}`}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${disabled ? 'opacity-50' : 'hover:border-blue-400'}`}
-      onClick={() => !disabled && inputRef.current.click()}
-      style={{ background: '#fafbfc' }}
+      onClick={() => !disabled && inputRef.current?.click()}
     >
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".csv"
-        style={{ display: 'none' }}
-        onChange={handleChange}
-        disabled={disabled}
-      />
-      <p className="text-sm text-slate-600">Glissez-déposez un fichier CSV ici ou cliquez pour sélectionner.</p>
-    </div>
+      <CardContent className="flex flex-col items-center gap-2 py-8 text-center">
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".csv"
+          className="hidden"
+          onChange={handleChange}
+          disabled={disabled}
+        />
+        <Upload className="h-5 w-5 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">
+          Glissez-déposez un fichier CSV ici ou cliquez pour sélectionner.
+        </p>
+      </CardContent>
+    </Card>
   )
 }

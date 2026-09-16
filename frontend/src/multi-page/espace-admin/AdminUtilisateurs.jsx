@@ -3,6 +3,18 @@ import { Users, RefreshCw, Eye, Power, Trash2, Mail, UserCheck } from 'lucide-re
 import { fetchWithAuth } from '../../auth'
 import Modal from '../../components/Modal'
 import UserDetailModal from './UserDetailModal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
@@ -12,14 +24,6 @@ const ROLE_LABELS = {
   professeur: 'Professeur',
   bibliothecaire: 'Bibliothécaire',
   user: 'Étudiant',
-}
-
-const ROLE_BADGES = {
-  admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
-  admin_ecole: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
-  professeur: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-  bibliothecaire: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-  user: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
 }
 
 const ROLE_OPTIONS = [
@@ -79,7 +83,7 @@ export default function AdminUtilisateurs() {
     }
   }
 
-  async   function confirmDelete() {
+  async function confirmDelete() {
     if (!toDelete) return
     setBusy(true)
     const r = await fetchWithAuth(API_BASE, `${API_BASE}/api/auth/users/${toDelete.id}/`, {
@@ -99,65 +103,63 @@ export default function AdminUtilisateurs() {
   return (
     <div className="p-6 sm:p-8">
       {notice && (
-        <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-slate-200">
-          {notice}
-        </div>
+        <Alert className="mb-4">
+          <AlertDescription>{notice}</AlertDescription>
+        </Alert>
       )}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)] dark:bg-esi-orange/20 dark:text-esi-orange">
+          <div className="rounded-xl bg-muted p-2.5 text-foreground">
             <Users className="h-7 w-7" strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Gestion des utilisateurs</h1>
-            <p className="text-slate-600 dark:text-slate-400">Tous les comptes, avec recherche, filtres et actions.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Utilisateurs</h1>
+            <p className="text-muted-foreground">IAM — comptes, recherche, filtres et actions.</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={load}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-70 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-200 dark:hover:bg-gray-700"
-        >
+        <Button type="button" variant="outline" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Rafraîchir
-        </button>
+        </Button>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input
+        <Input
           type="search"
           placeholder="Rechercher par email, prénom, nom…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100"
+          className="max-w-sm"
         />
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-slate-100"
-        >
-          {ROLE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <span className="text-sm text-slate-500 dark:text-slate-400">
+        <Select value={role || '__all__'} onValueChange={(v) => setRole(v === '__all__' ? '' : v)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Tous les rôles" />
+          </SelectTrigger>
+          <SelectContent>
+            {ROLE_OPTIONS.map((o) => (
+              <SelectItem key={o.value || '__all__'} value={o.value || '__all__'}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-muted-foreground">
           {users.length} compte{users.length > 1 ? 's' : ''}
         </span>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <Card className="shadow-sm">
         {loading ? (
-          <div className="p-8 text-center text-slate-500 dark:text-slate-400">Chargement…</div>
+          <div className="p-8 text-center text-muted-foreground">Chargement…</div>
         ) : users.length === 0 ? (
-          <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+          <div className="p-8 text-center text-muted-foreground">
             Aucun utilisateur ne correspond à ces critères.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-600 dark:border-gray-700 dark:bg-gray-700/50 dark:text-slate-300">
+                <tr className="border-b border-border bg-muted/40 text-left text-muted-foreground">
                   <th className="px-4 py-3 font-medium">Nom</th>
                   <th className="px-4 py-3 font-medium">Prénom</th>
                   <th className="px-4 py-3 font-medium">Email</th>
@@ -168,55 +170,56 @@ export default function AdminUtilisateurs() {
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50 dark:border-gray-700 dark:hover:bg-gray-700/40">
-                    <td className="px-4 py-3 text-slate-800 dark:text-slate-200">{u.last_name || '—'}</td>
-                    <td className="px-4 py-3 text-slate-800 dark:text-slate-200">{u.first_name || '—'}</td>
+                  <tr key={u.id} className="border-b border-border hover:bg-muted/30">
+                    <td className="px-4 py-3 text-foreground">{u.last_name || '—'}</td>
+                    <td className="px-4 py-3 text-foreground">{u.first_name || '—'}</td>
                     <td className="px-4 py-3">
-                      <a href={`mailto:${u.email}`} className="inline-flex items-center gap-1 text-[var(--color-esi-primary)] hover:underline">
+                      <a
+                        href={`mailto:${u.email}`}
+                        className="inline-flex items-center gap-1 text-foreground hover:underline"
+                      >
                         <Mail className="h-3.5 w-3.5" />
                         {u.email}
                       </a>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${ROLE_BADGES[u.role] || 'bg-slate-100 text-slate-600'}`}>
-                        {ROLE_LABELS[u.role] || u.role}
-                      </span>
+                      <Badge variant="secondary">{ROLE_LABELS[u.role] || u.role}</Badge>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${u.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-slate-100 text-slate-600 dark:bg-gray-700 dark:text-slate-400'}`}>
+                      <Badge variant={u.is_active ? 'secondary' : 'outline'}>
                         {u.is_active ? 'Actif' : 'Inactif'}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setViewing(u)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-200 dark:hover:bg-gray-700"
-                        >
+                        <Button type="button" variant="outline" size="sm" onClick={() => setViewing(u)}>
                           <Eye className="h-3.5 w-3.5" />
                           Voir
-                        </button>
+                        </Button>
                         {!u.is_superuser && (
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => toggleActive(u)}
                             disabled={busy}
-                            className={`rounded p-1.5 hover:bg-slate-200 dark:hover:bg-gray-700 ${u.is_active ? 'text-amber-600 hover:text-amber-800 dark:hover:text-amber-300' : 'text-green-600 hover:text-green-800 dark:hover:text-green-300'}`}
+                            className="text-muted-foreground hover:text-foreground"
                             title={u.is_active ? 'Désactiver' : 'Activer'}
                           >
                             {u.is_active ? <Power className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                          </button>
+                          </Button>
                         )}
                         {!u.is_superuser && (
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => setToDelete(u)}
-                            className="rounded p-1.5 text-red-400 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-300"
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                             title="Supprimer"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </td>
@@ -226,9 +229,8 @@ export default function AdminUtilisateurs() {
             </table>
           </div>
         )}
-      </div>
+      </Card>
 
-      {/* Modal détail / modification */}
       <UserDetailModal
         user={viewing}
         onClose={() => setViewing(null)}
@@ -237,30 +239,21 @@ export default function AdminUtilisateurs() {
         }}
       />
 
-      {/* Modal suppression */}
       <Modal open={!!toDelete} onClose={() => setToDelete(null)}>
-        <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Supprimer ce compte ?</h3>
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <h3 className="mb-2 text-lg font-semibold text-foreground">Supprimer ce compte ?</h3>
+        <p className="text-sm text-muted-foreground">
           Confirmer la suppression définitive de{' '}
-          <span className="font-medium text-slate-900 dark:text-slate-100">{toDelete?.email}</span> ? Cette action est irréversible.
+          <span className="font-medium text-foreground">{toDelete?.email}</span> ? Cette action est
+          irréversible.
         </p>
         <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setToDelete(null)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:text-slate-200 dark:hover:bg-gray-700"
-          >
+          <Button type="button" variant="outline" onClick={() => setToDelete(null)}>
             Annuler
-          </button>
-          <button
-            type="button"
-            onClick={confirmDelete}
-            disabled={busy}
-            className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-70"
-          >
+          </Button>
+          <Button type="button" variant="destructive" onClick={confirmDelete} disabled={busy}>
             <Trash2 className="h-4 w-4" />
             {busy ? 'Suppression…' : 'Supprimer'}
-          </button>
+          </Button>
         </div>
       </Modal>
     </div>

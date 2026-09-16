@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { GraduationCap, Search, Filter, ArrowUpDown, Download, Save, Trash2 } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
+import { Button } from '@/components/ui/button'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 const STORAGE_VIEWS = 'esi_etudiants_vues'
@@ -70,14 +71,14 @@ export default function AdminEtudiantsRecherche() {
     const params = buildParams()
     const url = `${API_BASE}/api/auth/students/export/?${params}`
     fetchWithAuth(API_BASE, url)
-      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Export échoué'))))
+      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Export �chou�'))))
       .then((blob) => {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
         a.download = 'etudiants.csv'
         a.click()
         URL.revokeObjectURL(a.href)
-        setMsg({ type: 'success', text: 'Fichier CSV téléchargé.' })
+        setMsg({ type: 'success', text: 'Fichier CSV t�l�charg�.' })
         setTimeout(() => setMsg({ type: '', text: '' }), 3000)
       })
       .catch(() => setMsg({ type: 'error', text: 'Erreur lors de l\'export.' }))
@@ -85,13 +86,13 @@ export default function AdminEtudiantsRecherche() {
 
   function handleSaveView() {
     if (!viewName.trim()) {
-      setMsg({ type: 'error', text: 'Donnez un nom à la vue.' })
+      setMsg({ type: 'error', text: 'Donnez un nom � la vue.' })
       return
     }
     saveView(viewName.trim(), { search, classeId, isActive, orderBy, orderDir })
     setSavedViews(loadSavedViews())
     setViewName('')
-    setMsg({ type: 'success', text: 'Vue enregistrée.' })
+    setMsg({ type: 'success', text: 'Vue enregistr�e.' })
     setTimeout(() => setMsg({ type: '', text: '' }), 2000)
   }
 
@@ -107,47 +108,47 @@ export default function AdminEtudiantsRecherche() {
     { value: 'date_joined', label: 'Date d\'inscription' },
     { value: 'email', label: 'Email' },
     { value: 'last_name', label: 'Nom' },
-    { value: 'first_name', label: 'Prénom' },
+    { value: 'first_name', label: 'Pr�nom' },
     { value: 'id', label: 'ID' },
   ]
 
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-[var(--color-esi-orange-light)] p-2.5 text-[var(--color-esi-orange)]">
+        <div className="rounded-xl bg-muted p-2.5 text-foreground">
           <Search className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Recherche avancée</h1>
-          <p className="text-slate-600">
-            Filtres, règles de tri, vues sauvegardées et export Excel (CSV).
+          <h1 className="text-2xl font-semibold text-foreground">Recherche avanc�e</h1>
+          <p className="text-muted-foreground">
+            Filtres, r�gles de tri, vues sauvegard�es et export Excel (CSV).
           </p>
         </div>
       </div>
 
       {/* Bloc filtres / query builder */}
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
+      <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm">
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
           <Filter className="h-4 w-4" />
-          Critères et tri
+          Crit�res et tri
         </h2>
         <div className="flex flex-wrap items-end gap-4">
           <div className="min-w-[180px]">
-            <label className="mb-1 block text-xs font-medium text-slate-500">Recherche texte</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Recherche texte</label>
             <input
               type="text"
-              placeholder="Email, nom, prénom…"
+              placeholder="Email, nom, pr�nom�"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Classe</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Classe</label>
             <select
               value={classeId}
               onChange={(e) => setClasseId(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-border px-3 py-2 text-sm"
             >
               <option value="">Toutes</option>
               {classes.map((c) => (
@@ -156,11 +157,11 @@ export default function AdminEtudiantsRecherche() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Actif</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Actif</label>
             <select
               value={isActive}
               onChange={(e) => setIsActive(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-border px-3 py-2 text-sm"
             >
               <option value="">Tous</option>
               <option value="1">Oui</option>
@@ -168,8 +169,8 @@ export default function AdminEtudiantsRecherche() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Tri</label>
-            <div className="flex items-center gap-1 rounded-lg border border-slate-300">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Tri</label>
+            <div className="flex items-center gap-1 rounded-lg border border-border">
               <select
                 value={orderBy}
                 onChange={(e) => setOrderBy(e.target.value)}
@@ -182,62 +183,53 @@ export default function AdminEtudiantsRecherche() {
               <button
                 type="button"
                 onClick={() => setOrderDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-                className="rounded-r-lg border-l border-slate-300 bg-slate-50 px-2 py-2 text-slate-600 hover:bg-slate-100"
-                title={orderDir === 'asc' ? 'Croissant' : 'Décroissant'}
+                className="rounded-r-lg border-l border-border bg-background px-2 py-2 text-muted-foreground hover:bg-muted"
+                title={orderDir === 'asc' ? 'Croissant' : 'D�croissant'}
               >
                 <ArrowUpDown className="h-4 w-4" />
               </button>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={runSearch}
-            disabled={loading}
-            className="rounded-lg bg-[var(--color-esi-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-esi-primary-hover)] disabled:opacity-70"
-          >
-            {loading ? 'Recherche…' : 'Appliquer'}
-          </button>
+          <Button type="button" onClick={runSearch} disabled={loading}>
+            {loading ? 'Recherche�' : 'Appliquer'}
+          </Button>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
           <div className="flex items-center gap-2">
             <input
               type="text"
               placeholder="Nom de la vue"
               value={viewName}
               onChange={(e) => setViewName(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm w-40"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm w-40"
             />
             <button
               type="button"
               onClick={handleSaveView}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground hover:bg-background"
             >
               <Save className="h-4 w-4" /> Enregistrer la vue
             </button>
           </div>
-          <button
-            type="button"
-            onClick={handleExport}
-            className="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
-          >
+          <Button type="button" variant="outline" onClick={handleExport}>
             <Download className="h-4 w-4" /> Export Excel (CSV)
-          </button>
+          </Button>
         </div>
 
         {savedViews.length > 0 && (
-          <div className="mt-4 border-t border-slate-200 pt-4">
-            <p className="mb-2 text-xs font-medium text-slate-500">Vues enregistrées</p>
+          <div className="mt-4 border-t border-border pt-4">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Vues enregistr�es</p>
             <div className="flex flex-wrap gap-2">
               {savedViews.map((v) => (
                 <span
                   key={v.id}
-                  className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs"
+                  className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs"
                 >
-                  <button type="button" onClick={() => applyView(v.config)} className="font-medium text-slate-700 hover:underline">
+                  <button type="button" onClick={() => applyView(v.config)} className="font-medium text-foreground hover:underline">
                     {v.name}
                   </button>
-                  <button type="button" onClick={() => { deleteView(v.id); setSavedViews(loadSavedViews()); }} className="text-slate-400 hover:text-red-600">
+                  <button type="button" onClick={() => { deleteView(v.id); setSavedViews(loadSavedViews()); }} className="text-muted-foreground hover:text-red-600">
                     <Trash2 className="h-3 w-3" />
                   </button>
                 </span>
@@ -247,22 +239,22 @@ export default function AdminEtudiantsRecherche() {
         )}
 
         {msg.text && (
-          <p className={`mt-3 text-sm ${msg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{msg.text}</p>
+          <p className={`mt-3 text-sm ${msg.type === 'success' ? 'text-foreground' : 'text-red-600'}`}>{msg.text}</p>
         )}
       </div>
 
-      {/* Résultats */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-4 py-3 text-sm font-medium text-slate-600">
-          {students.length} résultat(s)
+      {/* R�sultats */}
+      <div className="rounded-xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-4 py-3 text-sm font-medium text-muted-foreground">
+          {students.length} r�sultat(s)
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-slate-50 text-left text-slate-600">
+              <tr className="border-b bg-background text-left text-muted-foreground">
                 <th className="p-3">ID</th>
                 <th className="p-3">Email</th>
-                <th className="p-3">Prénom</th>
+                <th className="p-3">Pr�nom</th>
                 <th className="p-3">Nom</th>
                 <th className="p-3">Classe</th>
                 <th className="p-3">Actif</th>
@@ -271,14 +263,14 @@ export default function AdminEtudiantsRecherche() {
             </thead>
             <tbody>
               {students.map((s) => (
-                <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50">
+                <tr key={s.id} className="border-b border-border hover:bg-background">
                   <td className="p-3">{s.id}</td>
                   <td className="p-3">{s.email}</td>
                   <td className="p-3">{s.first_name}</td>
                   <td className="p-3">{s.last_name}</td>
-                  <td className="p-3">{s.classe_code ?? '—'}</td>
+                  <td className="p-3">{s.classe_code ?? '�'}</td>
                   <td className="p-3">{s.is_active ? 'Oui' : 'Non'}</td>
-                  <td className="p-3">{s.date_joined ? new Date(s.date_joined).toLocaleDateString() : '—'}</td>
+                  <td className="p-3">{s.date_joined ? new Date(s.date_joined).toLocaleDateString() : '�'}</td>
                 </tr>
               ))}
             </tbody>
