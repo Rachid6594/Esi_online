@@ -11,7 +11,7 @@ export {
   AProposPage,
   EnseignantsPage,
 } from './landing'
-export { LoginPage, ChangerMotDePassePage } from './auth'
+export { LoginPage, RegisterPage, ChangerMotDePassePage } from './auth'
 export {
   AdminLayout,
   AdminDashboard,
@@ -24,6 +24,7 @@ export {
   AdminProfesseursListe,
   AdminProfesseursCreation,
   AdminContenu,
+  AdminUtilisateurs,
   AdminAdministration,
   AdminParametres,
   AdminEtablissement,

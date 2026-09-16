@@ -40,7 +40,10 @@ from app.authentification.api.serializers import (
     ImportStudentsResponseSerializer,
     ErrorDetailSerializer,
     ApiMessageSerializer,
+    GlobalUserListItemSerializer,
 )
+from app.authentification.api.serializers import UserUpdateSerializer
+from app.authentification.api.serializers import get_user_role
 from app.authentification.models import UserClasse
 from app.authentification.services import AuthService
 from app.authentification.services.student_email_service import send_student_credentials
@@ -607,3 +610,186 @@ def set_password_from_invitation(request):
     user.set_password(new_password)
     user.save()
     return Response({"message": "Mot de passe mis à jour. Vous pouvez vous connecter."})
+
+
+# --- Gestion globale des utilisateurs (admin) ---
+
+@extend_schema(
+    tags=["Authentification"],
+    summary="Lister tous les utilisateurs",
+    description="Liste tous les comptes (étudiants, professeurs, bibliothécaires, administration, superusers) avec leur rôle, pour la gestion utilisateur de l'admin.",
+    parameters=[
+        OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("role", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("is_active", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False),
+        OpenApiParameter("ordering", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False),
+    ],
+    responses={200: GlobalUserListItemSerializer(many=True)},
+)
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def users_list(request):
+    """
+    Liste globale de tous les utilisateurs avec leur rôle.
+    Query params : search, role (admin|admin_ecole|professeur|bibliothecaire|user),
+                   is_active, ordering.
+    """
+    qs = User.objects.all().select_related().order_by("email")
+    search = (request.query_params.get("search") or "").strip()
+    if search:
+        qs = qs.filter(
+            Q(email__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+            | Q(username__icontains=search)
+        )
+    role = (request.query_params.get("role") or "").strip()
+    is_active = request.query_params.get("is_active")
+    if is_active is not None and is_active != "":
+        qs = qs.filter(is_active=is_active.lower() in ("1", "true", "yes"))
+
+    result = []
+    for u in qs:
+        user_role = get_user_role(u)
+        if role and user_role != role:
+            continue
+        poste = None
+        if user_role == "admin_ecole":
+            try:
+                from app.administration.models import AdministrationEcole
+                profile = AdministrationEcole.objects.filter(auth_user=u).first()
+                poste = profile.poste if profile else None
+            except Exception:
+                pass
+        item = {
+            "id": u.id,
+            "email": u.email,
+            "first_name": u.first_name or "",
+            "last_name": u.last_name or "",
+            "username": u.username,
+            "is_active": u.is_active,
+            "is_staff": u.is_staff,
+            "is_superuser": u.is_superuser,
+            "date_joined": u.date_joined.isoformat() if u.date_joined else None,
+            "role": user_role,
+            "poste": poste,
+        }
+        result.append(item)
+
+    ordering = (request.query_params.get("ordering") or "").strip()
+    if ordering in ("email", "-email", "date_joined", "-date_joined", "id", "-id"):
+        reverse = ordering.startswith("-")
+        key = ordering.lstrip("-")
+        result.sort(key=lambda x: (x.get(key) or "").lower() if isinstance(x.get(key), str) else x.get(key), reverse=reverse)
+    return Response(result)
+
+
+@extend_schema(
+    tags=["Authentification"],
+    summary="Mettre à jour un utilisateur",
+    description="Modifie un utilisateur existant : email, prénom, nom, nom d'utilisateur, statut actif et mot de passe (optionnel). Un superuser ne peut pas être modifié.",
+    parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+    request=UserUpdateSerializer,
+    responses={
+        200: UserSerializer,
+        400: OpenApiResponse(response=OpenApiTypes.OBJECT, description="Données invalides."),
+        404: OpenApiResponse(response=ErrorDetailSerializer, description="Utilisateur introuvable."),
+    },
+)
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAdminUser])
+def user_update(request, pk: int):
+    """Met à jour les champs autorisés d'un utilisateur (email, nom, prénom, username, is_active, mot de passe)."""
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response({"detail": "Utilisateur introuvable."}, status=status.HTTP_404_NOT_FOUND)
+    if user.is_superuser and request.user.pk != user.pk:
+        return Response(
+            {"detail": "Un compte super administrateur ne peut pas être modifié par un autre admin."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    data = serializer.validated_data
+    password = data.pop("password", None)
+    for field, value in data.items():
+        setattr(user, field, value)
+    if password:
+        user.set_password(password)
+    user.save()
+    uc = UserClasse.objects.filter(user=user).select_related("classe").first()
+    return Response({
+        "id": user.id,
+        "email": user.email,
+        "first_name": user.first_name or "",
+        "last_name": user.last_name or "",
+        "username": user.username,
+        "is_active": user.is_active,
+        "date_joined": user.date_joined.isoformat() if user.date_joined else None,
+        "classe_id": uc.classe_id if uc else None,
+        "classe_code": uc.classe.code if uc and uc.classe else None,
+        "classe_libelle": uc.classe.libelle if uc and uc.classe else None,
+    })
+
+
+@extend_schema(
+    tags=["Authentification"],
+    summary="Activer / désactiver un utilisateur",
+    description="Bascule l'attribut is_active d'un utilisateur. Un superuser admin ne peut pas être désactivé.",
+    parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+    request=None,
+    responses={
+        200: ApiMessageSerializer,
+        400: OpenApiResponse(response=ApiMessageSerializer, description="Action non autorisée."),
+        404: OpenApiResponse(response=ErrorDetailSerializer, description="Utilisateur introuvable."),
+    },
+)
+@api_view(["POST"])
+@permission_classes([IsAdminUser])
+def user_toggle_active(request, pk: int):
+    """Bascule is_active d'un utilisateur (interdit sur un superuser)."""
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response({"detail": "Utilisateur introuvable."}, status=status.HTTP_404_NOT_FOUND)
+    if user.is_superuser:
+        return Response(
+            {"detail": "Un compte super administrateur ne peut pas être désactivé."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    user.is_active = not user.is_active
+    user.save()
+    return Response({
+        "message": "Compte désactivé." if not user.is_active else "Compte activé.",
+        "is_active": user.is_active,
+    })
+
+
+@extend_schema(
+    tags=["Authentification"],
+    summary="Supprimer un utilisateur",
+    description="Supprime définitivement un utilisateur. Un superuser admin ne peut pas être supprimé.",
+    parameters=[OpenApiParameter("pk", OpenApiTypes.INT, OpenApiParameter.PATH, required=True)],
+    responses={
+        204: None,
+        400: OpenApiResponse(response=ApiMessageSerializer, description="Action non autorisée."),
+        404: OpenApiResponse(response=ErrorDetailSerializer, description="Utilisateur introuvable."),
+    },
+)
+@api_view(["DELETE"])
+@permission_classes([IsAdminUser])
+def user_delete(request, pk: int):
+    """Supprime définitivement un utilisateur (interdit sur un superuser)."""
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response({"detail": "Utilisateur introuvable."}, status=status.HTTP_404_NOT_FOUND)
+    if user.is_superuser:
+        return Response(
+            {"detail": "Un compte super administrateur ne peut pas être supprimé."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    user.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)

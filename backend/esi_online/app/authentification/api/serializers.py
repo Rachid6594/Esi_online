@@ -61,6 +61,23 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8, required=False)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "first_name", "last_name", "is_active", "password"]
+
+    def validate_email(self, value):
+        user = self.instance
+        qs = User.objects.filter(email__iexact=value)
+        if user:
+            qs = qs.exclude(pk=user.pk)
+        if qs.exists():
+            raise serializers.ValidationError("Un compte existe déjà avec cet email.")
+        return value
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True, trim_whitespace=False)
@@ -184,3 +201,18 @@ class ImportStudentsResponseSerializer(serializers.Serializer):
 
 class ApiMessageSerializer(serializers.Serializer):
     message = serializers.CharField()
+
+
+class GlobalUserListItemSerializer(serializers.Serializer):
+    """Élément de la vue globale de gestion des utilisateurs (admin)."""
+    id = serializers.IntegerField()
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    username = serializers.CharField()
+    is_active = serializers.BooleanField()
+    is_staff = serializers.BooleanField()
+    is_superuser = serializers.BooleanField()
+    date_joined = serializers.DateTimeField(allow_null=True)
+    role = serializers.CharField()
+    poste = serializers.CharField(allow_null=True, required=False)

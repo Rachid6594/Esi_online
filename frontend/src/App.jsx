@@ -7,18 +7,15 @@ import {
   AProposPage,
   EnseignantsPage,
   LoginPage,
+  RegisterPage,
   ChangerMotDePassePage,
   AdminLayout,
   AdminDashboard,
   AdminEtudiantsDashboard,
-  AdminEtudiantsCreation,
-  AdminEtudiantsRecherche,
-  AdminEtudiantsListe,
   AdminBibliothecairesListe,
-  AdminBibliothecairesCreation,
   AdminProfesseursListe,
-  AdminProfesseursCreation,
   AdminContenu,
+  AdminUtilisateurs,
   AdminAdministration,
   AdminParametres,
   AdminEtablissement,
@@ -48,6 +45,7 @@ function App() {
         <Route path="/enseignants" element={<EnseignantsPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/inscription" element={<RegisterPage />} />
       <Route path="/changer-mot-de-passe" element={<ChangerMotDePassePage />} />
       <Route path="/home" element={<StudentLayout />}>
         <Route index element={<StudentDashboard />} />
@@ -77,21 +75,22 @@ function App() {
         <Route path="etudiants">
           <Route index element={<Navigate to="/admin/etudiants/dashboard" replace />} />
           <Route path="dashboard" element={<AdminEtudiantsDashboard />} />
-          <Route path="creation" element={<AdminEtudiantsCreation />} />
-          <Route path="recherche" element={<AdminEtudiantsRecherche />} />
-          <Route path="liste" element={<AdminEtudiantsListe />} />
+          <Route path="creation" element={<Navigate to="/admin/etudiants/dashboard" replace />} />
+          <Route path="recherche" element={<Navigate to="/admin/etudiants/dashboard" replace />} />
+          <Route path="liste" element={<Navigate to="/admin/etudiants/dashboard" replace />} />
         </Route>
         <Route path="bibliothecaires">
           <Route index element={<Navigate to="/admin/bibliothecaires/liste" replace />} />
           <Route path="liste" element={<AdminBibliothecairesListe />} />
-          <Route path="creation" element={<AdminBibliothecairesCreation />} />
+          <Route path="creation" element={<Navigate to="/admin/bibliothecaires/liste" replace />} />
         </Route>
         <Route path="professeurs">
           <Route index element={<Navigate to="/admin/professeurs/liste" replace />} />
           <Route path="liste" element={<AdminProfesseursListe />} />
-          <Route path="creation" element={<AdminProfesseursCreation />} />
+          <Route path="creation" element={<Navigate to="/admin/professeurs/liste" replace />} />
         </Route>
         <Route path="contenu" element={<AdminContenu />} />
+        <Route path="utilisateurs" element={<AdminUtilisateurs />} />
         <Route path="administration" element={<AdminAdministration />} />
         <Route path="parametres" element={<AdminParametres />} />
         <Route path="etablissement">

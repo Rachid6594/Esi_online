@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { LogIn, Mail, Lock } from 'lucide-react'
+import { LogIn, Mail, Lock, GraduationCap } from 'lucide-react'
 import { setAuth } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
 
@@ -52,8 +52,13 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 dark:bg-gray-900 dark:text-slate-200">
       <header className="border-b border-slate-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" className="font-semibold text-slate-800 dark:text-slate-100">
-            <span className="text-[var(--color-esi-primary)]">ESI</span> Online
+          <Link to="/" className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-esi-primary)] text-white">
+              <GraduationCap className="h-5 w-5" />
+            </span>
+            <span>
+              <span className="text-[var(--color-esi-primary)]">ESI</span> Online
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -130,6 +135,12 @@ export default function LoginPage() {
               <LogIn className="h-4 w-4" /> {loading ? 'Connexion…' : 'Se connecter'}
             </button>
           </form>
+          <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
+            Pas encore de compte ?{' '}
+            <Link to="/inscription" className="font-medium text-[var(--color-esi-primary)] hover:underline">
+              S&apos;inscrire
+            </Link>
+          </p>
         </div>
       </main>
 

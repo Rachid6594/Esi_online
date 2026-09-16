@@ -20,4 +20,8 @@ urlpatterns = [
     path("professeurs/create/", views.create_professeur),
     path("invitation/validate/", views.validate_invitation_token),
     path("invitation/set-password/", views.set_password_from_invitation),
+    path("users/", views.users_list),
+    path("users/<int:pk>/toggle-active/", views.user_toggle_active),
+    path("users/<int:pk>/update/", views.user_update),
+    path("users/<int:pk>/", views.user_delete),
 ]
