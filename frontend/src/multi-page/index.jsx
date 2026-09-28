@@ -10,6 +10,7 @@ export {
   DocumentsPage,
   AProposPage,
   EnseignantsPage,
+  NotFoundPage,
 } from './landing'
 export { LoginPage, RegisterPage, ChangerMotDePassePage } from './auth'
 export {
