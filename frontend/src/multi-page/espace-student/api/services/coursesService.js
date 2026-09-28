@@ -60,15 +60,3 @@ export async function getCourseDetail(id) {
     chapitres: []
   }
 }
-
-/**
- * Récupère le contenu pédagogique d'un cours.
- * (Laissée vide ou pointant vers une autre ressource si le backend a un endpoint spécifique)
- * @param {string} id
- * @returns {Promise<Object|null>}
- */
-export async function getCourseContent(id) {
-  // Optionnel: si ENDPOINTS.COURSE_CONTENT existait
-  // return apiGet(ENDPOINTS.COURSE_CONTENT(id))
-  return null
-}

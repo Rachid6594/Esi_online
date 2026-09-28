@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { List, UserPlus, RefreshCw, Eye } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
 import UserDetailModal from './UserDetailModal'
@@ -60,7 +60,7 @@ export default function AdminProfesseursListe() {
       .finally(() => setLoadingMatieres(false))
   }, [])
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams()
     if (search.trim()) params.set('search', search.trim())
@@ -70,12 +70,12 @@ export default function AdminProfesseursListe() {
       .then((data) => setList(Array.isArray(data) ? data : []))
       .catch(() => setList([]))
       .finally(() => setLoading(false))
-  }
+  }, [search])
 
   useEffect(() => {
     const t = setTimeout(load, 250)
     return () => clearTimeout(t)
-  }, [search])
+  }, [load])
 
   function openModal() {
     setEmail('')

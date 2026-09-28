@@ -46,7 +46,7 @@ export default function LoginPage() {
       } else {
         navigate('/home', { replace: true })
       }
-    } catch (err) {
+    } catch {
       setError('Erreur réseau. Réessayez.')
     } finally {
       setLoading(false)

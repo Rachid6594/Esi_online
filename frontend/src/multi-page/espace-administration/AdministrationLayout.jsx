@@ -3,7 +3,8 @@ import { LayoutDashboard, LogOut, UserCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import { getAuth, clearAuth, isAdministrationEcole } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
-import { useSidebarState, SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { useSidebarState } from '../../hooks/useSidebarState'
 import { Button } from '@/components/ui/button'
 
 const navClass = ({ isActive }) =>

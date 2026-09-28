@@ -68,7 +68,7 @@ export default function ChangerMotDePassePage() {
         return
       }
       setStatus('success')
-    } catch (err) {
+    } catch {
       setMessage('Erreur réseau.')
     } finally {
       setLoading(false)
