@@ -1,4 +1,3 @@
-export { default as AdminLoginPage } from './AdminLoginPage'
 export { default as AdminLayout } from './AdminLayout'
 export { default as AdminDashboard } from './AdminDashboard'
 export { default as AdminEtudiantsDashboard } from './AdminEtudiantsDashboard'
