@@ -10,7 +10,7 @@ function formatValidationErrors(err) {
   if (typeof err === 'string') return err
   if (err && typeof err === 'object') {
     const parts = []
-    for (const [k, v] of Object.entries(err)) {
+    for (const v of Object.values(err)) {
       const msg = Array.isArray(v) ? v.join(' ') : String(v)
       if (msg) parts.push(msg)
     }

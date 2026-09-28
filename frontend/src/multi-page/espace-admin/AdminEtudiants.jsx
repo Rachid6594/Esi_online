@@ -68,7 +68,7 @@ export default function AdminEtudiantsCreation() {
         text: data.message || 'Compte créé. Les identifiants ont été envoyés par email.',
       })
       setForm({ email: '', first_name: '', last_name: '', classe_id: '' })
-    } catch (err) {
+    } catch {
       setFormMsg({ type: 'error', text: 'Erreur réseau.' })
     } finally {
       setFormLoading(false)
@@ -108,7 +108,7 @@ export default function AdminEtudiantsCreation() {
       })
       setCsvFile(null)
       if (e.target?.reset) e.target.reset()
-    } catch (err) {
+    } catch {
       setCsvMsg({ type: 'error', text: 'Erreur réseau.' })
     } finally {
       setCsvLoading(false)

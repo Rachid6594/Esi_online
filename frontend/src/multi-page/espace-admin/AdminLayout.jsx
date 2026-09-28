@@ -25,7 +25,8 @@ import {
 import { useEffect, useState } from 'react'
 import { getAuth, clearAuth, isAdmin } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
-import { useSidebarState, SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { useSidebarState } from '../../hooks/useSidebarState'
 import { Button } from '@/components/ui/button'
 
 const navClass = ({ isActive }) =>
