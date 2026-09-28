@@ -90,9 +90,7 @@ const SECTION_ICONS = { annees: Calendar, niveaux: Layers, filieres: BookOpen, c
 export default function AdminEtablissement() {
   const { section } = useParams()
   const navigate = useNavigate()
-  if (!section || !VALID_SECTIONS.includes(section)) {
-    return <Navigate to="/admin/etablissement/annees" replace />
-  }
+  const sectionInvalide = !section || !VALID_SECTIONS.includes(section)
 
   const [annees, setAnnees] = useState([])
   const [niveaux, setNiveaux] = useState([])
@@ -131,6 +129,7 @@ export default function AdminEtablissement() {
   }
 
   useEffect(() => {
+    if (!VALID_SECTIONS.includes(section)) return
     load(section)
     if (section === 'classes') {
       load('annees')
@@ -141,6 +140,10 @@ export default function AdminEtablissement() {
       load('filieres')
     }
   }, [section])
+
+  if (sectionInvalide) {
+    return <Navigate to="/admin/etablissement/annees" replace />
+  }
 
   const showMsg = (sectionKey, type, text) => {
     setMsg({ section: sectionKey, type, text })

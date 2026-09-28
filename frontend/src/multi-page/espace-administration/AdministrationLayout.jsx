@@ -23,6 +23,8 @@ export default function AdministrationLayout() {
     }
   }, [ok, navigate])
 
+  const [sidebarOpen, toggleSidebar] = useSidebarState()
+
   function handleLogout() {
     clearAuth()
     navigate('/login', { replace: true })
@@ -34,8 +36,6 @@ export default function AdministrationLayout() {
 
   const user = auth?.user
   const poste = user?.poste
-
-  const [sidebarOpen, toggleSidebar] = useSidebarState()
 
   return (
     <div className="flex min-h-screen bg-background font-sans text-foreground">

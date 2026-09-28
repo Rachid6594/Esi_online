@@ -23,6 +23,8 @@ export default function ProfesseurLayout() {
     }
   }, [ok, navigate])
 
+  const [sidebarOpen, toggleSidebar] = useSidebarState()
+
   function handleLogout() {
     clearAuth()
     navigate('/login', { replace: true })
@@ -33,7 +35,6 @@ export default function ProfesseurLayout() {
   }
 
   const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Professeur'
-  const [sidebarOpen, toggleSidebar] = useSidebarState()
 
   return (
     <div className="flex min-h-screen bg-background font-sans text-foreground">
