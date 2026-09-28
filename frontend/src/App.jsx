@@ -31,6 +31,7 @@ import {
   ProfesseurDashboard,
   AdministrationLayout,
   AdministrationDashboard,
+  NotFoundPage,
 } from './multi-page'
 import './App.css'
 
@@ -104,7 +105,7 @@ function App() {
         </Route>
       </Route>
 
-      {/* Ajouter ici les autres routes au fur et à mesure */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
