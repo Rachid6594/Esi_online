@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import DataTable from '../../components/DataTable'
-import CsvImportZone from '../../components/CsvImportZone'
 import Modal from '../../components/Modal'
 import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import {
@@ -230,22 +229,6 @@ export default function AdminEtablissement() {
 }
 
 function AnneesSection({ list, onReload, onMsg, apiPost }) {
-    // Import CSV
-    async function handleImport(file) {
-      const formData = new FormData()
-      formData.append('file', file)
-      try {
-        const res = await fetch('/api/etablissement/users/import-csv', {
-          method: 'POST',
-          body: formData,
-        })
-        if (!res.ok) throw new Error('Erreur import')
-        onMsg('success', 'Import CSV rÃ©ussi')
-        onReload()
-      } catch (e) {
-        onMsg('error', e.message)
-      }
-    }
   const [form, setForm] = useState({ libelle: '', date_debut: '', date_fin: '', is_active: false })
   const [submitting, setSubmitting] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
@@ -263,8 +246,7 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
   }
   return (
     <>
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <CsvImportZone onImport={handleImport} />
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
         <Button type="button" onClick={() => setModalOpen(true)}>Nouvelle annÃ©e</Button>
       </div>
       {/* DataTable avec tri/pagination */}
