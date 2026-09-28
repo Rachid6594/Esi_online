@@ -21,13 +21,13 @@ export default function DocumentsPage() {
         <div className="grid gap-6 sm:grid-cols-2">
           <SectionCard
             icon={BookOpen}
-            title="Biblioth�que en ligne"
-            description="Supports de cours, m�moires et ressources documentaires de l'�cole."
+            title="Bibliothèque en ligne"
+            description="Supports de cours, mémoires et ressources documentaires de l'école."
           />
           <SectionCard
             icon={FileText}
             title="Documents officiels"
-            description="R�glements, formulaires et documents administratifs."
+            description="Règlements, formulaires et documents administratifs."
           />
         </div>
         <p className="mt-10">
@@ -35,7 +35,7 @@ export default function DocumentsPage() {
             to="/"
             className="text-sm font-medium text-foreground hover:underline text-foreground"
           >
-            ? Retour � l&apos;accueil
+            ? Retour à l&apos;accueil
           </Link>
         </p>
       </div>

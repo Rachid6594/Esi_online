@@ -14,12 +14,12 @@ export default function ProfesseurDashboard() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Tableau de bord professeur</h1>
           <p className="text-muted-foreground">
-            Bienvenue, <span className="font-medium text-foreground">{userName}</span>. Acc�dez � votre espace enseignant.
+            Bienvenue, <span className="font-medium text-foreground">{userName}</span>. Accédez à votre espace enseignant.
           </p>
         </div>
       </div>
       <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-        Contenu du tableau de bord � venir (cours, emploi du temps, documents, etc.).
+        Contenu du tableau de bord À venir (cours, emploi du temps, documents, etc.).
       </div>
     </div>
   )

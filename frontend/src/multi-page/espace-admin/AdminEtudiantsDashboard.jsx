@@ -103,7 +103,7 @@ export default function AdminEtudiantsDashboard() {
   function handleExport() {
     const url = `${API_BASE}/api/auth/students/export/?${buildParams()}`
     fetchWithAuth(API_BASE, url)
-      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Export �chou�'))))
+      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Export échoué'))))
       .then((blob) => {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
@@ -132,13 +132,13 @@ export default function AdminEtudiantsDashboard() {
       if (!res) return
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setFormMsg({ type: 'error', text: data.detail || 'Erreur lors de la cr�ation.' })
+        setFormMsg({ type: 'error', text: data.detail || 'Erreur lors de la création.' })
         return
       }
-      const isEmailFailed = (data.message || '').toLowerCase().includes('�chou�')
+      const isEmailFailed = (data.message || '').toLowerCase().includes('échoué')
       setFormMsg({
         type: isEmailFailed ? 'warning' : 'success',
-        text: data.message || 'Compte cr��. Les identifiants ont �t� envoy�s par email.',
+        text: data.message || 'Compte créé. Les identifiants ont été envoyés par email.',
       })
       setForm({ email: '', first_name: '', last_name: '', classe_id: '' })
       load()
@@ -147,7 +147,7 @@ export default function AdminEtudiantsDashboard() {
         .then((data) => setTotal(Array.isArray(data) ? data.length : 0))
         .catch(() => {})
     } catch {
-      setFormMsg({ type: 'error', text: 'Erreur r�seau.' })
+      setFormMsg({ type: 'error', text: 'Erreur réseau.' })
     } finally {
       setFormLoading(false)
     }
@@ -178,14 +178,14 @@ export default function AdminEtudiantsDashboard() {
       const created = data.created ?? 0
       setCsvMsg({
         type: errCount ? (created ? 'warning' : 'error') : 'success',
-        text: `${created} compte(s) cr��(s). Identifiants envoy�s par email.${errCount ? ` ${errCount} erreur(s).` : ''}`,
+        text: `${created} compte(s) créé(s). Identifiants envoyés par email.${errCount ? ` ${errCount} erreur(s).` : ''}`,
         details: data.errors?.length ? data.errors : null,
       })
       setCsvFile(null)
       if (e.target?.reset) e.target.reset()
       load()
     } catch {
-      setCsvMsg({ type: 'error', text: 'Erreur r�seau.', details: null })
+      setCsvMsg({ type: 'error', text: 'Erreur réseau.', details: null })
     } finally {
       setCsvLoading(false)
     }
@@ -202,7 +202,7 @@ export default function AdminEtudiantsDashboard() {
     { value: 'date_joined', label: 'Date d\'inscription' },
     { value: 'email', label: 'Email' },
     { value: 'last_name', label: 'Nom' },
-    { value: 'first_name', label: 'Pr�nom' },
+    { value: 'first_name', label: 'Prénom' },
     { value: 'id', label: 'ID' },
   ]
 
@@ -216,14 +216,14 @@ export default function AdminEtudiantsDashboard() {
             <GraduationCap className="h-7 w-7" strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Gestion des �tudiants</h1>
-            <p className="text-muted-foreground">Liste, recherche et cr�ation des comptes �tudiants.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Gestion des étudiants</h1>
+            <p className="text-muted-foreground">Liste, recherche et création des comptes étudiants.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Rafra�chir
+            Rafraîchir
           </Button>
           <Button type="button" variant="outline" onClick={handleExport}>
             <Download className="h-4 w-4" />
@@ -231,16 +231,16 @@ export default function AdminEtudiantsDashboard() {
           </Button>
           <Button type="button" onClick={() => openModal('form')}>
             <UserPlus className="h-4 w-4" />
-            Cr�er
+            Créer
           </Button>
         </div>
       </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         {[
-          { icon: Users, label: '�tudiants', value: total, cls: 'bg-muted' },
-          { icon: Users, label: 'Actifs', value: students.length ? activeCount : '�', cls: 'bg-muted text-foreground' },
-          { icon: Search, label: 'R�sultat(s)', value: students.length, cls: 'bg-muted' },
+          { icon: Users, label: 'étudiants', value: total, cls: 'bg-muted' },
+          { icon: Users, label: 'Actifs', value: students.length ? activeCount : '—', cls: 'bg-muted text-foreground' },
+          { icon: Search, label: 'Résultat(s)', value: students.length, cls: 'bg-muted' },
         ].map(({ icon: Icon, label, value, cls }) => (
           <Card key={label} className="shadow-sm">
             <CardContent className="flex items-center gap-3 pt-6">
@@ -261,7 +261,7 @@ export default function AdminEtudiantsDashboard() {
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Rechercher par email, nom, pr�nom�"
+            placeholder="Rechercher par email, nom, prénoms"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="min-w-[220px] pl-9"
@@ -294,22 +294,22 @@ export default function AdminEtudiantsDashboard() {
             variant="ghost"
             size="icon-sm"
             onClick={() => setOrderDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-            title={orderDir === 'asc' ? 'Croissant' : 'D�croissant'}
+            title={orderDir === 'asc' ? 'Croissant' : 'Décroissant'}
           >
             {orderDir === 'asc' ? '?' : '?'}
           </Button>
         </div>
         <span className="text-sm text-muted-foreground">
-          {students.length} r�sultat{students.length > 1 ? 's' : ''}
+          {students.length} résultat{students.length > 1 ? 's' : ''}
         </span>
       </div>
 
       <Card className="shadow-sm">
         {loading ? (
-          <div className="p-8 text-center text-muted-foreground">Chargement�</div>
+          <div className="p-8 text-center text-muted-foreground">Chargement…</div>
         ) : students.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Aucun �tudiant. Cliquez sur � Cr�er � pour en ajouter un.
+            Aucun étudiant. Cliquez sur « Créer » pour en ajouter un.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -317,7 +317,7 @@ export default function AdminEtudiantsDashboard() {
               <thead>
                 <tr className="border-b border-border bg-background text-left text-muted-foreground">
                   <th className="p-3">Nom</th>
-                  <th className="p-3">Pr�nom</th>
+                  <th className="p-3">Prénom</th>
                   <th className="p-3">Email</th>
                   <th className="p-3">Classe</th>
                   <th className="p-3">Statut</th>
@@ -327,8 +327,8 @@ export default function AdminEtudiantsDashboard() {
               <tbody>
                 {students.map((s) => (
                   <tr key={s.id} className="border-b border-border hover:bg-background">
-                    <td className="p-3 text-foreground">{s.last_name || '�'}</td>
-                    <td className="p-3 text-foreground">{s.first_name || '�'}</td>
+                    <td className="p-3 text-foreground">{s.last_name || '—'}</td>
+                    <td className="p-3 text-foreground">{s.first_name || '—'}</td>
                     <td className="p-3">
                       <a href={`mailto:${s.email}`} className="inline-flex items-center gap-1 text-foreground hover:underline text-foreground">
                         <Mail className="h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ export default function AdminEtudiantsDashboard() {
                       </a>
                     </td>
                     <td className="p-3 text-foreground">
-                      {s.classe_code ? `${s.classe_code}${s.classe_libelle ? ` � ${s.classe_libelle}` : ''}` : '�'}
+                      {s.classe_code ? `${s.classe_code}${s.classe_libelle ? ` — ${s.classe_libelle}` : ''}` : '—'}
                     </td>
                     <td className="p-3">
                       <Badge variant={s.is_active ? 'secondary' : 'outline'} className={s.is_active ? '' : ''}>
@@ -370,7 +370,7 @@ export default function AdminEtudiantsDashboard() {
             >
               <X className="h-5 w-5" />
             </Button>
-            <h2 className="mb-4 text-lg font-semibold text-foreground">Cr�er un �tudiant</h2>
+            <h2 className="mb-4 text-lg font-semibold text-foreground">Créer un étudiant</h2>
 
             <div className="mb-4 flex gap-2">
               <Button type="button" variant={modalTab === 'form' ? 'default' : 'outline'} className="flex-1" onClick={() => setModalTab('form')}>
@@ -393,7 +393,7 @@ export default function AdminEtudiantsDashboard() {
                   <Input id="email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="first_name">Pr�nom</Label>
+                  <Label htmlFor="first_name">Prénom</Label>
                   <Input id="first_name" type="text" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} />
                 </div>
                 <div className="space-y-2">
@@ -404,10 +404,10 @@ export default function AdminEtudiantsDashboard() {
                   <Label htmlFor="classe">Classe (optionnel)</Label>
                   <Select value={form.classe_id || '__none__'} onValueChange={(v) => setForm((f) => ({ ...f, classe_id: v === '__none__' ? '' : v }))}>
                     <SelectTrigger id="classe" className="w-full">
-                      <SelectValue placeholder="� Aucune �" />
+                      <SelectValue placeholder="« Aucune »" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">� Aucune �</SelectItem>
+                      <SelectItem value="__none__">« Aucune »</SelectItem>
                       {classes.map((c) => (
                         <SelectItem key={c.id} value={String(c.id)}>{c.libelle || c.code}</SelectItem>
                       ))}
@@ -415,18 +415,18 @@ export default function AdminEtudiantsDashboard() {
                   </Select>
                 </div>
                 <Button type="submit" disabled={formLoading} className="w-full">
-                  {formLoading ? 'Cr�ation�' : 'Cr�er et envoyer les identifiants'}
+                  {formLoading ? 'Création…' : 'Créer et envoyer les identifiants'}
                 </Button>
               </form>
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Format attendu : une ligne d�en-t�te optionnelle <code className="rounded bg-muted px-1">email,prenom,nom,classe_id</code> (classe_id optionnel). Encodage UTF-8.
+                  Format attendu : une ligne demi-tête optionnelle <code className="rounded bg-muted px-1">email,prenom,nom,classe_id</code> (classe_id optionnel). Encodage UTF-8.
                 </p>
         <div className="flex flex-wrap items-center gap-2">
                   <Button type="button" variant="outline" onClick={downloadExampleCsv}>
                     <Download className="h-4 w-4" />
-                    T�l�charger un exemple
+                    Télécharger un exemple
                   </Button>
                 </div>
                 {csvMsg.text && (
@@ -439,7 +439,7 @@ export default function AdminEtudiantsDashboard() {
                             Ligne {err.ligne} {err.email && `(${err.email})`} : {err.erreur}
                           </li>
                         ))}
-                        {csvMsg.details.length > 5 && <li>� et {csvMsg.details.length - 5} autre(s) erreur(s)</li>}
+                        {csvMsg.details.length > 5 && <li>… et {csvMsg.details.length - 5} autre(s) erreur(s)</li>}
                       </ul>
                     )}
                   </div>
@@ -453,7 +453,7 @@ export default function AdminEtudiantsDashboard() {
                   />
                   <Button type="submit" disabled={csvLoading || !csvFile} className="w-full">
                     <FileSpreadsheet className="h-4 w-4" />
-                    {csvLoading ? 'Import en cours�' : 'Importer et envoyer les emails'}
+                    {csvLoading ? 'Import en cours…' : 'Importer et envoyer les emails'}
                   </Button>
                 </form>
               </div>

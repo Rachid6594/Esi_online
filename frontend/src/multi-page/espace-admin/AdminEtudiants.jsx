@@ -59,17 +59,17 @@ export default function AdminEtudiantsCreation() {
       }
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setFormMsg({ type: 'error', text: data.detail || 'Erreur lors de la cr�ation.' })
+        setFormMsg({ type: 'error', text: data.detail || 'Erreur lors de la création.' })
         return
       }
-      const isEmailFailed = (data.message || '').toLowerCase().includes('�chou�')
+      const isEmailFailed = (data.message || '').toLowerCase().includes('échoué')
       setFormMsg({
         type: isEmailFailed ? 'warning' : 'success',
-        text: data.message || 'Compte cr��. Les identifiants ont �t� envoy�s par email.',
+        text: data.message || 'Compte créé. Les identifiants ont été envoyés par email.',
       })
       setForm({ email: '', first_name: '', last_name: '', classe_id: '' })
     } catch (err) {
-      setFormMsg({ type: 'error', text: 'Erreur r�seau.' })
+      setFormMsg({ type: 'error', text: 'Erreur réseau.' })
     } finally {
       setFormLoading(false)
     }
@@ -103,13 +103,13 @@ export default function AdminEtudiantsCreation() {
       const created = data.created ?? 0
       setCsvMsg({
         type: errCount ? (created ? 'warning' : 'error') : 'success',
-        text: `${created} compte(s) cr��(s). Identifiants envoy�s par email.${errCount ? ` ${errCount} erreur(s).` : ''}`,
+        text: `${created} compte(s) créé(s). Identifiants envoyés par email.${errCount ? ` ${errCount} erreur(s).` : ''}`,
         details: data.errors?.length ? data.errors : null,
       })
       setCsvFile(null)
       if (e.target?.reset) e.target.reset()
     } catch (err) {
-      setCsvMsg({ type: 'error', text: 'Erreur r�seau.' })
+      setCsvMsg({ type: 'error', text: 'Erreur réseau.' })
     } finally {
       setCsvLoading(false)
     }
@@ -122,22 +122,22 @@ export default function AdminEtudiantsCreation() {
           <GraduationCap className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Cr�ation d&apos;�tudiants</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Création d&apos;étudiants</h1>
           <p className="text-muted-foreground">
-            Cr�ez des comptes �tudiants (un par un ou import CSV). Mot de passe al�atoire, identifiants envoy�s par email avec lien pour changer le mot de passe.
+            Créez des comptes étudiants (un par un ou import CSV). Mot de passe aléatoire, identifiants envoyés par email avec lien pour changer le mot de passe.
           </p>
         </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Formulaire : cr�er un �tudiant */}
+        {/* Formulaire : créer un étudiant */}
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
             <UserPlus className="h-5 w-5" strokeWidth={1.5} />
-            Cr�er un �tudiant
+            Créer un étudiant
           </h2>
           <p className="mb-3 text-xs text-muted-foreground">
-            L&apos;email avec les identifiants est envoy� � l&apos;<strong>adresse email de l&apos;�tudiant</strong> (celle que vous saisissez ci-dessous). V�rifiez aussi les spams.
+            L&apos;email avec les identifiants est envoyé à l&apos;<strong>adresse email de l&apos;étudiant</strong> (celle que vous saisissez ci-dessous). Vérifiez aussi les spams.
           </p>
           <form onSubmit={handleCreateStudent} className="space-y-4">
             {formMsg.text && (
@@ -170,7 +170,7 @@ export default function AdminEtudiantsCreation() {
             </div>
             <div>
               <label htmlFor="first_name" className="mb-1 block text-sm font-medium text-foreground">
-                Pr�nom
+                Prénom
               </label>
               <input
                 id="first_name"
@@ -202,15 +202,15 @@ export default function AdminEtudiantsCreation() {
                 onChange={(e) => setForm((f) => ({ ...f, classe_id: e.target.value }))}
                 className="w-full rounded-lg border border-border px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
               >
-                <option value="">� Aucune �</option>
+                <option value="">« Aucune »</option>
                 {classes.map((c) => (
                   <option key={c.id} value={c.id}>{c.libelle || c.code}</option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-muted-foreground">D�finir les classes dans Gestion de l&apos;�tablissement.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Définir les classes dans Gestion de l&apos;établissement.</p>
             </div>
             <Button type="submit" disabled={formLoading}>
-              {formLoading ? 'Cr�ation�' : 'Cr�er et envoyer les identifiants par email'}
+              {formLoading ? 'Création…' : 'Créer et envoyer les identifiants par email'}
             </Button>
           </form>
         </div>
@@ -222,7 +222,7 @@ export default function AdminEtudiantsCreation() {
             Importer un CSV
           </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            Format attendu : une ligne d�en-t�te optionnelle <code className="rounded bg-muted px-1">email,prenom,nom,classe_id</code> (classe_id optionnel). Encodage UTF-8.
+            Format attendu : une ligne demi-tête optionnelle <code className="rounded bg-muted px-1">email,prenom,nom,classe_id</code> (classe_id optionnel). Encodage UTF-8.
           </p>
           <div className="mb-4 flex items-center gap-2">
             <button
@@ -231,7 +231,7 @@ export default function AdminEtudiantsCreation() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground hover:bg-background"
             >
               <Download className="h-4 w-4" />
-              T�l�charger un exemple
+              Télécharger un exemple
             </button>
           </div>
           <form onSubmit={handleImportCsv} className="space-y-4">
@@ -254,7 +254,7 @@ export default function AdminEtudiantsCreation() {
                       </li>
                     ))}
                     {csvMsg.details.length > 5 && (
-                      <li>� et {csvMsg.details.length - 5} autre(s) erreur(s)</li>
+                      <li>… et {csvMsg.details.length - 5} autre(s) erreur(s)</li>
                     )}
                   </ul>
                 )}
@@ -270,7 +270,7 @@ export default function AdminEtudiantsCreation() {
             </div>
             <Button type="submit" disabled={csvLoading || !csvFile}>
               <FileSpreadsheet className="h-4 w-4" />
-              {csvLoading ? 'Import en cours�' : 'Importer et envoyer les emails'}
+              {csvLoading ? 'Import en cours…' : 'Importer et envoyer les emails'}
             </Button>
           </form>
         </div>

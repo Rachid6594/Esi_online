@@ -15,18 +15,18 @@ export default function AdminDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm font-medium text-muted-foreground">� venir</p>
+          <p className="text-sm font-medium text-muted-foreground">À venir</p>
           <p className="mt-1 text-lg font-semibold text-foreground">Statistiques</p>
           <p className="mt-1 text-sm text-muted-foreground">Vue d&apos;ensemble et indicateurs.</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm font-medium text-muted-foreground">� venir</p>
+          <p className="text-sm font-medium text-muted-foreground">À venir</p>
           <p className="mt-1 text-lg font-semibold text-foreground">Utilisateurs</p>
-          <p className="mt-1 text-sm text-muted-foreground">Gestion des comptes et r�les.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Gestion des comptes et rôles.</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm font-medium text-muted-foreground">� venir</p>
-          <p className="mt-1 text-lg font-semibold text-foreground">Param�tres</p>
+          <p className="text-sm font-medium text-muted-foreground">À venir</p>
+          <p className="mt-1 text-lg font-semibold text-foreground">Paramètres</p>
           <p className="mt-1 text-sm text-muted-foreground">Configuration de la plateforme.</p>
         </div>
       </div>

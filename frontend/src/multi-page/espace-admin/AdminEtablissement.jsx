@@ -59,7 +59,7 @@ function apiPost(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }).then(async (r) => {
-    if (!r) throw new Error('Non autorisÃ©')
+    if (!r) throw new Error('Non autorisé')
     const data = await r.json().catch(() => ({}))
     if (!r.ok) {
       const msg = data.detail ?? data.message ?? formatValidationErrors(data) ?? 'Erreur'
@@ -72,17 +72,17 @@ function apiPost(path, body) {
 function formatValidationErrors(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return null
   const parts = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v[0] : v}`)
-  return parts.length ? parts.join(' â ') : null
+  return parts.length ? parts.join(' — ') : null
 }
 
 const VALID_SECTIONS = ['annees', 'niveaux', 'filieres', 'classes', 'matieres', 'adminEcoles']
 const SECTION_TITLES = {
-  annees: 'AnnÃ©es acadÃ©miques',
+  annees: 'Années académiques',
   niveaux: 'Niveaux',
-  filieres: 'FiliÃ¨res',
+  filieres: 'Filières',
   classes: 'Classes',
-  matieres: 'MatiÃ¨res',
-  adminEcoles: 'Administration Ãcole',
+  matieres: 'Matières',
+  adminEcoles: 'Administration École',
 }
 const SECTION_ICONS = { annees: Calendar, niveaux: Layers, filieres: BookOpen, classes: GraduationCap, matieres: BookMarked, adminEcoles: Users }
 
@@ -161,13 +161,13 @@ export default function AdminEtablissement() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{SECTION_TITLES[section]}</h1>
           <p className="text-muted-foreground">
-            Gestion de l&apos;Ã©tablissement â {SECTION_TITLES[section].toLowerCase()}.
+            Gestion de l&apos;établissement — {SECTION_TITLES[section].toLowerCase()}.
           </p>
         </div>
       </div>
 
       <Card className="p-4 text-card-foreground">
-        {loading[section] && <p className="text-sm text-muted-foreground">Chargementâ¦</p>}
+        {loading[section] && <p className="text-sm text-muted-foreground">Chargement…</p>}
         {msg.section === section && (
           <Alert variant={msg.type === 'error' ? 'destructive' : 'default'} className="mb-2">
             <AlertDescription>{msg.text}</AlertDescription>
@@ -237,7 +237,7 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
     setSubmitting(true)
     apiPost('/anneeacademiques/', form)
       .then(() => {
-        onMsg('success', 'AnnÃ©e acadÃ©mique crÃ©Ã©e.')
+        onMsg('success', 'Année académique créée.')
         setForm({ libelle: '', date_debut: '', date_fin: '', is_active: false })
         onReload()
       })
@@ -247,13 +247,13 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
   return (
     <>
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <Button type="button" onClick={() => setModalOpen(true)}>Nouvelle annÃ©e</Button>
+        <Button type="button" onClick={() => setModalOpen(true)}>Nouvelle année</Button>
       </div>
       {/* DataTable avec tri/pagination */}
       <DataTable
         columns={[
-          { key: 'libelle', label: 'LibellÃ©' },
-          { key: 'date_debut', label: 'DÃ©but' },
+          { key: 'libelle', label: 'Libellé' },
+          { key: 'date_debut', label: 'Début' },
           { key: 'date_fin', label: 'Fin' },
           { key: 'is_active', label: 'Active', render: (v) => (v ? 'Oui' : 'Non') },
         ]}
@@ -261,10 +261,10 @@ function AnneesSection({ list, onReload, onMsg, apiPost }) {
         pageSize={5}
       />
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <h2 className="text-lg font-semibold mb-4">Nouvelle annÃ©e acadÃ©mique</h2>
+        <h2 className="text-lg font-semibold mb-4">Nouvelle année académique</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Input
-            placeholder="LibellÃ© (ex. 2024-2025)"
+            placeholder="Libellé (ex. 2024-2025)"
             value={form.libelle}
             onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
             required
@@ -308,7 +308,7 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
     const payload = { code: form.code.trim(), libelle: form.libelle.trim(), ordre: Number(form.ordre) || 0 }
     apiPost('/niveaus/', payload)
       .then(() => {
-        onMsg('success', 'Niveau crÃ©Ã©.')
+        onMsg('success', 'Niveau créé.')
         setForm({ code: '', libelle: '', ordre: 0 })
         onReload()
       })
@@ -320,7 +320,7 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
       <DataTable
         columns={[
           { key: 'code', label: 'Code' },
-          { key: 'libelle', label: 'LibellÃ©' },
+          { key: 'libelle', label: 'Libellé' },
           { key: 'ordre', label: 'Ordre' },
         ]}
         data={list}
@@ -334,10 +334,10 @@ function NiveauxSection({ list, onReload, onMsg, apiPost }) {
           maxLength={2}
           className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-20"
           required
-          title="2 caractÃ¨res max (ex. L1, M2)"
+          title="2 caractères max (ex. L1, M2)"
         />
         <input
-          placeholder="LibellÃ© (ex. Licence 1)"
+          placeholder="Libellé (ex. Licence 1)"
           value={form.libelle}
           onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
           className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
@@ -364,7 +364,7 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
     setSubmitting(true)
     apiPost('/filieres/', form)
       .then(() => {
-        onMsg('success', 'FiliÃ¨re crÃ©Ã©e.')
+        onMsg('success', 'Filière créée.')
         setForm({ code: '', libelle: '', description: '' })
         onReload()
       })
@@ -376,7 +376,7 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
       <DataTable
         columns={[
           { key: 'code', label: 'Code' },
-          { key: 'libelle', label: 'LibellÃ©' },
+          { key: 'libelle', label: 'Libellé' },
         ]}
         data={list}
         pageSize={5}
@@ -390,7 +390,7 @@ function FilieresSection({ list, onReload, onMsg, apiPost }) {
           required
         />
         <input
-          placeholder="LibellÃ© (ex. GÃ©nie Logiciel)"
+          placeholder="Libellé (ex. Génie Logiciel)"
           value={form.libelle}
           onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
           className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground flex-1 min-w-[200px]"
@@ -426,7 +426,7 @@ function ClassesSection({
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.niveau || !form.filiere || !form.annee_academique) {
-      onMsg('error', 'Choisissez niveau, filiÃ¨re et annÃ©e acadÃ©mique.')
+      onMsg('error', 'Choisissez niveau, filière et année académique.')
       return
     }
     setSubmitting(true)
@@ -439,7 +439,7 @@ function ClassesSection({
       effectif_max: form.effectif_max || 50,
     })
       .then(() => {
-        onMsg('success', 'Classe crÃ©Ã©e.')
+        onMsg('success', 'Classe créée.')
         setForm({ code: '', libelle: '', niveau: '', filiere: '', annee_academique: '', effectif_max: 50 })
         onReload()
       })
@@ -452,7 +452,7 @@ function ClassesSection({
         <thead>
           <tr className="border-b border-border text-left text-muted-foreground">
             <th className="py-2">Code</th>
-            <th className="py-2">LibellÃ©</th>
+            <th className="py-2">Libellé</th>
             <th className="py-2">Effectif max</th>
           </tr>
         </thead>
@@ -467,7 +467,7 @@ function ClassesSection({
         </tbody>
       </table>
       <p className="mb-2 text-xs text-muted-foreground">
-        CrÃ©ez d&apos;abord des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenAnnees}>annÃ©es acadÃ©miques</Button>, des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenNiveaux}>niveaux</Button> et des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenFilieres}>filiÃ¨res</Button>.
+        Créez d&apos;abord des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenAnnees}>années académiques</Button>, des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenNiveaux}>niveaux</Button> et des <Button type="button" variant="link" className="h-auto p-0" onClick={onOpenFilieres}>filières</Button>.
       </p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex flex-wrap gap-3">
@@ -479,7 +479,7 @@ function ClassesSection({
             required
           />
           <input
-            placeholder="LibellÃ©"
+            placeholder="Libellé"
             value={form.libelle}
             onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground flex-1 min-w-[180px]"
@@ -502,7 +502,7 @@ function ClassesSection({
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
             required
           >
-            <option value="">FiliÃ¨re</option>
+            <option value="">Filière</option>
             {filieres.map((f) => (
               <option key={f.id} value={f.id}>{f.libelle || f.code}</option>
             ))}
@@ -513,7 +513,7 @@ function ClassesSection({
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
             required
           >
-            <option value="">AnnÃ©e acadÃ©mique</option>
+            <option value="">Année académique</option>
             {annees.map((a) => (
               <option key={a.id} value={a.id}>{a.libelle}</option>
             ))}
@@ -550,7 +550,7 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
       credit: form.credit || 3,
     })
       .then(() => {
-        onMsg('success', 'MatiÃ¨re crÃ©Ã©e.')
+        onMsg('success', 'Matière créée.')
         setForm({ code: '', libelle: '', niveau: '', filiere: '', semestre: 1, coefficient: 1, credit: 3 })
         onReload()
       })
@@ -570,7 +570,7 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
   return (
     <>
       <p className="mb-3 text-sm text-muted-foreground">
-        Chaque matiÃ¨re est rattachÃ©e Ã  un <strong>semestre</strong>. Le programme d&apos;un semestre est l&apos;ensemble des matiÃ¨res de ce semestre (âventuellement par niveau/filiÃ¨re).
+        Chaque matière est rattachée à un <strong>semestre</strong>. Le programme d&apos;un semestre est l&apos;ensemble des matières de ce semestre (éventuellement par niveau/filière).
       </p>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -588,7 +588,7 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
       </div>
 
       {semestresOrdre.length === 0 ? (
-        <p className="mb-4 text-sm text-muted-foreground">Aucune matiÃ¨re. Ajoutez des matiÃ¨res ci-dessous en choisissant le semestre.</p>
+        <p className="mb-4 text-sm text-muted-foreground">Aucune matière. Ajoutez des matières ci-dessous en choisissant le semestre.</p>
       ) : (
         <div className="mb-6 space-y-6">
           {semestresOrdre.map((sem) => (
@@ -597,12 +597,12 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
               <table className="w-full text-sm text-foreground">
                 <thead>
                   <tr className="border-b border-border text-left text-muted-foreground">
-                    <th className="py-2">LibellÃ©</th>
+                    <th className="py-2">Libellé</th>
                     <th className="py-2">Code</th>
                     <th className="py-2">Niveau</th>
-                    <th className="py-2">FiliÃ¨re</th>
+                    <th className="py-2">Filière</th>
                     <th className="py-2">Coef.</th>
-                    <th className="py-2">CrÃ©dits</th>
+                    <th className="py-2">Crédits</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -610,10 +610,10 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
                     <tr key={m.id} className="border-b border-border">
                       <td className="py-2">{m.libelle}</td>
                       <td className="py-2">{m.code}</td>
-                      <td className="py-2">{m.niveau ? ((niveaux.find((n) => n.id === m.niveau)?.libelle || niveaux.find((n) => n.id === m.niveau)?.code) ?? m.niveau) : 'â'}</td>
-                      <td className="py-2">{m.filiere ? ((filieres.find((f) => f.id === m.filiere)?.libelle || filieres.find((f) => f.id === m.filiere)?.code) ?? m.filiere) : 'â'}</td>
-                      <td className="py-2">{m.coefficient ?? 'â'}</td>
-                      <td className="py-2">{m.credit ?? 'â'}</td>
+                      <td className="py-2">{m.niveau ? ((niveaux.find((n) => n.id === m.niveau)?.libelle || niveaux.find((n) => n.id === m.niveau)?.code) ?? m.niveau) : '—'}</td>
+                      <td className="py-2">{m.filiere ? ((filieres.find((f) => f.id === m.filiere)?.libelle || filieres.find((f) => f.id === m.filiere)?.code) ?? m.filiere) : '—'}</td>
+                      <td className="py-2">{m.coefficient ?? '—'}</td>
+                      <td className="py-2">{m.credit ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -624,12 +624,12 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
       )}
 
       <h3 className="mb-2 text-sm font-semibold text-foreground">
-        {`Ajouter une matiÃ¨re au programme (choisir le semestre)`}
+        {`Ajouter une matière au programme (choisir le semestre)`}
       </h3>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted-foreground">LibellÃ©</label>
-          <input placeholder="Ex. MathÃ©matiques" value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground min-w-[180px]" required />
+          <label className="text-xs text-muted-foreground">Libellé</label>
+          <input placeholder="Ex. Mathématiques" value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground min-w-[180px]" required />
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs text-muted-foreground">Code</label>
@@ -640,7 +640,7 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
           {niveaux.map((n) => <option key={n.id} value={n.id}>{n.libelle || n.code}</option>)}
         </select>
         <select value={form.filiere} onChange={(e) => setForm((f) => ({ ...f, filiere: e.target.value }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground">
-          <option value="">FiliÃ¨re</option>
+          <option value="">Filière</option>
           {filieres.map((f) => <option key={f.id} value={f.id}>{f.libelle || f.code}</option>)}
         </select>
         <div className="flex flex-col gap-1">
@@ -652,10 +652,10 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
           <input type="number" min="0" step="0.5" value={form.coefficient} onChange={(e) => setForm((f) => ({ ...f, coefficient: parseFloat(e.target.value) || 1 }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-16" />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted-foreground">CrÃ©dits</label>
+          <label className="text-xs text-muted-foreground">Crédits</label>
           <input type="number" min="0" value={form.credit} onChange={(e) => setForm((f) => ({ ...f, credit: parseInt(e.target.value, 10) || 3 }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground w-16" />
         </div>
-        <Button type="submit" disabled={submitting}>Ajouter la matiÃ¨re</Button>
+        <Button type="submit" disabled={submitting}>Ajouter la matière</Button>
       </form>
     </>
   )
@@ -664,7 +664,7 @@ function MatieresSection({ list, niveaux, filieres, onReload, onMsg, apiPost }) 
 function AdminEcolesSection({ list }) {
   return (
     <p className="text-sm text-muted-foreground">
-      Liste des comptes Administration Ãcole ({list.length}). La crÃ©ation se fait via la gestion des utilisateurs (lien avec un compte utilisateur).
+      Liste des comptes Administration École ({list.length}). La création se fait via la gestion des utilisateurs (lien avec un compte utilisateur).
     </p>
   )
 }

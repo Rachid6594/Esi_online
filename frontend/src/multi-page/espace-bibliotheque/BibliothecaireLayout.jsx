@@ -34,7 +34,7 @@ export default function BibliothecaireLayout() {
     return null
   }
 
-  const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Biblioth�caire'
+  const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Bibliothécaire'
 
   return (
     <div className="flex min-h-screen bg-background font-sans text-foreground">
@@ -51,7 +51,7 @@ export default function BibliothecaireLayout() {
         <div className="flex w-56 min-w-56 flex-1 flex-col">
           <div className="flex items-center justify-between border-b border-border px-4 py-5">
             <span className="truncate font-semibold text-foreground">
-              ESI Biblioth�que
+              ESI Bibliothèque
             </span>
             <div className="flex items-center gap-1">
               <ThemeToggle />
@@ -70,7 +70,7 @@ export default function BibliothecaireLayout() {
             </p>
             <Button type="button" variant="ghost" onClick={handleLogout} className="w-full justify-start gap-3 px-3 py-2.5">
               <LogOut className="h-5 w-5" strokeWidth={1.5} />
-              D�connexion
+              Déconnexion
             </Button>
           </div>
         </div>

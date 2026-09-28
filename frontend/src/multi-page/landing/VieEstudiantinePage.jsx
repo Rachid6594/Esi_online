@@ -21,18 +21,18 @@ export default function VieEstudiantinePage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <SectionCard
             icon={GraduationCap}
-            title="Activit�s & �v�nements"
-            description="D�couvrez les activit�s, associations et actualit�s de la vie �tudiante � l'ESI."
+            title="Activités & Événements"
+            description="Découvrez les activités, associations et actualités de la vie étudiante — l'ESI."
           />
           <SectionCard
             icon={Users}
-            title="Communaut�"
-            description="Rejoignez les clubs et �changez avec les autres �tudiants."
+            title="Communauté"
+            description="Rejoignez les clubs et échangez avec les autres étudiants."
           />
           <SectionCard
             icon={Info}
             title="Informations pratiques"
-            description="Horaires, lieux et contacts pour votre quotidien � l'�cole."
+            description="Horaires, lieux et contacts pour votre quotidien à l'école."
           />
         </div>
         <p className="mt-10">
@@ -40,7 +40,7 @@ export default function VieEstudiantinePage() {
             to="/"
             className="text-sm font-medium text-foreground hover:underline text-foreground"
           >
-            ? Retour � l&apos;accueil
+            ? Retour à l&apos;accueil
           </Link>
         </p>
       </div>

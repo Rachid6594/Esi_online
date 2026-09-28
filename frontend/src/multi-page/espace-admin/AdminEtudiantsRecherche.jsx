@@ -71,14 +71,14 @@ export default function AdminEtudiantsRecherche() {
     const params = buildParams()
     const url = `${API_BASE}/api/auth/students/export/?${params}`
     fetchWithAuth(API_BASE, url)
-      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Export �chou�'))))
+      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Export échoué'))))
       .then((blob) => {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
         a.download = 'etudiants.csv'
         a.click()
         URL.revokeObjectURL(a.href)
-        setMsg({ type: 'success', text: 'Fichier CSV t�l�charg�.' })
+        setMsg({ type: 'success', text: 'Fichier CSV téléchargé.' })
         setTimeout(() => setMsg({ type: '', text: '' }), 3000)
       })
       .catch(() => setMsg({ type: 'error', text: 'Erreur lors de l\'export.' }))
@@ -86,13 +86,13 @@ export default function AdminEtudiantsRecherche() {
 
   function handleSaveView() {
     if (!viewName.trim()) {
-      setMsg({ type: 'error', text: 'Donnez un nom � la vue.' })
+      setMsg({ type: 'error', text: 'Donnez un nom à la vue.' })
       return
     }
     saveView(viewName.trim(), { search, classeId, isActive, orderBy, orderDir })
     setSavedViews(loadSavedViews())
     setViewName('')
-    setMsg({ type: 'success', text: 'Vue enregistr�e.' })
+    setMsg({ type: 'success', text: 'Vue enregistrée.' })
     setTimeout(() => setMsg({ type: '', text: '' }), 2000)
   }
 
@@ -108,7 +108,7 @@ export default function AdminEtudiantsRecherche() {
     { value: 'date_joined', label: 'Date d\'inscription' },
     { value: 'email', label: 'Email' },
     { value: 'last_name', label: 'Nom' },
-    { value: 'first_name', label: 'Pr�nom' },
+    { value: 'first_name', label: 'Prénom' },
     { value: 'id', label: 'ID' },
   ]
 
@@ -119,9 +119,9 @@ export default function AdminEtudiantsRecherche() {
           <Search className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Recherche avanc�e</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Recherche avancée</h1>
           <p className="text-muted-foreground">
-            Filtres, r�gles de tri, vues sauvegard�es et export Excel (CSV).
+            Filtres, règles de tri, vues sauvegardées et export Excel (CSV).
           </p>
         </div>
       </div>
@@ -130,14 +130,14 @@ export default function AdminEtudiantsRecherche() {
       <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm">
         <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
           <Filter className="h-4 w-4" />
-          Crit�res et tri
+          Critères et tri
         </h2>
         <div className="flex flex-wrap items-end gap-4">
           <div className="min-w-[180px]">
             <label className="mb-1 block text-xs font-medium text-muted-foreground">Recherche texte</label>
             <input
               type="text"
-              placeholder="Email, nom, pr�nom�"
+              placeholder="Email, nom, prénoms"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm"
@@ -184,14 +184,14 @@ export default function AdminEtudiantsRecherche() {
                 type="button"
                 onClick={() => setOrderDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
                 className="rounded-r-lg border-l border-border bg-background px-2 py-2 text-muted-foreground hover:bg-muted"
-                title={orderDir === 'asc' ? 'Croissant' : 'D�croissant'}
+                title={orderDir === 'asc' ? 'Croissant' : 'Décroissant'}
               >
                 <ArrowUpDown className="h-4 w-4" />
               </button>
             </div>
           </div>
           <Button type="button" onClick={runSearch} disabled={loading}>
-            {loading ? 'Recherche�' : 'Appliquer'}
+            {loading ? 'Recherche…' : 'Appliquer'}
           </Button>
         </div>
 
@@ -219,7 +219,7 @@ export default function AdminEtudiantsRecherche() {
 
         {savedViews.length > 0 && (
           <div className="mt-4 border-t border-border pt-4">
-            <p className="mb-2 text-xs font-medium text-muted-foreground">Vues enregistr�es</p>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Vues enregistrées</p>
             <div className="flex flex-wrap gap-2">
               {savedViews.map((v) => (
                 <span
@@ -243,10 +243,10 @@ export default function AdminEtudiantsRecherche() {
         )}
       </div>
 
-      {/* R�sultats */}
+      {/* Résultats */}
       <div className="rounded-xl border border-border bg-card shadow-sm">
         <div className="border-b border-border px-4 py-3 text-sm font-medium text-muted-foreground">
-          {students.length} r�sultat(s)
+          {students.length} résultat(s)
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -254,7 +254,7 @@ export default function AdminEtudiantsRecherche() {
               <tr className="border-b bg-background text-left text-muted-foreground">
                 <th className="p-3">ID</th>
                 <th className="p-3">Email</th>
-                <th className="p-3">Pr�nom</th>
+                <th className="p-3">Prénom</th>
                 <th className="p-3">Nom</th>
                 <th className="p-3">Classe</th>
                 <th className="p-3">Actif</th>
@@ -268,9 +268,9 @@ export default function AdminEtudiantsRecherche() {
                   <td className="p-3">{s.email}</td>
                   <td className="p-3">{s.first_name}</td>
                   <td className="p-3">{s.last_name}</td>
-                  <td className="p-3">{s.classe_code ?? '�'}</td>
+                  <td className="p-3">{s.classe_code ?? '—'}</td>
                   <td className="p-3">{s.is_active ? 'Oui' : 'Non'}</td>
-                  <td className="p-3">{s.date_joined ? new Date(s.date_joined).toLocaleDateString() : '�'}</td>
+                  <td className="p-3">{s.date_joined ? new Date(s.date_joined).toLocaleDateString() : '—'}</td>
                 </tr>
               ))}
             </tbody>

@@ -23,7 +23,7 @@ export default function AdminEtudiantsListe() {
 
   function handleExport() {
     fetchWithAuth(API_BASE, `${API_BASE}/api/auth/students/export/`)
-      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Non autoris�'))))
+      .then((r) => (r && r.ok ? r.blob() : Promise.reject(new Error('Non autorisé'))))
       .then((blob) => {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
@@ -42,8 +42,8 @@ export default function AdminEtudiantsListe() {
             <List className="h-7 w-7" strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Liste des �tudiants</h1>
-            <p className="text-muted-foreground">Vue compl�te avec actions (export, rafra�chir).</p>
+            <h1 className="text-2xl font-semibold text-foreground">Liste des étudiants</h1>
+            <p className="text-muted-foreground">Vue complète avec actions (export, rafraîchir).</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export default function AdminEtudiantsListe() {
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-background disabled:opacity-70"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Rafra�chir
+            Rafraîchir
           </button>
           <button
             type="button"
@@ -69,10 +69,10 @@ export default function AdminEtudiantsListe() {
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
         {loading ? (
-          <div className="p-8 text-center text-muted-foreground">Chargement�</div>
+          <div className="p-8 text-center text-muted-foreground">Chargement…</div>
         ) : students.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Aucun �tudiant. Utilisez la page <Link to="/admin/etudiants/creation" className="text-primary hover:underline">Cr�ation</Link> pour en ajouter.
+            Aucun étudiant. Utilisez la page <Link to="/admin/etudiants/creation" className="text-primary hover:underline">Création</Link> pour en ajouter.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -81,7 +81,7 @@ export default function AdminEtudiantsListe() {
                 <tr className="border-b bg-background text-left text-muted-foreground">
                   <th className="p-3">ID</th>
                   <th className="p-3">Email</th>
-                  <th className="p-3">Pr�nom</th>
+                  <th className="p-3">Prénom</th>
                   <th className="p-3">Nom</th>
                   <th className="p-3">Classe</th>
                   <th className="p-3">Statut</th>
@@ -99,16 +99,16 @@ export default function AdminEtudiantsListe() {
                         {s.email}
                       </a>
                     </td>
-                    <td className="p-3">{s.first_name || '�'}</td>
-                    <td className="p-3">{s.last_name || '�'}</td>
-                    <td className="p-3">{s.classe_code ? `${s.classe_code}${s.classe_libelle ? ` � ${s.classe_libelle}` : ''}` : '�'}</td>
+                    <td className="p-3">{s.first_name || '—'}</td>
+                    <td className="p-3">{s.last_name || '—'}</td>
+                    <td className="p-3">{s.classe_code ? `${s.classe_code}${s.classe_libelle ? ` — ${s.classe_libelle}` : ''}` : '—'}</td>
                     <td className="p-3">
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${s.is_active ? 'bg-muted text-foreground' : 'bg-muted text-muted-foreground'}`}>
                         {s.is_active ? 'Actif' : 'Inactif'}
                       </span>
                     </td>
                     <td className="p-3 text-muted-foreground">
-                      {s.date_joined ? new Date(s.date_joined).toLocaleDateString('fr-FR') : '�'}
+                      {s.date_joined ? new Date(s.date_joined).toLocaleDateString('fr-FR') : '—'}
                     </td>
                     <td className="p-3 text-right">
                       <div className="relative inline-block">
