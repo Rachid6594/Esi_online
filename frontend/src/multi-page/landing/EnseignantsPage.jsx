@@ -6,18 +6,18 @@ export default function EnseignantsPage() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h1 className="mb-6 text-3xl font-semibold text-foreground">Enseignants</h1>
         <p className="max-w-2xl text-muted-foreground">
-          D�couvrez l&apos;�quipe p�dagogique et les enseignants de l&apos;ESI. Coordonn�es et domaines
+          Découvrez l&apos;équipe pédagogique et les enseignants de l&apos;ESI. Coordonnées et domaines
           d&apos;enseignement.
         </p>
         <p className="mt-6 max-w-2xl text-muted-foreground">
-          La liste des enseignants et leurs sp�cialit�s sera disponible prochainement sur cette page.
+          La liste des enseignants et leurs spécialités sera disponible prochainement sur cette page.
         </p>
         <p className="mt-10">
           <Link
             to="/"
             className="text-sm font-medium text-foreground hover:underline text-foreground"
           >
-            ? Retour � l&apos;accueil
+            ? Retour à l&apos;accueil
           </Link>
         </p>
       </div>

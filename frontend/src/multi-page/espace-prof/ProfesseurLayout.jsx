@@ -70,7 +70,7 @@ export default function ProfesseurLayout() {
             </p>
             <Button type="button" variant="ghost" onClick={handleLogout} className="w-full justify-start gap-3 px-3 py-2.5">
               <LogOut className="h-5 w-5" strokeWidth={1.5} />
-              D�connexion
+              Déconnexion
             </Button>
           </div>
         </div>

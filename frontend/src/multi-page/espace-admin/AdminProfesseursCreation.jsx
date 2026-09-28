@@ -51,7 +51,7 @@ export default function AdminProfesseursCreation() {
     setError('')
     setSuccess('')
     if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caract�res.')
+      setError('Le mot de passe doit contenir au moins 8 caractères.')
       return
     }
     if (password !== confirmPassword) {
@@ -59,7 +59,7 @@ export default function AdminProfesseursCreation() {
       return
     }
     if (matiereIds.length === 0) {
-      setError('Veuillez s�lectionner au moins une mati�re pour ce professeur.')
+      setError('Veuillez sélectionner au moins une matière pour ce professeur.')
       return
     }
     setLoading(true)
@@ -80,7 +80,7 @@ export default function AdminProfesseursCreation() {
         return r.json().then((data) => Promise.reject(data))
       })
       .then((data) => {
-        setSuccess(data?.message || 'Compte professeur cr��.')
+        setSuccess(data?.message || 'Compte professeur créé.')
         setEmail('')
         setFirst_name('')
         setLast_name('')
@@ -90,7 +90,7 @@ export default function AdminProfesseursCreation() {
         setTimeout(() => navigate('/admin/professeurs/liste'), 1500)
       })
       .catch((err) => {
-        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la cr�ation.')
+        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la création.')
       })
       .finally(() => setLoading(false))
   }
@@ -102,8 +102,8 @@ export default function AdminProfesseursCreation() {
           <UserPlus className="h-7 w-7" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Cr�er un compte professeur</h1>
-          <p className="text-muted-foreground">Saisissez l&apos;email, le nom, un mot de passe et associez au moins une mati�re.</p>
+          <h1 className="text-2xl font-semibold text-foreground">Créer un compte professeur</h1>
+          <p className="text-muted-foreground">Saisissez l&apos;email, le nom, un mot de passe et associez au moins une matière.</p>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export default function AdminProfesseursCreation() {
           className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Retour � la liste
+          Retour à la liste
         </Link>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -145,13 +145,13 @@ export default function AdminProfesseursCreation() {
 
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground">
-              Mati�re(s) <span className="text-red-500">*</span>
+              Matière(s) <span className="text-red-500">*</span>
             </label>
             {loadingMatieres ? (
-              <p className="text-sm text-muted-foreground">Chargement des mati�res�</p>
+              <p className="text-sm text-muted-foreground">Chargement des matières…</p>
             ) : matieres.length === 0 ? (
               <p className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground">
-                Aucune mati�re disponible. Cr�ez des mati�res dans �tablissement ? Mati�res avant d&apos;ajouter un professeur.
+                Aucune matière disponible. Créez des matières dans Établissement — Matières avant d&apos;ajouter un professeur.
               </p>
             ) : (
               <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border border-border p-3">
@@ -175,7 +175,7 @@ export default function AdminProfesseursCreation() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="first_name" className="mb-1 block text-sm font-medium text-foreground">
-                Pr�nom
+                Prénom
               </label>
               <input
                 id="first_name"
@@ -183,7 +183,7 @@ export default function AdminProfesseursCreation() {
                 value={first_name}
                 onChange={(e) => setFirst_name(e.target.value)}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Pr�nom"
+                placeholder="Prénom"
               />
             </div>
             <div>
@@ -213,7 +213,7 @@ export default function AdminProfesseursCreation() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-              placeholder="Au moins 8 caract�res"
+              placeholder="Au moins 8 caractères"
             />
           </div>
 
@@ -229,13 +229,13 @@ export default function AdminProfesseursCreation() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-              placeholder="Rep�ter le mot de passe"
+              placeholder="Répéter le mot de passe"
             />
           </div>
 
           <div className="flex gap-3 pt-2">
             <Button type="submit" disabled={loading}>
-              {loading ? 'Cr�ation�' : 'Cr�er le compte'}
+              {loading ? 'Création…' : 'Créer le compte'}
             </Button>
             <Link
               to="/admin/professeurs/liste"
