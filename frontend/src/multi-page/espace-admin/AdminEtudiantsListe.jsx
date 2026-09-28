@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { GraduationCap, List, Eye, Mail, MoreVertical, Download, RefreshCw } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
@@ -10,16 +10,27 @@ export default function AdminEtudiantsListe() {
   const [loading, setLoading] = useState(true)
   const [actionMenu, setActionMenu] = useState(null)
 
-  function load() {
-    setLoading(true)
-    fetchWithAuth(API_BASE, `${API_BASE}/api/auth/students/`)
-      .then((r) => (r && r.ok ? r.json() : []))
-      .then((data) => setStudents(Array.isArray(data) ? data : []))
-      .catch(() => setStudents([]))
-      .finally(() => setLoading(false))
-  }
+  // fetching seul : ne pose aucun etat de maniere synchrone, pour que l'effet
+  // de montage reste exempt de setState synchrone
+  const charger = useCallback(
+    () =>
+      fetchWithAuth(API_BASE, `${API_BASE}/api/auth/students/`)
+        .then((r) => (r && r.ok ? r.json() : []))
+        .then((data) => setStudents(Array.isArray(data) ? data : []))
+        .catch(() => setStudents([]))
+        .finally(() => setLoading(false)),
+    []
+  )
 
-  useEffect(() => load(), [])
+  // rechargement manuel, declenche par un evenement utilisateur
+  const load = useCallback(() => {
+    setLoading(true)
+    charger()
+  }, [charger])
+
+  useEffect(() => {
+    charger()
+  }, [charger])
 
   function handleExport() {
     fetchWithAuth(API_BASE, `${API_BASE}/api/auth/students/export/`)

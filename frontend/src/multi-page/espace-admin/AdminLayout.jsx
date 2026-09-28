@@ -83,43 +83,45 @@ export default function AdminLayout() {
   const isProfesseurs = location.pathname.startsWith('/admin/professeurs')
   const isContenu = location.pathname.startsWith('/admin/contenu')
   const isParametres = location.pathname.startsWith('/admin/parametres')
-  const [etablissementOpen, setEtablissementOpen] = useState(isEtablissement)
-  const [etudiantsOpen, setEtudiantsOpen] = useState(isEtudiants)
-  const [bibliothecairesOpen, setBibliothecairesOpen] = useState(isBibliothecaires)
-  const [professeursOpen, setProfesseursOpen] = useState(isProfesseurs)
-  const [contenuOpen, setContenuOpen] = useState(isContenu)
-  const [parametresOpen, setParametresOpen] = useState(isParametres)
+  // Ouverture des sections du menu : l'etat n'est stocke que pour les sections
+  // que l'utilisateur a explicitement ouvertes ou fermees. Sans override, la
+  // section contenant la route courante est ouverte.
+  const [sectionOverride, setSectionOverride] = useState({})
   const [sidebarOpen, toggleSidebar] = useSidebarState()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [lastPath, setLastPath] = useState(location.pathname)
 
-  useEffect(() => {
-    if (isEtablissement) setEtablissementOpen(true)
-  }, [isEtablissement])
-  useEffect(() => {
-    if (isEtudiants) setEtudiantsOpen(true)
-  }, [isEtudiants])
-  useEffect(() => {
-    if (isBibliothecaires) setBibliothecairesOpen(true)
-  }, [isBibliothecaires])
-  useEffect(() => {
-    if (isProfesseurs) setProfesseursOpen(true)
-  }, [isProfesseurs])
-  useEffect(() => {
-    if (isContenu) setContenuOpen(true)
-  }, [isContenu])
-  useEffect(() => {
-    if (isParametres) setParametresOpen(true)
-  }, [isParametres])
+  const routeActive = {
+    etablissement: isEtablissement,
+    etudiants: isEtudiants,
+    bibliothecaires: isBibliothecaires,
+    professeurs: isProfesseurs,
+    contenu: isContenu,
+    parametres: isParametres,
+  }
+
+  const isSectionOpen = (key) => sectionOverride[key] ?? routeActive[key]
+  const toggleSection = (key) =>
+    setSectionOverride((o) => ({ ...o, [key]: !(o[key] ?? routeActive[key]) }))
+
+  const etablissementOpen = isSectionOpen('etablissement')
+  const etudiantsOpen = isSectionOpen('etudiants')
+  const bibliothecairesOpen = isSectionOpen('bibliothecaires')
+  const professeursOpen = isSectionOpen('professeurs')
+  const contenuOpen = isSectionOpen('contenu')
+  const parametresOpen = isSectionOpen('parametres')
+
+  // le menu mobile se referme a chaque navigation
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname)
+    setMobileOpen(false)
+  }
 
   useEffect(() => {
     if (!ok) {
       navigate('/login', { replace: true })
     }
   }, [ok, navigate])
-
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [location.pathname])
 
   function handleLogout() {
     clearAuth()
@@ -172,7 +174,7 @@ export default function AdminLayout() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setEtudiantsOpen((o) => !o)}
+            onClick={() => toggleSection('etudiants')}
             className={accordionBtn(isEtudiants)}
           >
             <span className="flex items-center gap-3">
@@ -200,7 +202,7 @@ export default function AdminLayout() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setBibliothecairesOpen((o) => !o)}
+            onClick={() => toggleSection('bibliothecaires')}
             className={accordionBtn(isBibliothecaires)}
           >
             <span className="flex items-center gap-3">
@@ -228,7 +230,7 @@ export default function AdminLayout() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setProfesseursOpen((o) => !o)}
+            onClick={() => toggleSection('professeurs')}
             className={accordionBtn(isProfesseurs)}
           >
             <span className="flex items-center gap-3">
@@ -260,7 +262,7 @@ export default function AdminLayout() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setEtablissementOpen((o) => !o)}
+            onClick={() => toggleSection('etablissement')}
             className={accordionBtn(isEtablissement)}
           >
             <span className="flex items-center gap-3">
@@ -288,7 +290,7 @@ export default function AdminLayout() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setContenuOpen((o) => !o)}
+            onClick={() => toggleSection('contenu')}
             className={accordionBtn(isContenu)}
           >
             <span className="flex items-center gap-3">
@@ -321,7 +323,7 @@ export default function AdminLayout() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setParametresOpen((o) => !o)}
+            onClick={() => toggleSection('parametres')}
             className={accordionBtn(isParametres)}
           >
             <span className="flex items-center gap-3">
