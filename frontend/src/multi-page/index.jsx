@@ -2,7 +2,6 @@
  * Multi-page : export central des pages de l'application.
  * Ajouter ici les nouvelles pages au fur et à mesure.
  */
-export { default as HomePage } from './HomePage'
 export {
   LandingPage,
   PublicLayout,
