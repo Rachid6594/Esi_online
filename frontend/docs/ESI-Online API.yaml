@@ -749,6 +749,223 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenRefresh'
           description: ''
+  /api/auth/users/:
+    get:
+      operationId: auth_users_list
+      description: Liste tous les comptes (étudiants, professeurs, bibliothécaires,
+        administration, superusers) avec leur rôle, pour la gestion utilisateur de
+        l'admin.
+      summary: Lister tous les utilisateurs
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: ordering
+        schema:
+          type: string
+      - in: query
+        name: role
+        schema:
+          type: string
+      - in: query
+        name: search
+        schema:
+          type: string
+      tags:
+      - Authentification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GlobalUserListItem'
+          description: ''
+  /api/auth/users/{id}/:
+    delete:
+      operationId: auth_users_destroy
+      description: Supprime définitivement un utilisateur. Un superuser admin ne peut
+        pas être supprimé.
+      summary: Supprimer un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+          description: Action non autorisée.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
+  /api/auth/users/{id}/toggle-active/:
+    post:
+      operationId: auth_users_toggle_active_create
+      description: Bascule l'attribut is_active d'un utilisateur. Un superuser admin
+        ne peut pas être désactivé.
+      summary: Activer / désactiver un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+          description: Action non autorisée.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
+  /api/auth/users/{id}/update/:
+    put:
+      operationId: auth_users_update_update
+      description: 'Modifie un utilisateur existant : email, prénom, nom, nom d''utilisateur,
+        statut actif et mot de passe (optionnel). Un superuser ne peut pas être modifié.'
+      summary: Mettre à jour un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Données invalides.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
+    patch:
+      operationId: auth_users_update_partial_update
+      description: 'Modifie un utilisateur existant : email, prénom, nom, nom d''utilisateur,
+        statut actif et mot de passe (optionnel). Un superuser ne peut pas être modifié.'
+      summary: Mettre à jour un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Données invalides.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
   /api/bibliotheque/:
     get:
       operationId: bibliotheque_list
@@ -1041,6 +1258,1018 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/eleve/etudiants/:
+    get:
+      operationId: eleve_etudiants_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister etudiant
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Etudiant'
+          description: ''
+    post:
+      operationId: eleve_etudiants_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer etudiant
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/etudiants/{id}/:
+    get:
+      operationId: eleve_etudiants_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_etudiants_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_etudiants_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEtudiantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEtudiantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEtudiantRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_etudiants_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/me/upload/:
+    post:
+      operationId: eleve_me_upload_create
+      summary: Uploader un fichier (étudiant autorisé)
+      tags:
+      - Upload étudiant
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                titre:
+                  type: string
+                type_ressource:
+                  type: string
+                description:
+                  type: string
+                matiere_id:
+                  type: integer
+                fichier:
+                  type: string
+                  format: binary
+              required:
+              - titre
+              - type_ressource
+              - fichier
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Ressource créée.
+  /api/eleve/me/upload-permission/:
+    get:
+      operationId: eleve_me_upload_permission_retrieve
+      summary: Ma permission d'upload (étudiant connecté)
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/eleve/rendutps/:
+    get:
+      operationId: eleve_rendutps_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister rendutp
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RenduTP'
+          description: ''
+    post:
+      operationId: eleve_rendutps_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer rendutp
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/rendutps/{id}/:
+    get:
+      operationId: eleve_rendutps_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_rendutps_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_rendutps_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRenduTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRenduTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRenduTPRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_rendutps_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/reponseetudiantqcms/:
+    get:
+      operationId: eleve_reponseetudiantqcms_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister reponseetudiantqcm
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+    post:
+      operationId: eleve_reponseetudiantqcms_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer reponseetudiantqcm
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/reponseetudiantqcms/{id}/:
+    get:
+      operationId: eleve_reponseetudiantqcms_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_reponseetudiantqcms_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_reponseetudiantqcms_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReponseEtudiantQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReponseEtudiantQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReponseEtudiantQCMRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_reponseetudiantqcms_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/tentativeqcms/:
+    get:
+      operationId: eleve_tentativeqcms_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister tentativeqcm
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+    post:
+      operationId: eleve_tentativeqcms_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer tentativeqcm
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/tentativeqcms/{id}/:
+    get:
+      operationId: eleve_tentativeqcms_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_tentativeqcms_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_tentativeqcms_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTentativeQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTentativeQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTentativeQCMRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_tentativeqcms_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/upload-permissions/:
+    get:
+      operationId: eleve_upload_permissions_retrieve
+      summary: Lister / créer les permissions d'upload (admin)
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: eleve_upload_permissions_create
+      summary: Lister / créer les permissions d'upload (admin)
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/eleve/upload-permissions/{id}/:
+    get:
+      operationId: eleve_upload_permissions_retrieve_2
+      summary: Modifier / révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: eleve_upload_permissions_update
+      summary: Modifier / révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: eleve_upload_permissions_partial_update
+      summary: Modifier / révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: eleve_upload_permissions_destroy
+      summary: Modifier / révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/eleve/upload-types/:
+    get:
+      operationId: eleve_upload_types_retrieve
+      summary: Types de ressources uploadables
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Liste des types.
   /api/etablissement/administrationecoles/:
     get:
       operationId: etablissement_administrationecoles_list
@@ -7480,6 +8709,97 @@ components:
           nullable: true
       required:
       - name
+    Etudiant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        matricule:
+          type: string
+          maxLength: 20
+        date_naissance:
+          type: string
+          format: date
+          nullable: true
+        lieu_naissance:
+          type: string
+          nullable: true
+          maxLength: 200
+        adresse:
+          type: string
+          nullable: true
+        annee_entree:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        contact_urgence_nom:
+          type: string
+          nullable: true
+          maxLength: 200
+        contact_urgence_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          type: integer
+        classe:
+          type: integer
+          nullable: true
+      required:
+      - created_at
+      - id
+      - matricule
+      - updated_at
+      - user
+    EtudiantRequest:
+      type: object
+      properties:
+        matricule:
+          type: string
+          minLength: 1
+          maxLength: 20
+        date_naissance:
+          type: string
+          format: date
+          nullable: true
+        lieu_naissance:
+          type: string
+          nullable: true
+          maxLength: 200
+        adresse:
+          type: string
+          nullable: true
+        annee_entree:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        contact_urgence_nom:
+          type: string
+          nullable: true
+          maxLength: 200
+        contact_urgence_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        user:
+          type: integer
+        classe:
+          type: integer
+          nullable: true
+      required:
+      - matricule
+      - user
     Evenement:
       type: object
       properties:
@@ -7731,6 +9051,47 @@ components:
           nullable: true
       required:
       - titre
+    GlobalUserListItem:
+      type: object
+      description: Élément de la vue globale de gestion des utilisateurs (admin).
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        username:
+          type: string
+        is_active:
+          type: boolean
+        is_staff:
+          type: boolean
+        is_superuser:
+          type: boolean
+        date_joined:
+          type: string
+          format: date-time
+          nullable: true
+        role:
+          type: string
+        poste:
+          type: string
+          nullable: true
+      required:
+      - date_joined
+      - email
+      - first_name
+      - id
+      - is_active
+      - is_staff
+      - is_superuser
+      - last_name
+      - role
+      - username
     ImportStudentsCsvRequestRequest:
       type: object
       properties:
@@ -8488,6 +9849,42 @@ components:
         description:
           type: string
           nullable: true
+    PatchedEtudiantRequest:
+      type: object
+      properties:
+        matricule:
+          type: string
+          minLength: 1
+          maxLength: 20
+        date_naissance:
+          type: string
+          format: date
+          nullable: true
+        lieu_naissance:
+          type: string
+          nullable: true
+          maxLength: 200
+        adresse:
+          type: string
+          nullable: true
+        annee_entree:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        contact_urgence_nom:
+          type: string
+          nullable: true
+          maxLength: 200
+        contact_urgence_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        user:
+          type: integer
+        classe:
+          type: integer
+          nullable: true
     PatchedEvenementRequest:
       type: object
       properties:
@@ -8679,6 +10076,56 @@ components:
           type: integer
         user:
           type: integer
+    PatchedRenduTPRequest:
+      type: object
+      properties:
+        fichier:
+          type: string
+          minLength: 1
+          maxLength: 500
+        commentaire_etudiant:
+          type: string
+          nullable: true
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        note:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        commentaire_enseignant:
+          type: string
+          nullable: true
+        fichier_correction:
+          type: string
+          nullable: true
+          maxLength: 500
+        date_correction:
+          type: string
+          format: date-time
+          nullable: true
+        tp:
+          type: integer
+        etudiant:
+          type: integer
+        corrige_par:
+          type: integer
+          nullable: true
+    PatchedReponseEtudiantQCMRequest:
+      type: object
+      properties:
+        is_correcte:
+          type: boolean
+        points_obtenus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        tentative:
+          type: integer
+        question:
+          type: integer
     PatchedReponseRequest:
       type: object
       properties:
@@ -8759,10 +10206,13 @@ components:
           nullable: true
           maxLength: 500
         lien:
-          type: string
-          format: uri
           nullable: true
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         taille_fichier:
           type: integer
           maximum: 9223372036854775807
@@ -8856,6 +10306,71 @@ components:
           type: string
           minLength: 1
           maxLength: 7
+    PatchedTentativeQCMRequest:
+      type: object
+      properties:
+        numero_tentative:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        note_obtenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        pourcentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
+    PatchedUserUpdateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          title: Adresse électronique
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
     Prof:
       type: object
       properties:
@@ -8964,6 +10479,100 @@ components:
       required:
       - reponse
       - user
+    RenduTP:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        fichier:
+          type: string
+          maxLength: 500
+        commentaire_etudiant:
+          type: string
+          nullable: true
+        statut:
+          type: string
+          maxLength: 15
+        note:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        commentaire_enseignant:
+          type: string
+          nullable: true
+        fichier_correction:
+          type: string
+          nullable: true
+          maxLength: 500
+        date_correction:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        tp:
+          type: integer
+        etudiant:
+          type: integer
+        corrige_par:
+          type: integer
+          nullable: true
+      required:
+      - created_at
+      - etudiant
+      - fichier
+      - id
+      - tp
+      - updated_at
+    RenduTPRequest:
+      type: object
+      properties:
+        fichier:
+          type: string
+          minLength: 1
+          maxLength: 500
+        commentaire_etudiant:
+          type: string
+          nullable: true
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        note:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        commentaire_enseignant:
+          type: string
+          nullable: true
+        fichier_correction:
+          type: string
+          nullable: true
+          maxLength: 500
+        date_correction:
+          type: string
+          format: date-time
+          nullable: true
+        tp:
+          type: integer
+        etudiant:
+          type: integer
+        corrige_par:
+          type: integer
+          nullable: true
+      required:
+      - etudiant
+      - fichier
+      - tp
     Reponse:
       type: object
       properties:
@@ -9000,6 +10609,52 @@ components:
       - id
       - sujet
       - updated_at
+    ReponseEtudiantQCM:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        is_correcte:
+          type: boolean
+        points_obtenus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        tentative:
+          type: integer
+        question:
+          type: integer
+      required:
+      - created_at
+      - id
+      - question
+      - tentative
+      - updated_at
+    ReponseEtudiantQCMRequest:
+      type: object
+      properties:
+        is_correcte:
+          type: boolean
+        points_obtenus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        tentative:
+          type: integer
+        question:
+          type: integer
+      required:
+      - question
+      - tentative
     ReponseRequest:
       type: object
       properties:
@@ -9123,10 +10778,13 @@ components:
           nullable: true
           maxLength: 500
         lien:
-          type: string
-          format: uri
           nullable: true
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         taille_fichier:
           type: integer
           maximum: 9223372036854775807
@@ -9232,10 +10890,13 @@ components:
           nullable: true
           maxLength: 500
         lien:
-          type: string
-          format: uri
           nullable: true
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         taille_fichier:
           type: integer
           maximum: 9223372036854775807
@@ -9522,6 +11183,83 @@ components:
       required:
       - nom
       - slug
+    TentativeQCM:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        numero_tentative:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        statut:
+          type: string
+          maxLength: 15
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        note_obtenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        pourcentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
+      required:
+      - created_at
+      - etudiant
+      - id
+      - qcm
+      - updated_at
+    TentativeQCMRequest:
+      type: object
+      properties:
+        numero_tentative:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        note_obtenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        pourcentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
+      required:
+      - etudiant
+      - qcm
     TokenRefresh:
       type: object
       properties:
@@ -9553,10 +11291,13 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         email:
-          type: string
-          format: email
           title: Adresse électronique
-          maxLength: 254
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         is_active:
           type: boolean
           title: Actif
@@ -9592,16 +11333,57 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         email:
-          type: string
-          format: email
           title: Adresse électronique
-          maxLength: 254
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         password:
           type: string
           writeOnly: true
           minLength: 8
       required:
       - password
+      - username
+    UserUpdateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          title: Adresse électronique
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
       - username
     UserWithMessage:
       type: object
