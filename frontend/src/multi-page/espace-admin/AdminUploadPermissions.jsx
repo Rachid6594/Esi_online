@@ -45,30 +45,39 @@ export default function AdminUploadPermissions() {
     setTimeout(() => setNotice(null), 3500)
   }
 
+  // fetching seul : ne pose aucun etat de maniere synchrone, pour que l'effet
+  // de montage reste exempt de setState synchrone
+  const charger = useCallback(
+    () =>
+      Promise.all([
+        fetchWithAuth(API_BASE, `${API_BASE}/api/eleve/upload-permissions/`).then((r) =>
+          r && r.ok ? r.json() : []
+        ),
+        fetchWithAuth(API_BASE, `${API_BASE}/api/auth/students/`).then((r) =>
+          r && r.ok ? r.json() : []
+        ),
+      ])
+        .then(([p, s]) => {
+          setPerms(Array.isArray(p) ? p : [])
+          setStudents(Array.isArray(s) ? s : [])
+        })
+        .catch(() => {
+          setPerms([])
+          setStudents([])
+        })
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // rechargement manuel, declenche par un evenement utilisateur
   const load = useCallback(() => {
     setLoading(true)
-    Promise.all([
-      fetchWithAuth(API_BASE, `${API_BASE}/api/eleve/upload-permissions/`).then((r) =>
-        r && r.ok ? r.json() : []
-      ),
-      fetchWithAuth(API_BASE, `${API_BASE}/api/auth/students/`).then((r) =>
-        r && r.ok ? r.json() : []
-      ),
-    ])
-      .then(([p, s]) => {
-        setPerms(Array.isArray(p) ? p : [])
-        setStudents(Array.isArray(s) ? s : [])
-      })
-      .catch(() => {
-        setPerms([])
-        setStudents([])
-      })
-      .finally(() => setLoading(false))
-  }, [])
+    charger()
+  }, [charger])
 
   useEffect(() => {
-    load()
-  }, [load])
+    charger()
+  }, [charger])
 
   function toggleType(t) {
     setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))

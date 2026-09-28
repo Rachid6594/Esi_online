@@ -82,13 +82,17 @@ export default function StudentLayout() {
   const unreadCount = ok ? unread.length : 0
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  // React documente l'ajustement d'etat pendant le rendu pour reinitialiser sur
+  // changement de cle : on evite ainsi un effet et le second rendu qu'il cause.
+  const [lastPath, setLastPath] = useState(location.pathname)
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname)
+    setMobileOpen(false)
+  }
+
   useEffect(() => {
     if (!ok) navigate('/login', { replace: true })
   }, [ok, navigate])
-
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [location.pathname])
 
   function handleLogout() {
     clearAuth()

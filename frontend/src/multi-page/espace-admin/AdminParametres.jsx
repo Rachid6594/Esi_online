@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, Navigate, Link } from 'react-router-dom'
 import { Shield, KeyRound, Plus, Trash2, Search } from 'lucide-react'
 import { getAccessToken, refreshAccessToken, clearAuthAndRedirectToLogin } from '../../auth'
@@ -104,17 +104,26 @@ function useDroits() {
   const [loading, setLoading] = useState(true)
   const [msg, setMsg] = useState({ type: '', text: '' })
 
-  function load() {
+  // fetching seul : ne pose aucun etat de maniere synchrone, pour que l'effet
+  // de montage reste exempt de setState synchrone
+  const charger = useCallback(
+    () =>
+      apiGet('/droitadministrations/')
+        .then((data) => setDroits(Array.isArray(data) ? data : []))
+        .catch(() => setMsg({ type: 'error', text: 'Impossible de charger les droits.' }))
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // rechargement manuel, declenche par un evenement utilisateur
+  const load = useCallback(() => {
     setLoading(true)
-    apiGet('/droitadministrations/')
-      .then((data) => setDroits(Array.isArray(data) ? data : []))
-      .catch(() => setMsg({ type: 'error', text: 'Impossible de charger les droits.' }))
-      .finally(() => setLoading(false))
-  }
+    charger()
+  }, [charger])
 
   useEffect(() => {
-    load()
-  }, [])
+    charger()
+  }, [charger])
 
   return { droits, loading, msg, setMsg, load }
 }

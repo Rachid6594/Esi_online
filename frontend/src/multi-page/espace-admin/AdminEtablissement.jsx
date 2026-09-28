@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import DataTable from '../../components/DataTable'
 import Modal from '../../components/Modal'
 import { useParams, useNavigate, Navigate } from 'react-router-dom'
@@ -76,6 +76,25 @@ function formatValidationErrors(data) {
 }
 
 const VALID_SECTIONS = ['annees', 'niveaux', 'filieres', 'classes', 'matieres', 'adminEcoles']
+
+const SECTION_PATHS = {
+  annees: '/anneeacademiques/',
+  niveaux: '/niveaus/',
+  filieres: '/filieres/',
+  classes: '/classes/',
+  matieres: '/matieres/',
+  adminEcoles: '/administrationecoles/',
+}
+
+// Sections a charger en plus de la section courante, pour alimenter les
+// formulaires qui dependent d'elles (classes et matieres).
+const SECTIONS_A_CHARGER = {
+  classes: ['classes', 'annees', 'niveaux', 'filieres'],
+  matieres: ['matieres', 'niveaux', 'filieres'],
+}
+
+const sectionsPour = (s) => SECTIONS_A_CHARGER[s] || [s]
+
 const SECTION_TITLES = {
   annees: 'Années académiques',
   niveaux: 'Niveaux',
@@ -100,45 +119,49 @@ export default function AdminEtablissement() {
   const [loading, setLoading] = useState({})
   const [msg, setMsg] = useState({ section: '', type: '', text: '' })
 
+  const setSection = useCallback((sectionKey, value) => {
+    const setters = {
+      annees: setAnnees,
+      niveaux: setNiveaux,
+      filieres: setFilieres,
+      classes: setClasses,
+      matieres: setMatieres,
+      adminEcoles: setAdminEcoles,
+    }
+    setters[sectionKey]?.(Array.isArray(value) ? value : [])
+  }, [])
+
+  const charger = useCallback(
+    (sectionKey) => {
+      apiGet(SECTION_PATHS[sectionKey])
+        .then((data) => setSection(sectionKey, data))
+        .catch((err) =>
+          setMsg({ section: sectionKey, type: 'error', text: err?.message || 'Erreur chargement.' })
+        )
+        .finally(() => setLoading((l) => ({ ...l, [sectionKey]: false })))
+    },
+    [setSection]
+  )
+
   function load(sectionKey) {
     setLoading((l) => ({ ...l, [sectionKey]: true }))
-    const paths = {
-      annees: '/anneeacademiques/',
-      niveaux: '/niveaus/',
-      filieres: '/filieres/',
-      classes: '/classes/',
-      matieres: '/matieres/',
-      adminEcoles: '/administrationecoles/',
+    charger(sectionKey)
+  }
+
+  // React documente l'ajustement d'etat pendant le rendu pour reinitialiser sur
+  // changement de cle : on evite ainsi un effet et le second rendu qu'il cause.
+  const [sectionChargee, setSectionChargee] = useState(null)
+  if (sectionChargee !== section) {
+    setSectionChargee(section)
+    if (VALID_SECTIONS.includes(section)) {
+      setLoading(Object.fromEntries(sectionsPour(section).map((k) => [k, true])))
     }
-    apiGet(paths[sectionKey])
-      .then((data) => {
-        const setters = {
-          annees: setAnnees,
-          niveaux: setNiveaux,
-          filieres: setFilieres,
-          classes: setClasses,
-          matieres: setMatieres,
-          adminEcoles: setAdminEcoles,
-        }
-        const setter = setters[sectionKey]
-        if (setter) setter(Array.isArray(data) ? data : [])
-      })
-      .catch((err) => setMsg({ section: sectionKey, type: 'error', text: err?.message || 'Erreur chargement.' }))
-      .finally(() => setLoading((l) => ({ ...l, [sectionKey]: false })))
   }
 
   useEffect(() => {
     if (!VALID_SECTIONS.includes(section)) return
-    load(section)
-    if (section === 'classes') {
-      load('annees')
-      load('niveaux')
-      load('filieres')
-    } else if (section === 'matieres') {
-      load('niveaux')
-      load('filieres')
-    }
-  }, [section])
+    for (const cle of sectionsPour(section)) charger(cle)
+  }, [section, charger])
 
   if (sectionInvalide) {
     return <Navigate to="/admin/etablissement/annees" replace />

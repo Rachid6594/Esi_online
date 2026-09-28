@@ -38,10 +38,15 @@ function formatInline(text) {
 
 /* ── Composant principal ── */
 export default function CourseReader({ course, onClose }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  // La sidebar est ouverte par defaut sur desktop : on lit window au montage de
+  // l'etat plutot que dans un effet, ce qui evite un second rendu.
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth >= 768
+  )
   const [notesOpen, setNotesOpen] = useState(false)
   const [activeSection, setActiveSection] = useState(null)
-  const [expandedChapters, setExpandedChapters] = useState({})
+  // tous les chapitres ouverts par defaut ; un choix utilisateur les fige
+  const [chapitresChoisis, setChapitresChoisis] = useState(null)
   const sectionRefs = useRef({})
   const observerRef = useRef(null)
 
@@ -57,15 +62,8 @@ export default function CourseReader({ course, onClose }) {
 
   const chapitres = useMemo(() => course?.chapitres || [], [course])
 
-  /* Ouvrir tous les chapitres par défaut */
-  useEffect(() => {
-    const m = {}; chapitres.forEach((ch) => { m[ch.id] = true }); setExpandedChapters(m)
-  }, [chapitres])
-
-  /* Ouvrir la sidebar par défaut sur desktop */
-  useEffect(() => {
-    if (window.innerWidth >= 768) setSidebarOpen(true)
-  }, [])
+  const expandedChapters =
+    chapitresChoisis ?? Object.fromEntries(chapitres.map((ch) => [ch.id, true]))
 
   /* IntersectionObserver pour suivi actif */
   useEffect(() => {
@@ -79,7 +77,7 @@ export default function CourseReader({ course, onClose }) {
     if (!el) return; sectionRefs.current[id] = el; observerRef.current?.observe(el)
   }, [])
 
-  function toggleChapter(id) { setExpandedChapters((p) => ({ ...p, [id]: !p[id] })) }
+  function toggleChapter(id) { setChapitresChoisis((p) => ({ ...(p ?? expandedChapters), [id]: !expandedChapters[id] })) }
 
   function scrollToSection(sectionId) {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
