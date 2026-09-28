@@ -91,9 +91,17 @@ jobs:
         run: python esi_online/manage.py check
 
       - name: Tests
-        # 15 tests dans app/authentification. Ils ne sont decouverts que si
-        # app/__init__.py existe, sans quoi la commande n'en trouve aucun.
-        run: python esi_online/manage.py test
+        # Le label "app" est indispensable : sans argument, la decouverte part
+        # du dossier courant et n entre pas dans esi_online/, qui n a pas de
+        # __init__.py, donc 0 test est decouvert et la commande reussit quand
+        # meme. Le garde-fou plus bas detecte ce cas.
+        run: |
+          set -o pipefail
+          python esi_online/manage.py test app 2>&1 | tee backend-test.log
+          if grep -q "Ran 0 tests" backend-test.log; then
+            echo "::error::aucun test backend n'a ete execute"
+            exit 1
+          fi
 
       - name: Schema OpenAPI a jour
         run: |
