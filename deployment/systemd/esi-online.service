@@ -1,0 +1,47 @@
+[Unit]
+Description=ESI-Online (Django + gunicorn)
+# PostgreSQL est requis : les migrations et la connexion sont lancées au boot.
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=notify
+# Remplacez « esi » par l'utilisateur système créé pour l'application. Il doit
+# appartenir au groupe postgres pour lire le socket, et ne doit pas être root :
+# gunicorn refuse de tourner en root.
+User=esi
+Group=esi
+WorkingDirectory=/srv/esi-online/backend
+
+EnvironmentFile=/srv/esi-online/backend/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+# 3 workers : le CPU du VPS ne monte pas beaucoup au-delà, et les requêtes de
+# l'API sont courtes. Les téléchargements de fichiers ne passent pas ici, nginx
+# les sert directement.
+ExecStart=/srv/esi-online/backend/.venv/bin/gunicorn \
+    --workers 3 \
+    --timeout 300 \
+    --graceful-timeout 30 \
+    --bind 127.0.0.1:8000 \
+    --access-logfile - \
+    --error-logfile - \
+    esi_online.wsgi:application
+
+ExecReload=/bin/kill -s HUP $MAINPID
+KillSignal=SIGTERM
+TimeoutStopSec=45
+Restart=on-failure
+RestartSec=5
+
+# Le service écrit dans le dossier media et lit ses propres logs : on le
+# confine au nécessaire.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/esi-online/media
+
+[Install]
+WantedBy=multi-user.target
