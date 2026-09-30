@@ -408,3 +408,227 @@ class UploadEtudiantNonRegression(APITestCase):
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, reponse.status_code)
         self.assertFalse(Ressource.objects.exists())
+
+
+# Dossier de media du groupe de tests : l'override doit couvrir la lecture
+# du fichier par la vue, pas seulement l'ecriture.
+MEDIA_DOCS = tempfile.mkdtemp(prefix="esi-docs-etudiant-")
+
+
+@override_settings(MEDIA_ROOT=MEDIA_DOCS)
+class DocumentsEtudiantTests(APITestCase):
+    """
+    Portee, filtres et telechargement des documents vus par un etudiant.
+
+    L'espace etudiant lisait /api/etablissement/ressources/, l'endpoint d'admin :
+    la liste ne portait aucun tri de visibilite, et le front construisait ses
+    filtres sur des ids affiches en « Matiere N°5 ». Le bouton de
+    telechargement, lui, ne telechargeait rien : il generait un .txt de recu.
+    """
+
+    API = "/api/eleve/documents/"
+
+    def setUp(self):
+        self.annee = AnneeAcademique.objects.create(
+            libelle="2025-2026",
+            date_debut=date(2025, 9, 1),
+            date_fin=date(2026, 6, 30),
+            is_active=True,
+        )
+        self.niveau = Niveau.objects.create(code="L1", libelle="Licence 1", ordre=1)
+        self.filiere = Filiere.objects.create(code="INF", libelle="Informatique")
+        self.classe_a = Classe.objects.create(
+            code="L1-A", libelle="L1 groupe A", niveau=self.niveau,
+            filiere=self.filiere, annee_academique=self.annee,
+        )
+        self.classe_b = Classe.objects.create(
+            code="L1-B", libelle="L1 groupe B", niveau=self.niveau,
+            filiere=self.filiere, annee_academique=self.annee,
+        )
+        self.matiere = Matiere.objects.create(
+            code="ALGO", libelle="Algorithmique", niveau=self.niveau,
+            filiere=self.filiere, semestre=1,
+        )
+        self.etudiant, self.user = self._creer_etudiant_rattache(self.classe_a)
+        self.client.force_authenticate(user=self.user)
+        Path(MEDIA_DOCS).mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(MEDIA_DOCS, ignore_errors=True)
+
+    def _creer_etudiant_rattache(self, classe):
+        auth_user = User.objects.create_user(
+            username=f"et_{classe.code}", email=f"{classe.code}@esi.dz",
+            password="pass-test-123",
+        )
+        etudiant = ensure_etudiant_for_auth_user(auth_user)
+        etudiant.matricule = f"M{classe.code}"
+        etudiant.classe = classe
+        etudiant.save()
+        return etudiant, get_auth_user_for_etudiant(etudiant)
+
+    def _fichier(self, nom="cours.pdf", contenu=PDF):
+        """Pose un faux fichier joint sous MEDIA_ROOT et renvoie son chemin."""
+        path = Path(MEDIA_DOCS) / "docs"
+        path.mkdir(parents=True, exist_ok=True)
+        (path / nom).write_bytes(contenu)
+        return f"docs/{nom}"
+
+    def _doc(self, titre, **champs):
+        defauts = {
+            "titre": titre,
+            "type_ressource": "Cours",
+            "fichier": self._fichier(),
+            "taille_fichier": len(PDF),
+            "format_fichier": "pdf",
+            "is_public": True,
+        }
+        return Ressource.objects.create(**{**defauts, **champs})
+
+    # --- portee ---------------------------------------------------------
+
+    def test_liste_ne_expose_pas_les_documents_d_une_autre_classe(self):
+        prive = self._doc("Corrige B", is_public=False, classe=self.classe_b)
+        self._doc("Cours public")
+
+        reponse = self.client.get(self.API)
+
+        self.assertEqual(status.HTTP_200_OK, reponse.status_code)
+        ids = [d["id"] for d in reponse.json()]
+        self.assertNotIn(prive.id, ids, "un document prive d'une autre classe est expose")
+        self.assertEqual(1, len(ids))
+
+    def test_document_public_sans_classe_visible(self):
+        general = self._doc("Guide du campus")
+
+        reponse = self.client.get(self.API)
+
+        self.assertIn(general.id, [d["id"] for d in reponse.json()])
+
+    def test_document_prive_de_sa_classe_visible(self):
+        prive = self._doc("Programme de la classe", is_public=False, classe=self.classe_a)
+
+        reponse = self.client.get(self.API)
+
+        self.assertIn(prive.id, [d["id"] for d in reponse.json()])
+
+    def test_etudiant_revoit_son_propre_depot_meme_non_public(self):
+        """Un devoir rendu par l'etudiant ne doit pas disparaitre de son espace."""
+        etudiant_b, user_b = self._creer_etudiant_rattache(self.classe_b)
+        rendu = self._doc("Mon devoir", is_public=False, classe=self.classe_b)
+        Ressource.objects.filter(pk=rendu.pk).update(uploaded_by=etudiant_b.user)
+        self.client.force_authenticate(user=user_b)
+
+        reponse = self.client.get(self.API)
+
+        self.assertIn(rendu.id, [d["id"] for d in reponse.json()])
+
+    # --- libelles et telechargement --------------------------------------
+
+    def test_liste_renvoie_des_libelles_et_non_des_ids(self):
+        self._doc("Devoir algo", type_ressource="Devoir", matiere=self.matiere,
+                  classe=self.classe_a, annee_academique=self.annee)
+
+        document = self.client.get(self.API).json()[0]
+
+        self.assertEqual("Algorithmique", document["matiere_libelle"])
+        self.assertEqual("L1 groupe A", document["classe_libelle"])
+        self.assertEqual("2025-2026", document["annee_libelle"])
+        self.assertTrue(document["url_telechargement"].endswith("/telecharger/"))
+
+    def test_telechargement_envoie_les_octets_du_fichier(self):
+        document = self._doc("Devoir algo")
+
+        reponse = self.client.get(f"{self.API}{document.pk}/telecharger/")
+
+        self.assertEqual(status.HTTP_200_OK, reponse.status_code)
+        self.assertEqual(b"".join(reponse.streaming_content), PDF)
+        self.assertIn("attachment", reponse["Content-Disposition"])
+
+    def test_compteur_de_telechargements_incremente(self):
+        document = self._doc("Devoir algo")
+
+        self.client.get(f"{self.API}{document.pk}/telecharger/")
+
+        document.refresh_from_db()
+        self.assertEqual(1, document.nombre_telechargements)
+
+    def test_document_d_une_autre_classe_non_telechargeable(self):
+        prive = self._doc("Corrige B", is_public=False, classe=self.classe_b)
+
+        reponse = self.client.get(f"{self.API}{prive.pk}/telecharger/")
+
+        self.assertEqual(status.HTTP_404_NOT_FOUND, reponse.status_code)
+
+    def test_document_sans_fichier_ne_propose_pas_de_telechargement(self):
+        document = self._doc("Lien externe", fichier=None, lien="https://esi.dz")
+
+        payload = self.client.get(self.API).json()[0]
+
+        self.assertFalse(payload["telechargeable"])
+        self.assertIsNone(payload["url_telechargement"])
+
+    # --- filtres --------------------------------------------------------
+
+    def test_filtre_par_type(self):
+        self._doc("Un cours", type_ressource="Cours")
+        attendu = self._doc("Un rapport", type_ressource="Rapport")
+
+        reponse = self.client.get(self.API, {"type_ressource": "Rapport"})
+
+        self.assertEqual([attendu.pk], [d["id"] for d in reponse.json()])
+
+    def test_filtre_par_classe(self):
+        a = self._doc("Cours A", classe=self.classe_a)
+        self._doc("Cours B", classe=self.classe_b)
+
+        reponse = self.client.get(self.API, {"classe_id": self.classe_a.id})
+
+        self.assertEqual([a.pk], [d["id"] for d in reponse.json()])
+
+    def test_filtre_par_matiere_et_annee(self):
+        autre = Matiere.objects.create(
+            code="BDD", libelle="Bases de donnees", niveau=self.niveau,
+            filiere=self.filiere, semestre=2,
+        )
+        algo = self._doc("Algo", matiere=self.matiere, annee_academique=self.annee)
+        self._doc("BDD", matiere=autre, annee_academique=self.annee)
+
+        par_matiere = self.client.get(self.API, {"matiere_id": self.matiere.id})
+        par_annee = self.client.get(self.API, {"annee_academique_id": self.annee.id})
+
+        self.assertEqual([algo.pk], [d["id"] for d in par_matiere.json()])
+        self.assertEqual(2, len(par_annee.json()))
+
+    def test_recherche_sur_titre_et_matiere(self):
+        autre = Matiere.objects.create(
+            code="BDD", libelle="Bases de donnees", niveau=self.niveau,
+            filiere=self.filiere, semestre=2,
+        )
+        algo = self._doc("Rappels d'algo", matiere=self.matiere)
+        self._doc("Modele relationnel", matiere=autre)
+
+        par_titre = self.client.get(self.API, {"search": "rappels"})
+        par_matiere = self.client.get(self.API, {"search": "Algorithmique"})
+
+        self.assertEqual([algo.pk], [d["id"] for d in par_titre.json()])
+        self.assertEqual([algo.pk], [d["id"] for d in par_matiere.json()])
+
+    def test_filtre_ignore_les_valeurs_absentes(self):
+        """Un Select sans choix envoie 0 : il ne doit pas tout effacer."""
+        self._doc("Un cours")
+
+        reponse = self.client.get(self.API, {"classe_id": "0", "type_ressource": ""})
+
+        self.assertEqual(status.HTTP_200_OK, reponse.status_code)
+        self.assertEqual(1, len(reponse.json()))
+
+    def test_staff_ne_passe_pas_par_cet_endpoint(self):
+        staff = User.objects.create_user(username="prof_docs", password="x")
+        staff.is_staff = True
+        staff.save()
+        self.client.force_authenticate(user=staff)
+
+        reponse = self.client.get(self.API)
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, reponse.status_code)

@@ -1258,6 +1258,107 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/eleve/documents/:
+    get:
+      operationId: eleve_documents_list
+      description: Liste les documents visibles, filtres appliques cote serveur.
+      summary: Documents visibles par l'étudiant
+      parameters:
+      - in: query
+        name: annee_academique_id
+        schema:
+          type: integer
+      - in: query
+        name: classe_id
+        schema:
+          type: integer
+        description: Ressources de cette classe.
+      - in: query
+        name: filiere_id
+        schema:
+          type: integer
+      - in: query
+        name: matiere_id
+        schema:
+          type: integer
+      - in: query
+        name: niveau_id
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Titre, auteur, matière, description.
+      - in: query
+        name: type_ressource
+        schema:
+          type: string
+        description: 'Ex : Devoir, TP, Rapport.'
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DocumentEtudiant'
+          description: ''
+  /api/eleve/documents/{id}/telecharger/:
+    get:
+      operationId: eleve_documents_telecharger_retrieve
+      description: |-
+        Envoie les octets du fichier joint, pas une page HTML a interpreter.
+
+        Le nom propose vient du titre, nettoye, avec l'extension d'origine : c'est
+        ce que l'etudiant retrouvera dans ses telechargements.
+      summary: Télécharger un document
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/eleve/documents/types/:
+    get:
+      operationId: eleve_documents_types_retrieve
+      description: Types de documents, pour alimenter le menu de filtre.
+      summary: Types de documents
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+          description: ''
   /api/eleve/etudiants/:
     get:
       operationId: eleve_etudiants_list
@@ -8390,6 +8491,124 @@ components:
           nullable: true
       required:
       - email
+    DocumentEtudiant:
+      type: object
+      description: |-
+        Vue d'un document pour l'etudiant, avec des libelles et non des ids.
+
+        L'espace etudiant lisait directement RessourceSerializer, dont les cles
+        etrangeres sortent en cascade d'ids : le front affichait « Matiere N°5 »
+        dans ses filtres et son tri. Ici chaque libelle est resolu une fois, et
+        les ids restent disponibles pour relancer un filtre.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        titre:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+          nullable: true
+        type_ressource:
+          type: string
+          readOnly: true
+        auteur:
+          type: string
+          readOnly: true
+          nullable: true
+        fichier:
+          type: string
+          readOnly: true
+          nullable: true
+        lien:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        taille_fichier:
+          type: integer
+          readOnly: true
+          nullable: true
+        format_fichier:
+          type: string
+          readOnly: true
+          nullable: true
+        date_publication:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        matiere_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        matiere_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        classe_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        classe_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        niveau_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        filiere_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        annee_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        categorie_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        is_public:
+          type: boolean
+          readOnly: true
+        telechargeable:
+          type: boolean
+          readOnly: true
+        url_telechargement:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - annee_libelle
+      - auteur
+      - categorie_libelle
+      - classe_id
+      - classe_libelle
+      - created_at
+      - date_publication
+      - description
+      - fichier
+      - filiere_libelle
+      - format_fichier
+      - id
+      - is_public
+      - lien
+      - matiere_id
+      - matiere_libelle
+      - niveau_libelle
+      - taille_fichier
+      - telechargeable
+      - titre
+      - type_ressource
+      - url_telechargement
     DroitAdministration:
       type: object
       properties:
