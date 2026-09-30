@@ -7,28 +7,28 @@ from rest_framework import permissions
 class CanViewAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and (
-            request.user.is_staff or request.user.has_perm("admin.view_admin")
+            request.user.is_staff or request.user.has_perm("app_admin.view_admin")
         )
 
 
 class CanCreateAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and (
-            request.user.is_staff or request.user.has_perm("admin.add_admin")
+            request.user.is_staff or request.user.has_perm("app_admin.add_admin")
         )
 
 
 class CanUpdateAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and (
-            request.user.is_staff or request.user.has_perm("admin.change_admin")
+            request.user.is_staff or request.user.has_perm("app_admin.change_admin")
         )
 
 
 class CanDeleteAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and (
-            request.user.is_staff or request.user.has_perm("admin.delete_admin")
+            request.user.is_staff or request.user.has_perm("app_admin.delete_admin")
         )
 
 
@@ -38,7 +38,7 @@ class CanViewUser(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.view_user")
+                request.user.is_staff or request.user.has_perm("app_admin.view_user")
             )
         return True
 
@@ -48,7 +48,7 @@ class CanCreateUser(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.add_user")
+                request.user.is_staff or request.user.has_perm("app_admin.add_user")
             )
         return True
 
@@ -58,7 +58,7 @@ class CanUpdateUser(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("PUT", "PATCH"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.change_user")
+                request.user.is_staff or request.user.has_perm("app_admin.change_user")
             )
         return True
 
@@ -68,7 +68,7 @@ class CanDeleteUser(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "DELETE":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.delete_user")
+                request.user.is_staff or request.user.has_perm("app_admin.delete_user")
             )
         return True
 
@@ -79,7 +79,7 @@ class CanViewSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.view_superadmin")
+                request.user.is_staff or request.user.has_perm("app_admin.view_superadmin")
             )
         return True
 
@@ -89,7 +89,7 @@ class CanCreateSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.add_superadmin")
+                request.user.is_staff or request.user.has_perm("app_admin.add_superadmin")
             )
         return True
 
@@ -99,7 +99,7 @@ class CanUpdateSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("PUT", "PATCH"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.change_superadmin")
+                request.user.is_staff or request.user.has_perm("app_admin.change_superadmin")
             )
         return True
 
@@ -109,7 +109,7 @@ class CanDeleteSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "DELETE":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.delete_superadmin")
+                request.user.is_staff or request.user.has_perm("app_admin.delete_superadmin")
             )
         return True
 
@@ -120,7 +120,7 @@ class CanViewNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.view_notification")
+                request.user.is_staff or request.user.has_perm("app_admin.view_notification")
             )
         return True
 
@@ -130,7 +130,7 @@ class CanCreateNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.add_notification")
+                request.user.is_staff or request.user.has_perm("app_admin.add_notification")
             )
         return True
 
@@ -140,7 +140,7 @@ class CanUpdateNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("PUT", "PATCH"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.change_notification")
+                request.user.is_staff or request.user.has_perm("app_admin.change_notification")
             )
         return True
 
@@ -150,7 +150,7 @@ class CanDeleteNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "DELETE":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.delete_notification")
+                request.user.is_staff or request.user.has_perm("app_admin.delete_notification")
             )
         return True
 
@@ -161,7 +161,7 @@ class CanViewPreferenceNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.view_preferencenotification")
+                request.user.is_staff or request.user.has_perm("app_admin.view_preferencenotification")
             )
         return True
 
@@ -171,7 +171,7 @@ class CanCreatePreferenceNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.add_preferencenotification")
+                request.user.is_staff or request.user.has_perm("app_admin.add_preferencenotification")
             )
         return True
 
@@ -181,7 +181,7 @@ class CanUpdatePreferenceNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("PUT", "PATCH"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.change_preferencenotification")
+                request.user.is_staff or request.user.has_perm("app_admin.change_preferencenotification")
             )
         return True
 
@@ -191,7 +191,7 @@ class CanDeletePreferenceNotification(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "DELETE":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.delete_preferencenotification")
+                request.user.is_staff or request.user.has_perm("app_admin.delete_preferencenotification")
             )
         return True
 
@@ -202,7 +202,7 @@ class CanViewAuditLog(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.view_auditlog")
+                request.user.is_staff or request.user.has_perm("app_admin.view_auditlog")
             )
         return True
 
@@ -212,7 +212,7 @@ class CanCreateAuditLog(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.add_auditlog")
+                request.user.is_staff or request.user.has_perm("app_admin.add_auditlog")
             )
         return True
 
@@ -222,7 +222,7 @@ class CanUpdateAuditLog(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ("PUT", "PATCH"):
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.change_auditlog")
+                request.user.is_staff or request.user.has_perm("app_admin.change_auditlog")
             )
         return True
 
@@ -232,7 +232,7 @@ class CanDeleteAuditLog(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "DELETE":
             return request.user.is_authenticated and (
-                request.user.is_staff or request.user.has_perm("admin.delete_auditlog")
+                request.user.is_staff or request.user.has_perm("app_admin.delete_auditlog")
             )
         return True
 
