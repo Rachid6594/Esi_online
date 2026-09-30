@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import document_views
 
 
 urlpatterns = [
@@ -33,6 +34,8 @@ urlpatterns = [
     path("affectationenseignants/<int:pk>/", views.affectationenseignant_detail),
     path("ressources/", views.ressource_list),
     path("ressources/<int:pk>/", views.ressource_detail),
+    path("documents/types/", document_views.types_document),
+    path("documents/depot/", document_views.document_depot),
     path("consultationressources/", views.consultationressource_list),
     path("consultationressources/<int:pk>/", views.consultationressource_detail),
     path("exemplaires/", views.exemplaire_list),
