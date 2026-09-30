@@ -180,6 +180,6 @@ class PermissionUploadService:
             fichier=relative,
             taille_fichier=size,
             format_fichier=ext.lstrip(".")[:10] or None,
-            is_public=True,
+            is_public=False,  # un devoir rendu n'est pas public, cf. DocumentEtudiantService
             uploaded_by=admin_user,
         )

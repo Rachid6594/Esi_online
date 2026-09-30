@@ -9,6 +9,7 @@ from drf_spectacular.types import OpenApiTypes
 
 from app.core.exceptions import NotFoundError, ValidationError
 from app.espace_student.models import TYPE_UPLOAD_CHOICES
+from app.espace_student.permissions.eleve_permissions import IsStudentUser
 from app.espace_student.services.permission_upload_service import PermissionUploadService
 
 
@@ -18,18 +19,6 @@ class IsSuperAdmin(BasePermission):
             request.user
             and request.user.is_authenticated
             and request.user.is_superuser
-        )
-
-
-class IsStudentUser(BasePermission):
-    """Étudiant = authentifié, non staff, non superuser."""
-    def has_permission(self, request, view):
-        u = request.user
-        return bool(
-            u
-            and u.is_authenticated
-            and not u.is_staff
-            and not u.is_superuser
         )
 
 
