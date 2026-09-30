@@ -21,6 +21,16 @@ class ReponseEtudiantQCMService:
     def list_all(self):
         return self.repository.get_queryset()
 
+    def list_pour_etudiant(self, etudiant):
+        """Reponses d'un seul etudiant. Le lien passe par la tentative, qui
+        porte l'etudiant ; filtrer directement sur "etudiant" n'existerait pas
+        sur ce modele."""
+        return self.repository.filter(tentative__etudiant=etudiant)
+
+    def get_pour_etudiant(self, pk: int, etudiant):
+        """Reponse d'un etudiant donne, ou None (404 plutot que 403)."""
+        return self.repository.filter(pk=pk, tentative__etudiant=etudiant).first()
+
     def create(self, **kwargs):
         return self.repository.create(**kwargs)
 

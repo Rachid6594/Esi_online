@@ -21,6 +21,14 @@ class TentativeQCMService:
     def list_all(self):
         return self.repository.get_queryset()
 
+    def list_pour_etudiant(self, etudiant):
+        """Tentatives d'un seul etudiant (voir RenduTPService)."""
+        return self.repository.filter(etudiant=etudiant)
+
+    def get_pour_etudiant(self, pk: int, etudiant):
+        """Tentative d'un etudiant donne, ou None (404 plutot que 403)."""
+        return self.repository.filter(pk=pk, etudiant=etudiant).first()
+
     def create(self, **kwargs):
         return self.repository.create(**kwargs)
 

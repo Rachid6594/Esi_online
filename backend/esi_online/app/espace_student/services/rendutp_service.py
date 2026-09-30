@@ -21,6 +21,16 @@ class RenduTPService:
     def list_all(self):
         return self.repository.get_queryset()
 
+    def list_pour_etudiant(self, etudiant):
+        """Rendus d'un seul etudiant. Sans ce filtre, list_all() renvoyait
+        les rendus de toute l'ecole a quiconque avait la permission de lire."""
+        return self.repository.filter(etudiant=etudiant)
+
+    def get_pour_etudiant(self, pk: int, etudiant):
+        """Rendu d'un etudiant donne, ou None. On repond 404 et non 403 pour ne
+        pas reveler qu'un rendu portant cet id existe pour quelqu'un d'autre."""
+        return self.repository.filter(pk=pk, etudiant=etudiant).first()
+
     def create(self, **kwargs):
         return self.repository.create(**kwargs)
 
