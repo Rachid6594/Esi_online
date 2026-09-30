@@ -11,7 +11,7 @@ router.register(r"", EleveViewSet, basename="eleve")
 
 urlpatterns = [
     path("upload-types/", upload_views.upload_types),
-    path("upload-permissions/", upload_views.upload_permissions_list),
+    path("upload-permissions/", upload_views.upload_permissions_collection),
     path("upload-permissions/<int:pk>/", upload_views.upload_permissions_detail),
     path("me/upload-permission/", upload_views.my_upload_permission),
     path("me/upload/", upload_views.my_upload_ressource),
