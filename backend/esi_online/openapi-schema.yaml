@@ -1580,6 +1580,12 @@ paths:
   /api/eleve/me/upload/:
     post:
       operationId: eleve_me_upload_create
+      description: |-
+        Depose un document pour l'etudiant connecte.
+
+        JSONParser a ete retire des parseurs : cet endpoint est un multipart, et
+        un JSON passerait par une porte differente pour un traitement identique.
+        L'extension, le plafond et la permission sont verifies par le service.
       summary: Uploader un fichier (étudiant autorisé)
       tags:
       - Upload étudiant
@@ -1587,28 +1593,29 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                titre:
-                  type: string
-                type_ressource:
-                  type: string
-                description:
-                  type: string
-                matiere_id:
-                  type: integer
-                fichier:
-                  type: string
-                  format: binary
-              required:
-              - titre
-              - type_ressource
-              - fichier
+              $ref: '#/components/schemas/UploadEtudiantRequest'
+        required: true
       security:
       - jwtAuth: []
       responses:
         '201':
-          description: Ressource créée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadEtudiantReponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
   /api/eleve/me/upload-permission/:
     get:
       operationId: eleve_me_upload_permission_retrieve
@@ -1619,7 +1626,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyUploadPermission'
+          description: ''
   /api/eleve/rendutps/:
     get:
       operationId: eleve_rendutps_list
@@ -2276,29 +2287,83 @@ paths:
           description: ''
   /api/eleve/upload-permissions/:
     get:
-      operationId: eleve_upload_permissions_retrieve
-      summary: Lister / créer les permissions d'upload (admin)
+      operationId: eleve_upload_permissions_list
+      summary: Lister ou accorder une permission d'upload (admin)
       tags:
       - Upload étudiant
       security:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
     post:
       operationId: eleve_upload_permissions_create
-      summary: Lister / créer les permissions d'upload (admin)
+      summary: Lister ou accorder une permission d'upload (admin)
       tags:
       - Upload étudiant
+      requestBody:
+        content:
+          POST:
+            schema:
+              $ref: '#/components/schemas/PermissionUploadGrantRequest'
+        required: true
       security:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
   /api/eleve/upload-permissions/{id}/:
     get:
-      operationId: eleve_upload_permissions_retrieve_2
-      summary: Modifier / révoquer une permission d'upload (admin)
+      operationId: eleve_upload_permissions_retrieve
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
       parameters:
       - in: path
         name: id
@@ -2311,58 +2376,146 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
-    put:
-      operationId: eleve_upload_permissions_update
-      summary: Modifier / révoquer une permission d'upload (admin)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Upload étudiant
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: No response body
-    patch:
-      operationId: eleve_upload_permissions_partial_update
-      summary: Modifier / révoquer une permission d'upload (admin)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Upload étudiant
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: No response body
-    delete:
-      operationId: eleve_upload_permissions_destroy
-      summary: Modifier / révoquer une permission d'upload (admin)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Upload étudiant
-      security:
-      - jwtAuth: []
-      responses:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+    put:
+      operationId: eleve_upload_permissions_update
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      requestBody:
+        content:
+          PATCH:
+            schema:
+              $ref: '#/components/schemas/PermissionUploadPatchRequest'
+          PUT:
+            schema:
+              $ref: '#/components/schemas/PermissionUploadPatchRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+    patch:
+      operationId: eleve_upload_permissions_partial_update
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      requestBody:
+        content:
+          PATCH:
+            schema:
+              $ref: '#/components/schemas/PatchedPermissionUploadPatchRequest'
+          PUT:
+            schema:
+              $ref: '#/components/schemas/PatchedPermissionUploadPatchRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+    delete:
+      operationId: eleve_upload_permissions_destroy
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
   /api/eleve/upload-types/:
     get:
-      operationId: eleve_upload_types_retrieve
+      operationId: eleve_upload_types_list
       summary: Types de ressources uploadables
       tags:
       - Upload étudiant
@@ -2370,7 +2523,13 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: Liste des types.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TypeUpload'
+          description: ''
   /api/etablissement/administrationecoles/:
     get:
       operationId: etablissement_administrationecoles_list
@@ -8934,6 +9093,19 @@ components:
       - date_retour_prevue
       - emprunteur
       - exemplaire
+    ErreurDetail:
+      type: object
+      description: |-
+        Forme de toutes les erreurs metier des endpoints d'upload.
+
+        Les vues renvoient {"detail": "message"} et rien d'autre. Sans ce
+        serialiseur, le schema annonait un objet libre sur chaque 400 et 404, et
+        le front ne pouvait pas typer ses cas d'erreur.
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
     ErrorDetail:
       type: object
       properties:
@@ -9645,6 +9817,31 @@ components:
       - destinataire
       - expediteur
       - sujet
+    MyUploadPermission:
+      type: object
+      description: |-
+        Ma permission d'upload, vue par l'etudiant connecte.
+
+        Deux formes pour un seul endpoint : sans permission, l'endpoint renvoie
+        allowed/is_active/types_autorises sans id ni note, parce qu'il n'y a pas de
+        ligne a decrire. Les deux sont ici, avec les champs optionnels.
+      properties:
+        allowed:
+          type: boolean
+        is_active:
+          type: boolean
+        types_autorises:
+          type: array
+          items:
+            type: string
+        note:
+          type: string
+        id:
+          type: integer
+      required:
+      - allowed
+      - is_active
+      - types_autorises
     Niveau:
       type: object
       properties:
@@ -10331,6 +10528,21 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+    PatchedPermissionUploadPatchRequest:
+      type: object
+      description: |-
+        Corps du PATCH. Tous les champs sont facultatifs : le service n'ecrit que
+        ceux qui sont presents, un PATCH {"is_active": false} doit laisser la liste
+        de types intacte.
+      properties:
+        types_autorises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TypeRessourceEnum'
+        is_active:
+          type: boolean
+        note:
+          type: string
     PatchedProfRequest:
       type: object
       properties:
@@ -10671,6 +10883,114 @@ components:
           type: string
           writeOnly: true
           minLength: 8
+    PermissionUpload:
+      type: object
+      description: |-
+        Une permission d'upload, vue par l'admin.
+
+        Les noms et prenoms viennent du User d'authentification, pas du profil
+        Etudiant : c'est ce que le service lit, via get_auth_user_for_etudiant.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        etudiant_id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        email:
+          type: string
+          readOnly: true
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        matricule:
+          type: string
+          readOnly: true
+        types_autorises:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        accorde_par_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - accorde_par_id
+      - created_at
+      - email
+      - etudiant_id
+      - first_name
+      - id
+      - is_active
+      - last_name
+      - matricule
+      - note
+      - types_autorises
+      - updated_at
+      - user_id
+    PermissionUploadGrantRequest:
+      type: object
+      description: |-
+        Corps du POST d'octroi. Seul l'admin l'atteint (IsSuperAdmin).
+
+        Les types sont valides ici plutot que dans le service, pour que le schema
+        annonce la liste autorisee, libelles compris. Le service revérifie : un
+        sérialiseur documente, il n'est pas la seule porte.
+      properties:
+        user_id:
+          type: integer
+        types_autorises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TypeRessourceEnum'
+        is_active:
+          type: boolean
+          default: true
+        note:
+          type: string
+          default: ''
+      required:
+      - types_autorises
+      - user_id
+    PermissionUploadPatchRequest:
+      type: object
+      description: |-
+        Corps du PATCH. Tous les champs sont facultatifs : le service n'ecrit que
+        ceux qui sont presents, un PATCH {"is_active": false} doit laisser la liste
+        de types intacte.
+      properties:
+        types_autorises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TypeRessourceEnum'
+        is_active:
+          type: boolean
+        note:
+          type: string
     Prof:
       type: object
       properties:
@@ -11627,6 +11947,102 @@ components:
           minLength: 1
       required:
       - refresh
+    TypeRessourceEnum:
+      enum:
+      - Cours
+      - TD
+      - TP
+      - Devoir
+      - Examen
+      - Rapport
+      - Exercice
+      - Annonce
+      - Document
+      - Autre
+      type: string
+      description: |-
+        * `Cours` - Cours
+        * `TD` - TD
+        * `TP` - TP
+        * `Devoir` - Devoir
+        * `Examen` - Examen
+        * `Rapport` - Rapport de stage ou mémoire
+        * `Exercice` - Exercice
+        * `Annonce` - Annonce
+        * `Document` - Document
+        * `Autre` - Autre
+    TypeUpload:
+      type: object
+      description: Un couple (valeur stockee, libelle affiche) de la liste des types.
+      properties:
+        value:
+          type: string
+        label:
+          type: string
+      required:
+      - label
+      - value
+    UploadEtudiantReponse:
+      type: object
+      description: Ce que renvoie un depot accepte.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        titre:
+          type: string
+          readOnly: true
+        type_ressource:
+          type: string
+          readOnly: true
+        fichier:
+          type: string
+          readOnly: true
+          nullable: true
+        taille_fichier:
+          type: integer
+          readOnly: true
+          nullable: true
+        message:
+          type: string
+          readOnly: true
+      required:
+      - fichier
+      - id
+      - message
+      - taille_fichier
+      - titre
+      - type_ressource
+    UploadEtudiantRequest:
+      type: object
+      description: |-
+        Corps du POST de depot : multipart/form-data.
+
+        Le service valide l'extension, le plafond et la permission ; ce
+        sérialiseur valide la forme. Il ne peut pas valider le fichier lui-meme
+        (taille, extension), donc il ne le fait pas : un "fichier" declare ici
+        peut encore etre refuse, et c'est le service qui refuse.
+      properties:
+        titre:
+          type: string
+          minLength: 1
+          maxLength: 300
+        type_ressource:
+          $ref: '#/components/schemas/TypeRessourceEnum'
+        description:
+          type: string
+          default: ''
+          maxLength: 5000
+        matiere_id:
+          type: integer
+          nullable: true
+        fichier:
+          type: string
+          format: binary
+      required:
+      - fichier
+      - titre
+      - type_ressource
     User:
       type: object
       properties:
