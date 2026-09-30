@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { List, UserPlus, RefreshCw, Eye } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
 import UserDetailModal from './UserDetailModal'
@@ -60,7 +60,7 @@ export default function AdminProfesseursListe() {
       .finally(() => setLoadingMatieres(false))
   }, [])
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams()
     if (search.trim()) params.set('search', search.trim())
@@ -70,12 +70,12 @@ export default function AdminProfesseursListe() {
       .then((data) => setList(Array.isArray(data) ? data : []))
       .catch(() => setList([]))
       .finally(() => setLoading(false))
-  }
+  }, [search])
 
   useEffect(() => {
     const t = setTimeout(load, 250)
     return () => clearTimeout(t)
-  }, [search])
+  }, [load])
 
   function openModal() {
     setEmail('')
@@ -98,7 +98,7 @@ export default function AdminProfesseursListe() {
     setError('')
     setSuccess('')
     if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caract�res.')
+      setError('Le mot de passe doit contenir au moins 8 caractères.')
       return
     }
     if (password !== confirmPassword) {
@@ -106,7 +106,7 @@ export default function AdminProfesseursListe() {
       return
     }
     if (matiereIds.length === 0) {
-      setError('Veuillez s�lectionner au moins une mati�re pour ce professeur.')
+      setError('Veuillez sélectionner au moins une matière pour ce professeur.')
       return
     }
     setBusy(true)
@@ -126,12 +126,12 @@ export default function AdminProfesseursListe() {
         return r.ok ? r.json() : r.json().then((data) => Promise.reject(data))
       })
       .catch((err) => {
-        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la cr�ation.')
+        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la création.')
         return null
       })
       .finally(() => setBusy(false))
     if (!res) return
-    setSuccess(res?.message || 'Compte professeur cr��.')
+    setSuccess(res?.message || 'Compte professeur créé.')
     setEmail('')
     setFirstName('')
     setLastName('')
@@ -153,34 +153,34 @@ export default function AdminProfesseursListe() {
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Gestion des professeurs</h1>
-            <p className="text-muted-foreground">Comptes ayant acc�s � l&apos;espace professeur.</p>
+            <p className="text-muted-foreground">Comptes ayant accès à l&apos;espace professeur.</p>
           </div>
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Input
             type="search"
-            placeholder="Rechercher�"
+            placeholder="Rechercher…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full flex-1 sm:flex-none sm:max-w-xs"
           />
           <Button type="button" variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Rafra�chir
+            Rafraîchir
           </Button>
           <Button type="button" onClick={openModal}>
             <UserPlus className="h-4 w-4" />
-            Cr�er
+            Créer
           </Button>
         </div>
       </div>
 
       <Card className="shadow-sm">
         {loading ? (
-          <div className="p-8 text-center text-muted-foreground">Chargement�</div>
+          <div className="p-8 text-center text-muted-foreground">Chargement…</div>
         ) : list.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Aucun professeur. Cliquez sur � Cr�er � pour en ajouter un.
+            Aucun professeur. Cliquez sur « Créer » pour en ajouter un.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -188,9 +188,9 @@ export default function AdminProfesseursListe() {
               <thead>
                 <tr className="border-b border-border bg-background text-left text-muted-foreground">
                   <th className="px-4 py-3 font-medium">Nom</th>
-                  <th className="px-4 py-3 font-medium">Pr�nom</th>
+                  <th className="px-4 py-3 font-medium">Prénom</th>
                   <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Mati�re(s)</th>
+                  <th className="px-4 py-3 font-medium">Matière(s)</th>
                   <th className="px-4 py-3 font-medium">Statut</th>
                   <th className="px-4 py-3 text-right font-medium">Actions</th>
                 </tr>
@@ -198,11 +198,11 @@ export default function AdminProfesseursListe() {
               <tbody>
                 {list.map((p) => (
                   <tr key={p.id} className="border-b border-border hover:bg-background">
-                    <td className="px-4 py-3 text-foreground">{p.last_name || '�'}</td>
-                    <td className="px-4 py-3 text-foreground">{p.first_name || '�'}</td>
+                    <td className="px-4 py-3 text-foreground">{p.last_name || '—'}</td>
+                    <td className="px-4 py-3 text-foreground">{p.first_name || '—'}</td>
                     <td className="px-4 py-3 text-foreground text-foreground">{p.email}</td>
                     <td className="px-4 py-3 text-foreground">
-                      {p.matieres?.length ? p.matieres.map((m) => m.libelle).join(', ') : '�'}
+                      {p.matieres?.length ? p.matieres.map((m) => m.libelle).join(', ') : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={p.is_active ? 'secondary' : 'outline'}>
@@ -228,7 +228,7 @@ export default function AdminProfesseursListe() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              Cr�er un professeur
+              Créer un professeur
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -247,13 +247,13 @@ export default function AdminProfesseursListe() {
               <Input id="prof_email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="professeur@esi.bf" />
             </div>
             <div className="space-y-2">
-              <Label>Mati�re(s) <span className="text-destructive">*</span></Label>
+              <Label>Matière(s) <span className="text-destructive">*</span></Label>
               {loadingMatieres ? (
-                <p className="text-sm text-muted-foreground">Chargement des mati�res�</p>
+                <p className="text-sm text-muted-foreground">Chargement des matières…</p>
               ) : matieres.length === 0 ? (
                 <Alert>
                   <AlertDescription>
-                    Aucune mati�re disponible. Cr�ez des mati�res dans �tablissement ? Mati�res.
+                    Aucune matière disponible. Créez des matières dans Établissement — Matières.
                   </AlertDescription>
                 </Alert>
               ) : (
@@ -273,8 +273,8 @@ export default function AdminProfesseursListe() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="prof_first">Pr�nom</Label>
-                <Input id="prof_first" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Pr�nom" />
+                <Label htmlFor="prof_first">Prénom</Label>
+                <Input id="prof_first" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Prénom" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="prof_last">Nom</Label>
@@ -283,18 +283,18 @@ export default function AdminProfesseursListe() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="prof_pass">Mot de passe <span className="text-destructive">*</span></Label>
-              <Input id="prof_pass" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Au moins 8 caract�res" />
+              <Input id="prof_pass" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Au moins 8 caractères" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="prof_confirm">Confirmer le mot de passe <span className="text-destructive">*</span></Label>
-              <Input id="prof_confirm" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Rep�ter le mot de passe" />
+              <Input id="prof_confirm" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Répéter le mot de passe" />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
                 Annuler
               </Button>
               <Button type="submit" disabled={busy}>
-                {busy ? 'Cr�ation�' : 'Cr�er le compte'}
+                {busy ? 'Création…' : 'Créer le compte'}
               </Button>
             </DialogFooter>
           </form>

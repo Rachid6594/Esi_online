@@ -3,7 +3,8 @@ import { LayoutDashboard, LogOut } from 'lucide-react'
 import { useEffect } from 'react'
 import { getAuth, clearAuth, isBibliothecaire } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
-import { useSidebarState, SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { useSidebarState } from '../../hooks/useSidebarState'
 import { Button } from '@/components/ui/button'
 
 const navClass = ({ isActive }) =>
@@ -23,6 +24,8 @@ export default function BibliothecaireLayout() {
     }
   }, [ok, navigate])
 
+  const [sidebarOpen, toggleSidebar] = useSidebarState()
+
   function handleLogout() {
     clearAuth()
     navigate('/login', { replace: true })
@@ -32,8 +35,7 @@ export default function BibliothecaireLayout() {
     return null
   }
 
-  const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Biblioth�caire'
-  const [sidebarOpen, toggleSidebar] = useSidebarState()
+  const userName = auth?.user?.first_name || auth?.user?.email?.split('@')[0] || 'Bibliothécaire'
 
   return (
     <div className="flex min-h-screen bg-background font-sans text-foreground">
@@ -50,7 +52,7 @@ export default function BibliothecaireLayout() {
         <div className="flex w-56 min-w-56 flex-1 flex-col">
           <div className="flex items-center justify-between border-b border-border px-4 py-5">
             <span className="truncate font-semibold text-foreground">
-              ESI Biblioth�que
+              ESI Bibliothèque
             </span>
             <div className="flex items-center gap-1">
               <ThemeToggle />
@@ -69,7 +71,7 @@ export default function BibliothecaireLayout() {
             </p>
             <Button type="button" variant="ghost" onClick={handleLogout} className="w-full justify-start gap-3 px-3 py-2.5">
               <LogOut className="h-5 w-5" strokeWidth={1.5} />
-              D�connexion
+              Déconnexion
             </Button>
           </div>
         </div>

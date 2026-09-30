@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { FileText, Search, Filter, Calendar, BookOpen, SlidersHorizontal, X } from 'lucide-react'
+import { FileText, Search, Filter, Calendar, BookOpen, SlidersHorizontal, Users, Layers, X } from 'lucide-react'
 import useResources from './hooks/useResources'
 import { downloadResource } from '../../api/services/documentsService'
 import ResourceCard from './components/ResourceCard'
@@ -10,6 +10,16 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+
+/**
+ * Valeurs distinctes et triées d'un champ, les vides écartés.
+ * Alimente les menus de filtres.
+ */
+function uniques(resources, champ) {
+  return [...new Set(resources.map((r) => r[champ]).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, 'fr', { numeric: true })
+  )
+}
 
 function FilterPill({ label, value, onClear }) {
   return (
@@ -26,42 +36,75 @@ function FilterPill({ label, value, onClear }) {
 export default function StudentDocuments() {
   const { resources, loading, reload } = useResources()
   const [search, setSearch] = useState('')
-  const [filterMatiere, setFilterMatiere] = useState('')
-  const [filterAnnee, setFilterAnnee] = useState('')
   const [filterType, setFilterType] = useState('')
+  const [filterMatiere, setFilterMatiere] = useState('')
+  const [filterClasse, setFilterClasse] = useState('')
+  const [filterNiveau, setFilterNiveau] = useState('')
+  const [filterFiliere, setFilterFiliere] = useState('')
+  const [filterAnnee, setFilterAnnee] = useState('')
   const [downloading, setDownloading] = useState(null)
+  const [error, setError] = useState(null)
 
-  const matieres = useMemo(() => [...new Set(resources.map((r) => r.matiere))].sort(), [resources])
-  const annees = useMemo(() => [...new Set(resources.map((r) => r.annee).filter(Boolean))].sort().reverse(), [resources])
-  const types = useMemo(() => [...new Set(resources.map((r) => r.type))].sort(), [resources])
+  // Les options viennent de la liste complète, jamais de la liste filtrée :
+  // sinon l'option qu'on vient de choisir disparaît du menu.
+  const options = useMemo(
+    () => ({
+      types: uniques(resources, 'type'),
+      matieres: uniques(resources, 'matiere'),
+      classes: uniques(resources, 'classe'),
+      niveaux: uniques(resources, 'niveau'),
+      filieres: uniques(resources, 'filiere'),
+      annees: [...new Set(resources.map((r) => r.annee).filter(Boolean))].sort().reverse(),
+    }),
+    [resources]
+  )
+  const { types, matieres, classes, niveaux, filieres, annees } = options
 
   const filtered = useMemo(() => resources.filter((r) => {
-    if (filterMatiere && r.matiere !== filterMatiere) return false
-    if (filterAnnee && r.annee !== filterAnnee) return false
     if (filterType && r.type !== filterType) return false
+    if (filterMatiere && r.matiere !== filterMatiere) return false
+    if (filterClasse && r.classe !== filterClasse) return false
+    if (filterNiveau && r.niveau !== filterNiveau) return false
+    if (filterFiliere && r.filiere !== filterFiliere) return false
+    if (filterAnnee && r.annee !== filterAnnee) return false
     if (search) {
-      const q = search.toLowerCase()
-      if (!r.titre.toLowerCase().includes(q) && !r.matiere.toLowerCase().includes(q) && !r.professeur.toLowerCase().includes(q)) return false
+      const q = search.trim().toLowerCase()
+      if (!q) return true
+      // Le champ auteur a remplacé « professeur », et la description est
+      // entrée dans la recherche.
+      return [r.titre, r.matiere, r.auteur, r.classe, r.description, r.type]
+        .some((champ) => champ && champ.toLowerCase().includes(q))
     }
     return true
-  }), [resources, filterMatiere, filterAnnee, filterType, search])
+  }), [resources, filterType, filterMatiere, filterClasse, filterNiveau, filterFiliere, filterAnnee, search])
 
-  const hasActiveFilters = filterMatiere || filterAnnee || filterType
-  function clearAllFilters() { setFilterMatiere(''); setFilterAnnee(''); setFilterType(''); setSearch('') }
+  const filtres = [
+    ['Type', filterType, setFilterType],
+    ['Classe', filterClasse, setFilterClasse],
+    ['Matière', filterMatiere, setFilterMatiere],
+    ['Niveau', filterNiveau, setFilterNiveau],
+    ['Filière', filterFiliere, setFilterFiliere],
+    ['Année', filterAnnee, setFilterAnnee],
+  ]
+  const hasActiveFilters = filtres.some(([, valeur]) => valeur)
+
+  function clearAllFilters() {
+    filtres.forEach(([, , setV]) => setV(''))
+    setSearch('')
+  }
 
   async function handleDownload(resource) {
     setDownloading(resource.id)
+    setError(null)
     try {
-      await downloadResource(resource.id)
-      const content = [`Titre : ${resource.titre}`, `Matière : ${resource.matiere}`, `Professeur : ${resource.professeur}`, `Date : ${resource.date}`, `Taille : ${resource.taille}`, '', 'Ce document est disponible sur votre espace ESI Online.'].join('\n')
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${resource.titre.replace(/[^\w\s-]/g, '').trim()}.txt`
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch (e) { console.error('Download error', e) } finally { setDownloading(null) }
+      // Le vrai fichier, depuis l'endpoint de téléchargement de l'espace.
+      await downloadResource(resource)
+    } catch (e) {
+      console.error('Téléchargement impossible', e)
+      setError(e.message || 'Téléchargement impossible.')
+    } finally {
+      setDownloading(null)
+    }
   }
 
   return (
@@ -78,6 +121,17 @@ export default function StudentDocuments() {
         </div>
       </div>
       <StudentUploadPanel onUploaded={reload} />
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          <span>{error}</span>
+          <Button type="button" variant="ghost" size="icon-xs" onClick={() => setError(null)} aria-label="Fermer">
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      )}
       <Card className="mb-6 shadow-sm backdrop-blur-sm">
         <CardContent className="pt-6">
           <div className="relative mb-4">
@@ -85,7 +139,7 @@ export default function StudentDocuments() {
             <Input
               id="documents-search"
               type="text"
-              placeholder="Rechercher par titre, matière ou professeur…"
+              placeholder="Rechercher par titre, matière, auteur ou description…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -106,18 +160,21 @@ export default function StudentDocuments() {
             <div className="mt-5 hidden shrink-0 sm:block">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
-              <FilterSelect id="filter-matiere" label="Matière" icon={BookOpen} value={filterMatiere} onChange={setFilterMatiere} options={matieres} placeholder="Toutes les matières" />
-              <FilterSelect id="filter-annee" label="Année" icon={Calendar} value={filterAnnee} onChange={setFilterAnnee} options={annees} placeholder="Toutes les années" />
+            <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <FilterSelect id="filter-type" label="Type" icon={Filter} value={filterType} onChange={setFilterType} options={types} placeholder="Tous les types" />
+              <FilterSelect id="filter-classe" label="Classe" icon={Users} value={filterClasse} onChange={setFilterClasse} options={classes} placeholder="Toutes les classes" />
+              <FilterSelect id="filter-matiere" label="Matière" icon={BookOpen} value={filterMatiere} onChange={setFilterMatiere} options={matieres} placeholder="Toutes les matières" />
+              <FilterSelect id="filter-niveau" label="Niveau" icon={Layers} value={filterNiveau} onChange={setFilterNiveau} options={niveaux} placeholder="Tous les niveaux" />
+              <FilterSelect id="filter-filiere" label="Filière" icon={Layers} value={filterFiliere} onChange={setFilterFiliere} options={filieres} placeholder="Toutes les filières" />
+              <FilterSelect id="filter-annee" label="Année" icon={Calendar} value={filterAnnee} onChange={setFilterAnnee} options={annees} placeholder="Toutes les années" />
             </div>
           </div>
           {(hasActiveFilters || search) && (
             <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
               <span className="mr-1 text-xs font-medium text-muted-foreground">Filtres actifs :</span>
-              {filterMatiere && <FilterPill label="Matière" value={filterMatiere} onClear={() => setFilterMatiere('')} />}
-              {filterAnnee && <FilterPill label="Année" value={filterAnnee} onClear={() => setFilterAnnee('')} />}
-              {filterType && <FilterPill label="Type" value={filterType} onClear={() => setFilterType('')} />}
+              {filtres.map(([label, valeur, setValeur]) =>
+                valeur ? <FilterPill key={label} label={label} value={valeur} onClear={() => setValeur('')} /> : null
+              )}
               {search && <FilterPill label="Recherche" value={`"${search}"`} onClear={() => setSearch('')} />}
               <Button type="button" variant="ghost" size="sm" onClick={clearAllFilters} className="ml-auto text-xs text-muted-foreground hover:text-primary">
                 Tout effacer

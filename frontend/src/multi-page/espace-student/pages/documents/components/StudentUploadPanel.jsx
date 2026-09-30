@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Upload } from 'lucide-react'
-import { fetchWithAuth, getAccessToken } from '../../../../../auth'
+import { fetchWithAuth } from '../../../../../auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -59,12 +59,11 @@ export default function StudentUploadPanel({ onUploaded }) {
       form.append('description', description.trim())
       form.append('fichier', file)
 
-      const token = getAccessToken()
-      const res = await fetch(`${API_BASE}/api/eleve/me/upload/`, {
+      const res = await fetchWithAuth(API_BASE, `${API_BASE}/api/eleve/me/upload/`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: form,
       })
+      if (!res) return
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setMsg({ type: 'err', text: data.detail || 'Échec de l’upload.' })

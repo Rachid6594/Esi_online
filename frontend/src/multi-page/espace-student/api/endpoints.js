@@ -11,8 +11,13 @@ export const ENDPOINTS = {
   TIMETABLE: '/api/etablissement/emploidutempss/',
 
   // Ressources / Documents
-  RESOURCES: '/api/etablissement/ressources/',
-  RESOURCE_DETAIL: (id) => `/api/etablissement/ressources/${id}/`,
+  // L'espace étudiant lisait RESOURCES ci-dessous, l'endpoint d'administration
+  // : liste non triée par visibilité, ids bruts dans le payload. DOCUMENTS est
+  // l'endpoint de l'espace, qui applique la règle de visibilité.
+  DOCUMENTS: '/api/eleve/documents/',
+  DOCUMENT_TYPES: '/api/eleve/documents/types/',
+  DOCUMENT_DOWNLOAD: (id) => `/api/eleve/documents/${id}/telecharger/`,
+  UPLOAD_TYPES: '/api/eleve/upload-types/',
 
   // Notifications (Annonces)
   NOTIFICATIONS: '/api/etablissement/annonces/',

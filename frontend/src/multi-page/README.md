@@ -4,7 +4,10 @@ Dossier des différentes pages de l'application ESI Online.
 
 ## Structure
 
-- **HomePage.jsx** — Page d'accueil
+Les pages sont regroupées par espace : `landing/`, `auth/`, `espace-admin/`,
+`espace-student/`, `espace-bibliotheque/`, `espace-prof/`,
+`espace-administration/`.
+
 - **index.jsx** — Export central (à mettre à jour à chaque nouvelle page)
 
 ## Ajouter une page
@@ -15,7 +18,5 @@ Dossier des différentes pages de l'application ESI Online.
 
 ## Pages à venir (exemples)
 
-- LoginPage
-- DashboardPage (admin / prof / élève)
 - CataloguePage
 - etc.

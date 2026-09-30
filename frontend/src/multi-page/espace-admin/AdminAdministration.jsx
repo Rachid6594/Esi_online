@@ -41,7 +41,7 @@ function apiPost(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }).then(async (r) => {
-    if (!r) throw new Error('Non autoris�')
+    if (!r) throw new Error('Non autorisé')
     const data = await r.json().catch(() => ({}))
     if (!r.ok) {
       const msg = data.detail ?? data.message ?? (data.droits && data.droits[0]) ?? 'Erreur'
@@ -90,7 +90,7 @@ export default function AdminAdministration() {
       return
     }
     if (!form.password || form.password.length < 8) {
-      setMsg({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caract�res.' })
+      setMsg({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caractères.' })
       return
     }
     if (form.password !== form.passwordConfirm) {
@@ -118,12 +118,12 @@ export default function AdminAdministration() {
       droits: form.droitIds,
     })
       .then(() => {
-        setMsg({ type: 'success', text: 'Compte administration cr��. La personne peut se connecter avec cet email et ce mot de passe.' })
+        setMsg({ type: 'success', text: 'Compte administration créé. La personne peut se connecter avec cet email et ce mot de passe.' })
         setForm((f) => ({ ...f, email: '', password: '', passwordConfirm: '', phone: '', matricule: '', poste: '', departement: '', bureau: '', droitIds: [] }))
         return apiGet('/administrationecoles/')
       })
       .then((admins) => setList(Array.isArray(admins) ? admins : []))
-      .catch((err) => setMsg({ type: 'error', text: err?.message || 'Erreur cr�ation.' }))
+      .catch((err) => setMsg({ type: 'error', text: err?.message || 'Erreur création.' }))
       .finally(() => setSubmitting(false))
   }
 
@@ -154,7 +154,7 @@ export default function AdminAdministration() {
     setForm((f) => ({ ...f, droitIds: f.droitIds.filter((id) => !ids.includes(id)) }))
   }
 
-  // Grouper par domaine pour afficher C, R, U, D par r�le
+  // Grouper par domaine pour afficher C, R, U, D par rôle
   const ACTION_ORDER = ['create', 'read', 'update', 'delete']
   const droitsByDomaine = droits
     .filter((d) => d.domaine)
@@ -180,7 +180,7 @@ export default function AdminAdministration() {
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Gestion de l&apos;administration</h1>
-          <p className="text-muted-foreground">Cr�er et g�rer les comptes administration (�coles, services) et leurs droits.</p>
+          <p className="text-muted-foreground">Créer et gérer les comptes administration (écoles, services) et leurs droits.</p>
         </div>
       </div>
 
@@ -200,10 +200,10 @@ export default function AdminAdministration() {
         <div className="border-b border-border p-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <UserPlus className="h-5 w-5" />
-            Cr�er un compte administration
+            Créer un compte administration
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Saisissez l&apos;email et le mot de passe pour que la personne puisse se connecter. Pour chaque r�le, cochez C (Cr�er), R (Lire), U (Modifier), D (Supprimer) selon les besoins.
+            Saisissez l&apos;email et le mot de passe pour que la personne puisse se connecter. Pour chaque rôle, cochez C (Créer), R (Lire), U (Modifier), D (Supprimer) selon les besoins.
           </p>
         </div>
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
@@ -220,13 +220,13 @@ export default function AdminAdministration() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">Mot de passe * (min. 8 caract�res)</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Mot de passe * (min. 8 caractères)</label>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="��������"
+                placeholder="Au moins 8 caractères"
                 minLength={8}
                 required
               />
@@ -240,13 +240,13 @@ export default function AdminAdministration() {
                 value={form.passwordConfirm}
                 onChange={(e) => setForm((f) => ({ ...f, passwordConfirm: e.target.value }))}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="��������"
+                placeholder="Au moins 8 caractères"
                 minLength={8}
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">T�l�phone (optionnel)</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Téléphone (optionnel)</label>
               <input
                 type="text"
                 value={form.phone}
@@ -273,17 +273,17 @@ export default function AdminAdministration() {
                 value={form.poste}
                 onChange={(e) => setForm((f) => ({ ...f, poste: e.target.value }))}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Ex. Secr�tariat"
+                placeholder="Ex. Secrétariat"
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">D�partement (optionnel)</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Département (optionnel)</label>
               <input
                 value={form.departement}
                 onChange={(e) => setForm((f) => ({ ...f, departement: e.target.value }))}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Ex. Scolarit�"
+                placeholder="Ex. Scolarité"
               />
             </div>
           </div>
@@ -293,26 +293,26 @@ export default function AdminAdministration() {
               value={form.bureau}
               onChange={(e) => setForm((f) => ({ ...f, bureau: e.target.value }))}
               className="w-full max-w-xs rounded-lg border border-border px-3 py-2 text-sm"
-              placeholder="Ex. B�t. A"
+              placeholder="Ex. Bât. A"
             />
           </div>
           {domainesList.length > 0 && (
             <div>
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground">Droits par r�le (C = Cr�er, R = Lire, U = Modifier, D = Supprimer)</span>
+                <span className="text-xs font-medium text-muted-foreground">Droits par rôle (C = Créer, R = Lire, U = Modifier, D = Supprimer)</span>
                 <button
                   type="button"
                   onClick={selectAllDroits}
                   className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground hover:bg-muted"
                 >
-                  Tout s�lectionner (tous les r�les)
+                  Tout sélectionner (tous les rôles)
                 </button>
                 <button
                   type="button"
                   onClick={deselectAllDroits}
                   className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground hover:bg-muted"
                 >
-                  Tout d�s�lectionner (tous les r�les)
+                  Tout désélectionner (tous les rôles)
                 </button>
               </div>
               <div className="space-y-3">
@@ -326,14 +326,14 @@ export default function AdminAdministration() {
                           onClick={() => selectAllCrudForDomaine(items)}
                           className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted "
                         >
-                          Tout s�lectionner (C,R,U,D)
+                          Tout sélectionner (C,R,U,D)
                         </button>
                         <button
                           type="button"
                           onClick={() => deselectAllCrudForDomaine(items)}
                           className="rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted "
                         >
-                          Tout d�s�lectionner
+                          Tout désélectionner
                         </button>
                       </div>
                     </div>
@@ -359,7 +359,7 @@ export default function AdminAdministration() {
             </div>
           )}
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Cr�ation...' : 'Cr�er le compte'}
+            {submitting ? 'Création...' : 'Créer le compte'}
           </Button>
         </form>
       </div>
@@ -372,7 +372,7 @@ export default function AdminAdministration() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Chargement...</p>
           ) : list.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Aucun compte. Cr�ez-en un ci-dessus.</p>
+            <p className="text-sm text-muted-foreground">Aucun compte. Créez-en un ci-dessus.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
@@ -380,7 +380,7 @@ export default function AdminAdministration() {
                   <th className="py-2">ID</th>
                   <th className="py-2">Matricule</th>
                   <th className="py-2">Poste</th>
-                  <th className="py-2">D�partement</th>
+                  <th className="py-2">Département</th>
                   <th className="py-2">Droits</th>
                 </tr>
               </thead>
@@ -388,9 +388,9 @@ export default function AdminAdministration() {
                 {list.map((a) => (
                   <tr key={a.id} className="border-b border-border">
                     <td className="py-2">{a.id}</td>
-                    <td className="py-2">{a.matricule ?? '�'}</td>
-                    <td className="py-2">{a.poste ?? '�'}</td>
-                    <td className="py-2">{a.departement ?? '�'}</td>
+                    <td className="py-2">{a.matricule ?? '—'}</td>
+                    <td className="py-2">{a.poste ?? '—'}</td>
+                    <td className="py-2">{a.departement ?? '—'}</td>
                     <td className="py-2">
                       {(a.droits_detail || []).length
                         ? (() => {
@@ -402,7 +402,7 @@ export default function AdminAdministration() {
                             }, {})
                             return Object.entries(byDomaine).map(([dom, letters]) => `${dom}: ${letters.filter(Boolean).join(', ')}`).join(' ; ')
                           })()
-                        : '�'}
+                        : '—'}
                     </td>
                   </tr>
                 ))}

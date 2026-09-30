@@ -1,7 +1,7 @@
 import { useTheme } from 'next-themes'
 import { Moon, Sun } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 import {
   Select,
   SelectContent,
@@ -12,9 +12,7 @@ import {
 
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
+  const mounted = useIsHydrated()
 
   if (!mounted) {
     return <Button type="button" variant="ghost" size="icon" aria-label="Changer le thème" />
@@ -37,9 +35,7 @@ export function ThemeToggle() {
 
 export function ThemeSelect() {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
+  const mounted = useIsHydrated()
 
   if (!mounted) return null
 
