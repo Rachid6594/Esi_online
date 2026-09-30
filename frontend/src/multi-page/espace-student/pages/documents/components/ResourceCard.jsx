@@ -1,4 +1,4 @@
-import { BookOpen, Calendar, Download, Loader2 } from 'lucide-react'
+import { BookOpen, Calendar, Download, ExternalLink, Loader2, Users } from 'lucide-react'
 import { TYPE_CONFIG, DEFAULT_TYPE_CONFIG } from '../../../constants/typeStyles'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -20,9 +20,17 @@ export default function ResourceCard({ resource, onDownload, downloading, index 
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold leading-snug text-foreground group-hover:text-foreground sm:truncate sm:text-base">{resource.titre}</p>
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><BookOpen className="h-3 w-3 opacity-50" />{resource.matiere}</span>
+              <span className="flex items-center gap-1"><BookOpen className="h-3 w-3 opacity-50" />{resource.matiere || 'Général'}</span>
               <span className="hidden sm:inline">·</span>
-              <span className="hidden sm:inline">{resource.professeur}</span>
+              <span className="hidden sm:inline">{resource.auteur}</span>
+              {resource.classe && (
+                <>
+                  <span className="hidden lg:inline">·</span>
+                  <span className="hidden items-center gap-1 lg:inline-flex">
+                    <Users className="h-3 w-3 opacity-50" />{resource.classe}
+                  </span>
+                </>
+              )}
               <span className="hidden md:inline">·</span>
               <span className="hidden items-center gap-1 md:inline-flex"><Calendar className="h-3 w-3 opacity-50" />{resource.date}</span>
               {resource.annee && (
@@ -38,10 +46,20 @@ export default function ResourceCard({ resource, onDownload, downloading, index 
             {resource.type}
           </Badge>
           <span className="hidden shrink-0 text-xs text-muted-foreground xl:inline">{resource.taille}</span>
-          <Button onClick={onDownload} disabled={downloading} size="sm" className="shrink-0">
-            {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-            <span className="hidden sm:inline">{downloading ? 'En cours…' : 'Télécharger'}</span>
-          </Button>
+          {resource.telechargeable ? (
+            <Button onClick={onDownload} disabled={downloading} size="sm" className="shrink-0">
+              {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+              <span className="hidden sm:inline">{downloading ? 'En cours…' : 'Télécharger'}</span>
+            </Button>
+          ) : (
+            <span
+              title="Ce document est un lien externe, pas un fichier joint."
+              className="shrink-0 text-[11px] text-muted-foreground sm:text-xs"
+            >
+              <ExternalLink className="h-3.5 w-3.5 sm:hidden" />
+              <span className="hidden sm:inline">Lien externe</span>
+            </span>
+          )}
         </div>
         <div className="mt-2 flex items-center justify-between sm:hidden">
           <Badge variant="outline" className={`text-[11px] ${config.bg} ${config.text} ring-1 ${config.border}`}>
