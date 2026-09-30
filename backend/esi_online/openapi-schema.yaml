@@ -3797,6 +3797,60 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
+  /api/etablissement/documents/depot/:
+    post:
+      operationId: etablissement_documents_depot_create
+      description: |-
+        Depose un document (devoir, TD, TP, rapport...) et le rattache a sa classe,
+        sa matiere, son annee et sa categorie.
+
+        Le fichier est ecrit sous MEDIA_ROOT/uploads/admin/ avec un nom uuid, et
+        Ressource.fichier conserve le chemin relatif.
+      summary: Deposer un document
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ressource'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/etablissement/documents/types/:
+    get:
+      operationId: etablissement_documents_types_retrieve
+      description: |-
+        Liste des types de documents acceptes par l'endpoint de depot.
+
+        Le formulaire d'admin le lit au lieu d'ecrire sa propre liste : les deux
+        cotes ne peuvent plus diverger.
+      summary: Types de documents acceptes
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+          description: ''
   /api/etablissement/droitadministrations/:
     get:
       operationId: etablissement_droitadministrations_list
@@ -10078,7 +10132,19 @@ components:
           type: integer
     PatchedRenduTPRequest:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
+        tp:
+          type: integer
+        etudiant:
+          type: integer
         fichier:
           type: string
           minLength: 1
@@ -10106,26 +10172,30 @@ components:
           type: string
           format: date-time
           nullable: true
-        tp:
-          type: integer
-        etudiant:
-          type: integer
         corrige_par:
           type: integer
           nullable: true
     PatchedReponseEtudiantQCMRequest:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
+        tentative:
+          type: integer
+        question:
+          type: integer
         is_correcte:
           type: boolean
         points_obtenus:
           type: string
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-        tentative:
-          type: integer
-        question:
-          type: integer
     PatchedReponseRequest:
       type: object
       properties:
@@ -10244,6 +10314,9 @@ components:
         niveau:
           type: integer
           nullable: true
+        classe:
+          type: integer
+          nullable: true
         matiere:
           type: integer
           nullable: true
@@ -10308,7 +10381,19 @@ components:
           maxLength: 7
     PatchedTentativeQCMRequest:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
         numero_tentative:
           type: integer
           maximum: 2147483647
@@ -10331,10 +10416,6 @@ components:
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
           nullable: true
-        qcm:
-          type: integer
-        etudiant:
-          type: integer
     PatchedUserUpdateRequest:
       type: object
       properties:
@@ -10481,10 +10562,22 @@ components:
       - user
     RenduTP:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
         id:
           type: integer
           readOnly: true
+        tp:
+          type: integer
+        etudiant:
+          type: integer
         fichier:
           type: string
           maxLength: 500
@@ -10509,6 +10602,9 @@ components:
         date_correction:
           type: string
           format: date-time
+          nullable: true
+        corrige_par:
+          type: integer
           nullable: true
         created_at:
           type: string
@@ -10518,23 +10614,27 @@ components:
           type: string
           format: date-time
           readOnly: true
-        tp:
-          type: integer
-        etudiant:
-          type: integer
-        corrige_par:
-          type: integer
-          nullable: true
       required:
       - created_at
-      - etudiant
       - fichier
       - id
       - tp
       - updated_at
     RenduTPRequest:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
+        tp:
+          type: integer
+        etudiant:
+          type: integer
         fichier:
           type: string
           minLength: 1
@@ -10562,15 +10662,10 @@ components:
           type: string
           format: date-time
           nullable: true
-        tp:
-          type: integer
-        etudiant:
-          type: integer
         corrige_par:
           type: integer
           nullable: true
       required:
-      - etudiant
       - fichier
       - tp
     Reponse:
@@ -10611,10 +10706,22 @@ components:
       - updated_at
     ReponseEtudiantQCM:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
         id:
           type: integer
           readOnly: true
+        tentative:
+          type: integer
+        question:
+          type: integer
         is_correcte:
           type: boolean
         points_obtenus:
@@ -10629,10 +10736,6 @@ components:
           type: string
           format: date-time
           readOnly: true
-        tentative:
-          type: integer
-        question:
-          type: integer
       required:
       - created_at
       - id
@@ -10641,17 +10744,25 @@ components:
       - updated_at
     ReponseEtudiantQCMRequest:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
+        tentative:
+          type: integer
+        question:
+          type: integer
         is_correcte:
           type: boolean
         points_obtenus:
           type: string
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-        tentative:
-          type: integer
-        question:
-          type: integer
       required:
       - question
       - tentative
@@ -10824,6 +10935,9 @@ components:
         niveau:
           type: integer
           nullable: true
+        classe:
+          type: integer
+          nullable: true
         matiere:
           type: integer
           nullable: true
@@ -10926,6 +11040,9 @@ components:
           maximum: 2147483647
           minimum: -2147483648
         niveau:
+          type: integer
+          nullable: true
+        classe:
           type: integer
           nullable: true
         matiere:
@@ -11185,10 +11302,22 @@ components:
       - slug
     TentativeQCM:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
         id:
           type: integer
           readOnly: true
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
         numero_tentative:
           type: integer
           maximum: 2147483647
@@ -11218,19 +11347,26 @@ components:
           type: string
           format: date-time
           readOnly: true
-        qcm:
-          type: integer
-        etudiant:
-          type: integer
       required:
       - created_at
-      - etudiant
       - id
       - qcm
       - updated_at
     TentativeQCMRequest:
       type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
       properties:
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
         numero_tentative:
           type: integer
           maximum: 2147483647
@@ -11253,12 +11389,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
           nullable: true
-        qcm:
-          type: integer
-        etudiant:
-          type: integer
       required:
-      - etudiant
       - qcm
     TokenRefresh:
       type: object

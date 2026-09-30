@@ -14,9 +14,14 @@ Les deux sont verifies ici, avec le double cas etudiant / staff.
 """
 from datetime import date, timedelta
 from decimal import Decimal
+import shutil
+import tempfile
+from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -27,15 +32,26 @@ from app.administration.models import (
     Filiere,
     Niveau,
     Matiere,
+    Ressource,
 )
 from app.admin.models import User as AppAdminUser
 from app.espace_prof.models import Chapitre, Cours, Enseignant, TP
-from app.espace_student.models import Etudiant, RenduTP, TentativeQCM
-from app.espace_student.utils import get_auth_user_for_etudiant
+from app.espace_student.models import (
+    Etudiant,
+    PermissionUploadEtudiant,
+    RenduTP,
+    TentativeQCM,
+)
+from app.espace_student.utils import (
+    ensure_etudiant_for_auth_user,
+    get_auth_user_for_etudiant,
+    get_etudiant_for_auth_user,
+)
 
 User = get_user_model()
 
 API = "/api/eleve"
+PDF = b"%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n"
 
 
 class BasePorteeEtudiant(APITestCase):
@@ -307,3 +323,88 @@ class TentativeQCMPorteeTests(BasePorteeEtudiant):
         attendu = ReponseEtudiantQCM.objects.get(tentative=self.tentative_a)
         self.assertEqual([attendu.pk], ids)
         self.assertTrue(reponse.pk)  # la reponse correcte existe bien
+
+
+class UploadEtudiantNonRegression(APITestCase):
+    """
+    Non-regression sur l'upload etudiant.
+
+    L'ecriture du fichier a ete deplacee vers app/core/documents.py pour etre
+    partagee avec l'espace admin. Ce test existe pour prouver que le chemin
+    etudiant n'a pas change au passage : meme extension acceptee, meme nom uuid,
+    et surtout le fichier toujours ecrit sous uploads/etudiants/<id>/.
+    """
+
+    API_UPLOAD = "/api/eleve/me/upload/"
+
+    def setUp(self):
+        auth_user = User.objects.create_user(
+            username="etudiant_upload",
+            email="upload@esi.dz",
+            password="pass-test-123",
+        )
+        self.etudiant = ensure_etudiant_for_auth_user(auth_user)
+        self.user = get_auth_user_for_etudiant(self.etudiant)
+        PermissionUploadEtudiant.objects.create(
+            etudiant=self.etudiant,
+            types_autorises=["Cours", "Rapport"],
+            is_active=True,
+        )
+        self.media_tmp = tempfile.mkdtemp(prefix="esi-upload-etudiant-")
+
+    def tearDown(self):
+        shutil.rmtree(self.media_tmp, ignore_errors=True)
+
+    def _deposer(self, nom="cours.pdf", contenu=PDF, **champs):
+        donnees = {
+            "titre": "Chapitre 1",
+            "type_ressource": "Cours",
+            **champs,
+        }
+        with override_settings(MEDIA_ROOT=self.media_tmp):
+            reponse = self.client.post(
+                self.API_UPLOAD,
+                {**donnees, "fichier": SimpleUploadedFile(nom, contenu)},
+            )
+        return reponse
+
+    def test_upload_etudiant_ecrit_le_fichier_sous_son_dossier(self):
+        self.client.force_authenticate(user=self.user)
+
+        reponse = self._deposer()
+
+        self.assertEqual(status.HTTP_201_CREATED, reponse.status_code)
+        ressource = Ressource.objects.get()
+        # Le dossier porte l'id du User d'authentification, pas celui du profil
+        # Etudiant : ce sont deux tables liees par identifiant.
+        self.assertTrue(
+            ressource.fichier.startswith(f"uploads/etudiants/{self.user.id}/"),
+            f"chemin inattendu : {ressource.fichier}",
+        )
+        contenu = Path(self.media_tmp) / ressource.fichier
+        self.assertTrue(contenu.is_file(), "le fichier doit etre sur le disque")
+
+    def test_upload_etudiant_refuse_un_type_hors_permission(self):
+        self.client.force_authenticate(user=self.user)
+
+        reponse = self._deposer(type_ressource="Examen")
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, reponse.status_code)
+        self.assertFalse(Ressource.objects.exists())
+
+    def test_upload_etudiant_accepte_un_type_ajoute_a_la_liste_partagee(self):
+        """« Rapport » n'existait pas dans l'ancienne liste de l'espace etudiant."""
+        self.client.force_authenticate(user=self.user)
+
+        reponse = self._deposer(type_ressource="Rapport")
+
+        self.assertEqual(status.HTTP_201_CREATED, reponse.status_code)
+
+    def test_upload_etudiant_refuse_sans_permission(self):
+        self.client.force_authenticate(user=self.user)
+        PermissionUploadEtudiant.objects.update(is_active=False)
+
+        reponse = self._deposer()
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, reponse.status_code)
+        self.assertFalse(Ressource.objects.exists())

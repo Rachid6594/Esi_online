@@ -1,12 +1,8 @@
 """Service métier : permissions d'upload étudiant + upload de ressources."""
-import os
-import uuid
-from pathlib import Path
-
-from django.conf import settings
 from django.db import transaction
 
 from app.administration.models import Ressource
+from app.core.documents import enregistrer_fichier
 from app.core.exceptions import NotFoundError, ValidationError
 from app.espace_student.models import (
     TYPES_UPLOAD_VALIDES,
@@ -18,6 +14,9 @@ from app.espace_student.utils import (
     get_etudiant_for_auth_user,
 )
 
+# Plafond historique de l'upload etudiant. Le module partage porte la meme
+# valeur par defaut ; on la redefinit ici pour qu'une evolution du plafond
+# general ne change pas le contrat deja lu par les permissions existantes.
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 Mo
 ALLOWED_EXTENSIONS = {
     ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx",
@@ -150,28 +149,15 @@ class PermissionUploadService:
         titre = (titre or "").strip()
         if not titre:
             raise ValidationError("Le titre est requis.")
-        if not uploaded_file:
-            raise ValidationError("Le fichier est requis.")
 
-        size = getattr(uploaded_file, "size", 0) or 0
-        if size > MAX_UPLOAD_BYTES:
-            raise ValidationError("Fichier trop volumineux (max 20 Mo).")
-
-        name = getattr(uploaded_file, "name", "fichier") or "fichier"
-        ext = Path(name).suffix.lower()
-        if ext not in ALLOWED_EXTENSIONS:
-            raise ValidationError(f"Extension non autorisée : {ext or '(aucune)'}")
-
-        dest_dir = Path(settings.MEDIA_ROOT) / "uploads" / "etudiants" / str(auth_user.id)
-        dest_dir.mkdir(parents=True, exist_ok=True)
-        safe_name = f"{uuid.uuid4().hex}{ext}"
-        dest_path = dest_dir / safe_name
-
-        with open(dest_path, "wb") as out:
-            for chunk in uploaded_file.chunks():
-                out.write(chunk)
-
-        relative = f"uploads/etudiants/{auth_user.id}/{safe_name}"
+        # L'ecriture sur disque est partagee avec l'espace admin : memes
+        # extensions, meme plafond, meme nomuuid. Voir app/core/documents.py.
+        relative, size, ext = enregistrer_fichier(
+            uploaded_file,
+            sous_dossier=f"uploads/etudiants/{auth_user.id}",
+            taille_max=MAX_UPLOAD_BYTES,
+            extensions=ALLOWED_EXTENSIONS,
+        )
 
         # uploaded_by = app_admin.User aligné sur auth user id
         from app.admin.models import User as AdminUser

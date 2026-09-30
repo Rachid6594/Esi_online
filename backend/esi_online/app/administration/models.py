@@ -384,6 +384,7 @@ class Ressource(models.Model):
     description = models.TextField(null=True, blank=True)
     type_ressource = models.CharField(max_length=15)
     niveau = models.ForeignKey(null=True, blank=True, to='administration.Niveau', on_delete=models.CASCADE, related_name='ressources')
+    classe = models.ForeignKey(null=True, blank=True, to='administration.Classe', on_delete=models.CASCADE, related_name='ressources')
     matiere = models.ForeignKey(null=True, blank=True, to='administration.Matiere', on_delete=models.CASCADE, related_name='ressources')
     annee_academique = models.ForeignKey(null=True, blank=True, to='administration.AnneeAcademique', on_delete=models.CASCADE, related_name='ressources')
     filiere = models.ForeignKey(null=True, blank=True, to='administration.Filiere', on_delete=models.CASCADE, related_name='ressources')
