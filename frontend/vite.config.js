@@ -22,6 +22,32 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        /*
+         * Le chunk principal est React + react-router + le radix/ui utilise par
+         * les composants shadcn : ~470 Ko qui ne changent pas d'une version a
+         * l'autre. Sans ce decoupage, chaque modification d'une page le
+         * reinventait, et le navigateur le retelechargait entierement.
+         *
+         * Il faut nommer le chunk "vendor" et non "react" : le bundle contient
+         * aussi lucide-react, next-themes et tout radix/ui. "vendor" survit a
+         * une montee de version comme a un changement de page.
+         */
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom|react-responsive|@remix-run)[\\/]/.test(id)) {
+            return 'vendor'
+          }
+          if (/[\\/]node_modules[\\/](@radix-ui|lucide-react|next-themes|sonner|class-variance-authority|clsx|tailwind-merge)[\\/]/.test(id)) {
+            return 'vendor-ui'
+          }
+          return undefined
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,

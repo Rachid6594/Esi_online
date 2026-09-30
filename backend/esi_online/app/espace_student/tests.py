@@ -410,6 +410,184 @@ class UploadEtudiantNonRegression(APITestCase):
         self.assertFalse(Ressource.objects.exists())
 
 
+class UploadEtudiantMatiereControlee(UploadEtudiantNonRegression):
+    """
+    L'etudiant ne peut pas inscrire son fichier dans une matiere etrangere.
+
+    /api/eleve/me/upload/ resolvait matiere_id par un .first() sans rien
+    verifier. N'importe quel etudiant authentifie pouvait donc deposer un
+    document dans la matiere d'une autre filiere, en devinant un id : la
+    matiere est une cle etrangere partagee, pas une etiquette libre. Le
+    service refuse maintenant la matiere hors programme, avec un 400.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.annee = AnneeAcademique.objects.create(
+            libelle="2025-2026",
+            date_debut=date(2025, 9, 1),
+            date_fin=date(2026, 6, 30),
+            is_active=True,
+        )
+        self.niveau = Niveau.objects.create(code="L1", libelle="Licence 1", ordre=1)
+        self.filiere_inf = Filiere.objects.create(code="INF", libelle="Informatique")
+        self.filiere_math = Filiere.objects.create(code="MATH", libelle="Mathematique")
+        self.classe = Classe.objects.create(
+            code="L1-A", libelle="L1 groupe A", niveau=self.niveau,
+            filiere=self.filiere_inf, annee_academique=self.annee,
+        )
+        self.etudiant.classe = self.classe
+        self.etudiant.save()
+        self.matiere_ok = Matiere.objects.create(
+            code="INF01", libelle="Algorithmique", niveau=self.niveau,
+            filiere=self.filiere_inf, semestre=1,
+        )
+        self.matiere_etrangere = Matiere.objects.create(
+            code="MATH01", libelle="Analyse", niveau=self.niveau,
+            filiere=self.filiere_math, semestre=1,
+        )
+
+    def test_upload_accepte_la_matiere_de_son_programme(self):
+        self.client.force_authenticate(user=self.user)
+
+        reponse = self._deposer(matiere_id=self.matiere_ok.pk)
+
+        self.assertEqual(status.HTTP_201_CREATED, reponse.status_code)
+        self.assertEqual(self.matiere_ok.pk, Ressource.objects.get().matiere_id)
+
+    def test_upload_refuse_la_matiere_d_une_autre_filiere(self):
+        self.client.force_authenticate(user=self.user)
+
+        reponse = self._deposer(matiere_id=self.matiere_etrangere.pk)
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, reponse.status_code)
+        self.assertFalse(Ressource.objects.exists())
+
+    def test_upload_refuse_une_matiere_inexistante(self):
+        """Un id devine qui n'existe pas doit repondre 404, pas 500."""
+        self.client.force_authenticate(user=self.user)
+
+        reponse = self._deposer(matiere_id=999999)
+
+        self.assertEqual(status.HTTP_404_NOT_FOUND, reponse.status_code)
+        self.assertFalse(Ressource.objects.exists())
+
+    def test_upload_refuse_un_matiere_id_non_numerique(self):
+        """matiere_id='abc' faisait lever une ValueError non captalee : 500."""
+        self.client.force_authenticate(user=self.user)
+
+        reponse = self._deposer(matiere_id="abc")
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, reponse.status_code)
+        self.assertFalse(Ressource.objects.exists())
+
+
+class UploadEtudiantFichierOrphelin(APITestCase):
+    """
+    Un depot refuse ne doit pas laisser de fichier sur le disque.
+
+    L'ecriture sur le disque precedait la creation de la ligne. Si celle-ci
+    echouait, la transaction annulait la ligne mais pas l'octet ecrit : le
+    fichier restait la, sans ligne qui le reference et sans moyen de le
+    retrouver. Le service le supprime maintenant.
+    """
+
+    API_UPLOAD = "/api/eleve/me/upload/"
+
+    def setUp(self):
+        auth_user = User.objects.create_user(
+            username="etudiant_orphelin",
+            email="orphelin@esi.dz",
+            password="pass-test-123",
+        )
+        etudiant = ensure_etudiant_for_auth_user(auth_user)
+        self.user = get_auth_user_for_etudiant(etudiant)
+        PermissionUploadEtudiant.objects.create(
+            etudiant=etudiant, types_autorises=["Cours"], is_active=True,
+        )
+        self.media_tmp = tempfile.mkdtemp(prefix="esi-upload-orphelin-")
+
+    def tearDown(self):
+        shutil.rmtree(self.media_tmp, ignore_errors=True)
+
+    def test_un_depot_refuse_ne_laisse_aucun_fichier(self):
+        self.client.force_authenticate(user=self.user)
+
+        with override_settings(MEDIA_ROOT=self.media_tmp):
+            # Type hors permission : refuse avant toute ecriture.
+            self.client.post(
+                self.API_UPLOAD,
+                {
+                    "titre": "Chapitre 1",
+                    "type_ressource": "Examen",
+                    "fichier": SimpleUploadedFile("cours.pdf", PDF),
+                },
+            )
+            # Titre vide : refuse lui aussi avant l'ecriture.
+            self.client.post(
+                self.API_UPLOAD,
+                {
+                    "titre": "   ",
+                    "type_ressource": "Cours",
+                    "fichier": SimpleUploadedFile("cours.pdf", PDF),
+                },
+            )
+            deposes = list(Path(self.media_tmp).rglob("*"))
+
+        self.assertEqual([], [p for p in deposes if p.is_file()])
+        self.assertFalse(Ressource.objects.exists())
+
+
+class UploadPermissionsAdminErreurs(APITestCase):
+    """
+    Les endpoints de permissions d'upload ne doivent pas repondre 500.
+
+    is_superuser est le seul acces (IsSuperAdmin). Un user_id non numerique
+    faisait lever une ValueError par l'ORM, et le front recevait une page de
+    trace au lieu du message d'erreur.
+    """
+
+    API = "/api/eleve/upload-permissions/"
+
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="admin_upload", email="admin@esi.dz", password="pass-test-123",
+        )
+
+    def test_user_id_non_numerique_repond_400(self):
+        self.client.force_authenticate(user=self.admin)
+
+        reponse = self.client.post(self.API, {"user_id": "abc", "types_autorises": ["Cours"]})
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, reponse.status_code)
+        self.assertIn("detail", reponse.data)
+
+    def test_user_id_absent_repond_400(self):
+        self.client.force_authenticate(user=self.admin)
+
+        reponse = self.client.post(self.API, {"types_autorises": ["Cours"]})
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, reponse.status_code)
+        self.assertIn("detail", reponse.data)
+
+    def test_user_id_inconnu_repond_404(self):
+        self.client.force_authenticate(user=self.admin)
+
+        reponse = self.client.post(self.API, {"user_id": 999999, "types_autorises": ["Cours"]})
+
+        self.assertEqual(status.HTTP_404_NOT_FOUND, reponse.status_code)
+
+    def test_un_etudiant_ne_lit_pas_les_permissions(self):
+        etudiant = User.objects.create_user(
+            username="etudiant_lecture", email="lecture@esi.dz", password="pass-test-123",
+        )
+        self.client.force_authenticate(user=etudiant)
+
+        reponse = self.client.get(self.API)
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, reponse.status_code)
+
+
 # Dossier de media du groupe de tests : l'override doit couvrir la lecture
 # du fichier par la vue, pas seulement l'ecriture.
 MEDIA_DOCS = tempfile.mkdtemp(prefix="esi-docs-etudiant-")

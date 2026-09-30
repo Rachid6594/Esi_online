@@ -1,13 +1,22 @@
 """Endpoints API : permissions upload + upload étudiant."""
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, parser_classes
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiResponse
-from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 
 from app.core.exceptions import NotFoundError, ValidationError
+from app.espace_student.api.serializers import (
+    ErreurDetailSerializer,
+    MyUploadPermissionSerializer,
+    PermissionUploadGrantSerializer,
+    PermissionUploadPatchSerializer,
+    PermissionUploadSerializer,
+    TypeUploadSerializer,
+    UploadEtudiantReponseSerializer,
+    UploadEtudiantSerializer,
+)
 from app.espace_student.models import TYPE_UPLOAD_CHOICES
 from app.espace_student.permissions.eleve_permissions import IsStudentUser
 from app.espace_student.services.permission_upload_service import PermissionUploadService
@@ -25,7 +34,7 @@ class IsSuperAdmin(BasePermission):
 @extend_schema(
     tags=["Upload étudiant"],
     summary="Types de ressources uploadables",
-    responses={200: OpenApiResponse(description="Liste des types.")},
+    responses={200: TypeUploadSerializer(many=True)},
 )
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -35,29 +44,41 @@ def upload_types(request):
 
 @extend_schema(
     tags=["Upload étudiant"],
-    summary="Lister / créer les permissions d'upload (admin)",
+    summary="Lister ou accorder une permission d'upload (admin)",
+    request={"GET": None, "POST": PermissionUploadGrantSerializer},
+    responses={
+        200: PermissionUploadSerializer(many=True),
+        201: PermissionUploadSerializer,
+        400: ErreurDetailSerializer,
+        404: ErreurDetailSerializer,
+    },
 )
 @api_view(["GET", "POST"])
 @permission_classes([IsSuperAdmin])
-def upload_permissions_list(request):
+def upload_permissions_collection(request):
     service = PermissionUploadService()
-    if request.method == "GET":
-        data = [service.serialize(p) for p in service.list_all()]
-        return Response(data)
 
-    body = request.data or {}
+    if request.method == "GET":
+        return Response([service.serialize(p) for p in service.list_all()])
+
     try:
-        user_id = body.get("user_id")
-        if user_id is None:
-            raise ValidationError("user_id est requis.")
+        # Le pk est un entier : sans cette conversion, un "abc" envoye par le
+        # front ferait lever une ValueError par l'ORM et answered 500.
+        user_id = int(request.data["user_id"])
         perm = service.grant(
-            auth_user_id=int(user_id),
-            types_autorises=body.get("types_autorises") or [],
-            is_active=body.get("is_active", True),
-            note=body.get("note") or "",
+            auth_user_id=user_id,
+            types_autorises=request.data.get("types_autorises") or [],
+            is_active=request.data.get("is_active", True),
+            note=request.data.get("note") or "",
             accorde_par=request.user,
         )
         return Response(service.serialize(perm), status=status.HTTP_201_CREATED)
+    except KeyError:
+        return Response({"detail": "user_id est requis."}, status=status.HTTP_400_BAD_REQUEST)
+    except (TypeError, ValueError):
+        return Response(
+            {"detail": "user_id doit être un entier."}, status=status.HTTP_400_BAD_REQUEST
+        )
     except ValidationError as e:
         return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
     except NotFoundError as e:
@@ -66,7 +87,14 @@ def upload_permissions_list(request):
 
 @extend_schema(
     tags=["Upload étudiant"],
-    summary="Modifier / révoquer une permission d'upload (admin)",
+    summary="Lire, modifier ou révoquer une permission d'upload (admin)",
+    request={"PATCH": PermissionUploadPatchSerializer, "PUT": PermissionUploadPatchSerializer},
+    responses={
+        200: PermissionUploadSerializer,
+        204: None,
+        400: ErreurDetailSerializer,
+        404: ErreurDetailSerializer,
+    },
 )
 @api_view(["GET", "PATCH", "PUT", "DELETE"])
 @permission_classes([IsSuperAdmin])
@@ -95,6 +123,7 @@ def upload_permissions_detail(request, pk: int):
 @extend_schema(
     tags=["Upload étudiant"],
     summary="Ma permission d'upload (étudiant connecté)",
+    responses={200: MyUploadPermissionSerializer},
 )
 @api_view(["GET"])
 @permission_classes([IsStudentUser])
@@ -120,38 +149,34 @@ def my_upload_permission(request):
     tags=["Upload étudiant"],
     summary="Uploader un fichier (étudiant autorisé)",
     request={
-        "multipart/form-data": {
-            "type": "object",
-            "properties": {
-                "titre": {"type": "string"},
-                "type_ressource": {"type": "string"},
-                "description": {"type": "string"},
-                "matiere_id": {"type": "integer"},
-                "fichier": {"type": "string", "format": "binary"},
-            },
-            "required": ["titre", "type_ressource", "fichier"],
-        }
+        "multipart/form-data": UploadEtudiantSerializer,
     },
-    responses={201: OpenApiResponse(description="Ressource créée.")},
+    responses={
+        201: UploadEtudiantReponseSerializer,
+        400: ErreurDetailSerializer,
+        404: ErreurDetailSerializer,
+    },
 )
 @api_view(["POST"])
 @permission_classes([IsStudentUser])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser])
 def my_upload_ressource(request):
+    """
+    Depose un document pour l'etudiant connecte.
+
+    JSONParser a ete retire des parseurs : cet endpoint est un multipart, et
+    un JSON passerait par une porte differente pour un traitement identique.
+    L'extension, le plafond et la permission sont verifies par le service.
+    """
     service = PermissionUploadService()
     try:
-        matiere_id = request.data.get("matiere_id")
-        if matiere_id in ("", None):
-            matiere_id = None
-        else:
-            matiere_id = int(matiere_id)
         ressource = service.upload_ressource(
             auth_user=request.user,
             titre=request.data.get("titre") or "",
             type_ressource=request.data.get("type_ressource") or "",
             uploaded_file=request.FILES.get("fichier") or request.FILES.get("file"),
             description=request.data.get("description") or "",
-            matiere_id=matiere_id,
+            matiere_id=request.data.get("matiere_id"),
         )
         return Response(
             {

@@ -2,7 +2,13 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from app.administration.models import Ressource
-from app.espace_student.models import Etudiant, RenduTP, ReponseEtudiantQCM, TentativeQCM
+from app.core.documents import TYPES_DOCUMENT
+from app.espace_student.models import (
+    Etudiant,
+    RenduTP,
+    ReponseEtudiantQCM,
+    TentativeQCM,
+)
 
 
 # Champs que seul l'enseignant (ou le staff) a le droit d'ecrire : la note, le
@@ -220,3 +226,136 @@ class DocumentEtudiantSerializer(serializers.ModelSerializer):
         if not obj.fichier:
             return None
         return f"/api/eleve/documents/{obj.pk}/telecharger/"
+
+
+# ---------------------------------------------------------------------------
+# Upload : permissions d'upload et depot de fichier par l'etudiant
+# ---------------------------------------------------------------------------
+# Ces trois endpoints renvoient des dicts construits a la main dans
+# PermissionUploadService, sans serialiseur. Le schema OpenAPI ne pouvait donc
+# decrire aucune de leurs reponses : le Swagger affichait "aucun schema" et le
+# front ne pouvait pas generer de client. Les serialiseurs ci-dessous
+# reproduisent exactement les memes cles — ils decrivent, ils ne transforment
+# pas. Toute divergence casserait le front, donc les tests compares les deux.
+
+
+class ErreurDetailSerializer(serializers.Serializer):
+    """
+    Forme de toutes les erreurs metier des endpoints d'upload.
+
+    Les vues renvoient {"detail": "message"} et rien d'autre. Sans ce
+    serialiseur, le schema annonait un objet libre sur chaque 400 et 404, et
+    le front ne pouvait pas typer ses cas d'erreur.
+    """
+
+    detail = serializers.CharField()
+
+
+class TypeUploadSerializer(serializers.Serializer):
+    """Un couple (valeur stockee, libelle affiche) de la liste des types."""
+
+    value = serializers.CharField()
+    label = serializers.CharField()
+
+
+class PermissionUploadSerializer(serializers.Serializer):
+    """
+    Une permission d'upload, vue par l'admin.
+
+    Les noms et prenoms viennent du User d'authentification, pas du profil
+    Etudiant : c'est ce que le service lit, via get_auth_user_for_etudiant.
+    """
+
+    id = serializers.IntegerField(read_only=True)
+    etudiant_id = serializers.IntegerField(read_only=True)
+    user_id = serializers.IntegerField(read_only=True, allow_null=True)
+    email = serializers.CharField(read_only=True, allow_blank=True)
+    first_name = serializers.CharField(read_only=True, allow_blank=True)
+    last_name = serializers.CharField(read_only=True, allow_blank=True)
+    matricule = serializers.CharField(read_only=True)
+    types_autorises = serializers.ListField(
+        child=serializers.CharField(), read_only=True
+    )
+    is_active = serializers.BooleanField(read_only=True)
+    note = serializers.CharField(read_only=True, allow_blank=True)
+    accorde_par_id = serializers.IntegerField(read_only=True, allow_null=True)
+    created_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    updated_at = serializers.DateTimeField(read_only=True, allow_null=True)
+
+
+class PermissionUploadGrantSerializer(serializers.Serializer):
+    """
+    Corps du POST d'octroi. Seul l'admin l'atteint (IsSuperAdmin).
+
+    Les types sont valides ici plutot que dans le service, pour que le schema
+    annonce la liste autorisee, libelles compris. Le service revérifie : un
+    sérialiseur documente, il n'est pas la seule porte.
+    """
+
+    user_id = serializers.IntegerField()
+    types_autorises = serializers.ListField(
+        child=serializers.ChoiceField(choices=TYPES_DOCUMENT)
+    )
+    is_active = serializers.BooleanField(required=False, default=True)
+    note = serializers.CharField(required=False, allow_blank=True, default="")
+
+
+class PermissionUploadPatchSerializer(serializers.Serializer):
+    """
+    Corps du PATCH. Tous les champs sont facultatifs : le service n'ecrit que
+    ceux qui sont presents, un PATCH {"is_active": false} doit laisser la liste
+    de types intacte.
+    """
+
+    types_autorises = serializers.ListField(
+        child=serializers.ChoiceField(choices=TYPES_DOCUMENT),
+        required=False,
+    )
+    is_active = serializers.BooleanField(required=False)
+    note = serializers.CharField(required=False, allow_blank=True)
+
+
+class MyUploadPermissionSerializer(serializers.Serializer):
+    """
+    Ma permission d'upload, vue par l'etudiant connecte.
+
+    Deux formes pour un seul endpoint : sans permission, l'endpoint renvoie
+    allowed/is_active/types_autorises sans id ni note, parce qu'il n'y a pas de
+    ligne a decrire. Les deux sont ici, avec les champs optionnels.
+    """
+
+    allowed = serializers.BooleanField()
+    is_active = serializers.BooleanField()
+    types_autorises = serializers.ListField(child=serializers.CharField())
+    note = serializers.CharField(required=False, allow_blank=True)
+    id = serializers.IntegerField(required=False)
+
+
+class UploadEtudiantSerializer(serializers.Serializer):
+    """
+    Corps du POST de depot : multipart/form-data.
+
+    Le service valide l'extension, le plafond et la permission ; ce
+    sérialiseur valide la forme. Il ne peut pas valider le fichier lui-meme
+    (taille, extension), donc il ne le fait pas : un "fichier" declare ici
+    peut encore etre refuse, et c'est le service qui refuse.
+    """
+
+    titre = serializers.CharField(max_length=300)
+    type_ressource = serializers.ChoiceField(choices=TYPES_DOCUMENT)
+    description = serializers.CharField(
+        required=False, allow_blank=True, default="", max_length=5000
+    )
+    matiere_id = serializers.IntegerField(required=False, allow_null=True)
+    fichier = serializers.FileField(required=True)
+
+
+class UploadEtudiantReponseSerializer(serializers.Serializer):
+    """Ce que renvoie un depot accepte."""
+
+    id = serializers.IntegerField(read_only=True)
+    titre = serializers.CharField(read_only=True)
+    type_ressource = serializers.CharField(read_only=True)
+    fichier = serializers.CharField(read_only=True, allow_null=True)
+    taille_fichier = serializers.IntegerField(read_only=True, allow_null=True)
+    message = serializers.CharField(read_only=True)

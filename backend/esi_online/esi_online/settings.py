@@ -178,6 +178,12 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    # La liste des types de documents sert a la fois a l'upload et a l'admin.
+    # Sans ce nom explicite, drf-spectacular cree deux enums de memes valeurs
+    # sous deux noms differents, et le Swagger affiche le message W001.
+    "ENUM_NAME_OVERRIDES": {
+        "TypeRessourceEnum": "app.core.documents.TYPES_DOCUMENT",
+    },
 }
 
 SWAGGER_UI_SETTINGS = {
@@ -190,6 +196,23 @@ SWAGGER_UI_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = env("CORS_ALLOW_ALL_ORIGINS", default=DEBUG)
 if not CORS_ALLOW_ALL_ORIGINS:
     CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+
+# ---------------------------------------------------------------------------
+# HTTPS
+# ---------------------------------------------------------------------------
+# Rien n'est actif par defaut : avant que le certificat existe, une redirection
+# vers HTTPS rendrait le site injoignable, et HSTS est irreversible — un
+# navigateur qui l'a memorise refuse le HTTP ensuite, meme si le certificat
+# saute. A activer dans le .env du serveur, une fois certbot installe.
+# Voir deployment/README.md.
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=False)
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=False)
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False
+)
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
 
 # ---------------------------------------------------------------------------
 # Frontend (liens dans les emails)

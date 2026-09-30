@@ -49,7 +49,15 @@ sudo -u postgres createdb --owner=esi esi_online
 
 ## Variables d'environnement
 
-`backend/.env`, en chmod 600, propriétaire `esi` :
+`backend/.env`, en chmod 600, propriétaire `esi`. Le modèle est versionné :
+`backend/.env.example` liste toutes les variables avec leur défaut et ce qu'il
+faut changer en production.
+
+```bash
+sudo -u esi cp backend/.env.example backend/.env
+sudo -u esi chmod 600 backend/.env
+sudo -u esi nano backend/.env
+```
 
 ```ini
 DEBUG=false
@@ -68,6 +76,10 @@ MEDIA_ROOT=/srv/esi-online/media
 Avec `DEBUG=false`, le démarrage échoue si `SECRET_KEY` est encore la valeur par
 défaut ou si `ALLOWED_HOSTS` ne contient que `localhost`. C'est volontaire :
 une instance qui démarre avec une clé connue permet de forger un jeton JWT.
+
+`CORS_ALLOW_ALL_ORIGINS` vaut `DEBUG` par défaut, donc il passe à `false` seul.
+En production, renseignez alors `CORS_ALLOWED_ORIGINS` avec l'origine du front
+si elle diffère du domaine de l'API.
 
 ## Migration et collecte
 
@@ -129,6 +141,36 @@ Décommentez le `return 301 https://...` du bloc `server`, puis :
 ```bash
 sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d esi.example.dz
+```
+
+### Les quatre réglages qui vont avec
+
+`manage.py check --deploy` signale encore `SECURE_HSTS_SECONDS`,
+`SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE` et `CSRF_COOKIE_SECURE`. Ce ne
+sont pas des oublis : Django ne les active pas tout seul parce que les activer
+avant que le certificat existe casse le site, et parce que HSTS est
+irréversible — un navigateur qui l'a mémorisé refuse le HTTP ensuite, même si
+le certificat saute.
+
+Une fois `certbot` installé et la redirection active, ajoutez au `.env` :
+
+```ini
+SECURE_SSL_REDIRECT=true
+SESSION_COOKIE_SECURE=true
+CSRF_COOKIE_SECURE=true
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=true
+SECURE_HSTS_PRELOAD=true
+```
+
+Les trois premiers ne demandent aucune ligne de code. Les trois derniers
+demandent de les lire dans `settings.py` (`env.bool` / `env.int`), car
+`check --deploy` les cherche par nom.
+
+Vérifiez ensuite :
+
+```bash
+sudo -u esi .venv/bin/python esi_online/manage.py check --deploy
 ```
 
 ## Après le déploiement
