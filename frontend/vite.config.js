@@ -9,6 +9,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    include: ['react-pdf'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -42,6 +45,9 @@ export default defineConfig({
           }
           if (/[\\/]node_modules[\\/](@radix-ui|lucide-react|next-themes|sonner|class-variance-authority|clsx|tailwind-merge)[\\/]/.test(id)) {
             return 'vendor-ui'
+          }
+          if (/[\\/]node_modules[\\/](react-pdf|pdfjs-dist)[\\/]/.test(id)) {
+            return 'vendor-pdf'
           }
           return undefined
         },
