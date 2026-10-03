@@ -85,25 +85,34 @@ export default function BibliothequeStatsHistory({ userRole = 'user' }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {myDownloads.map((dl) => (
+                  {myDownloads.map((dl) => {
+                    // Compatibilité double : mock (downloaded_at / matiere) ou API réelle (date / matiere_libelle)
+                    const dateAffichee = dl.date || dl.downloaded_at
+                    const matiereAffichee = dl.matiere_libelle || dl.matiere
+                    const documentTitre = dl.document_titre || dl.titre || dl.document || '—'
+                    const auteurNom = dl.auteur_nom || dl.auteur || '—'
+                    return (
                     <tr
                       key={dl.id}
                       className="border-b border-slate-100 hover:bg-slate-50 dark:border-gray-700 dark:hover:bg-gray-700/40"
                     >
                       <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
-                        {dl.document_titre}
+                        {documentTitre}
                       </td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {dl.matiere_libelle || '—'}
+                        {matiereAffichee || '—'}
                       </td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {dl.auteur_nom || '—'}
+                        {auteurNom}
                       </td>
                       <td className="px-4 py-3 text-slate-500">
-                        {new Date(dl.date).toLocaleString('fr-FR')}
+                        {dateAffichee
+                          ? new Date(dateAffichee).toLocaleString('fr-FR')
+                          : '—'}
                       </td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -151,18 +160,22 @@ export default function BibliothequeStatsHistory({ userRole = 'user' }) {
                     </h5>
                     {stat.utilisateurs && stat.utilisateurs.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
-                        {stat.utilisateurs.map((u, idx) => (
+                        {stat.utilisateurs.map((u, idx) => {
+                          const uDate = u.date || u.downloaded_at
+                          const uNom = u.utilisateur_nom || u.nom || u.username || '?'
+                          return (
                           <span
                             key={idx}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700 shadow-2xs dark:border-gray-600 dark:bg-gray-800 dark:text-slate-200"
                           >
                             <User className="h-3 w-3 text-slate-400" />
-                            <span>{u.utilisateur_nom}</span>
+                            <span>{uNom}</span>
                             <span className="text-[10px] text-slate-400">
-                              ({new Date(u.date).toLocaleDateString('fr-FR')})
+                              {uDate ? `(${new Date(uDate).toLocaleDateString('fr-FR')})` : ''}
                             </span>
                           </span>
-                        ))}
+                          )
+                        })}
                       </div>
                     ) : (
                       <p className="text-xs italic text-slate-400">Pas encore téléchargé par des étudiants.</p>
