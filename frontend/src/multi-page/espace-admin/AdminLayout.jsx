@@ -21,6 +21,7 @@ import {
   UserPlus,
   Shield,
   KeyRound,
+  Library,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getAuth, clearAuth, isAdmin } from '../../auth'
@@ -65,6 +66,7 @@ const professeursSections = [
 
 const contenuSections = [
   { path: '/admin/contenu', label: 'Contenu', icon: Layers },
+  { path: '/admin/bibliotheque', label: 'Bibliothèque numérique', icon: Library },
 ]
 
 const parametresSections = [
@@ -81,7 +83,8 @@ export default function AdminLayout() {
   const isEtudiants = location.pathname.startsWith('/admin/etudiants')
   const isBibliothecaires = location.pathname.startsWith('/admin/bibliothecaires')
   const isProfesseurs = location.pathname.startsWith('/admin/professeurs')
-  const isContenu = location.pathname.startsWith('/admin/contenu')
+  const isContenu = location.pathname.startsWith('/admin/contenu') || location.pathname.startsWith('/admin/bibliotheque')
+  const isBibliotheque = location.pathname.startsWith('/admin/bibliotheque')
   const isParametres = location.pathname.startsWith('/admin/parametres')
   // Ouverture des sections du menu : l'etat n'est stocke que pour les sections
   // que l'utilisateur a explicitement ouvertes ou fermees. Sans override, la

@@ -51,7 +51,7 @@ function getFormatInfo(doc) {
   return { ext: 'FILE', bg: 'bg-gray-500/10 text-gray-600 border-gray-200 dark:border-gray-700' }
 }
 
-export default function BibliothequeExplorer({ canUpload = false, currentUser = null }) {
+export default function BibliothequeExplorer({ canUpload = false, currentUser = null, isAdminView = false }) {
   const [treeData, setTreeData] = useState([])
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -444,10 +444,11 @@ export default function BibliothequeExplorer({ canUpload = false, currentUser = 
                 }
                 const fmt = getFormatInfo(doc)
                 const canDelete =
-                  currentUser &&
-                  (currentUser.is_superuser ||
-                    currentUser.is_staff ||
-                    currentUser.id === doc.auteur_id)
+                  isAdminView ||
+                  (currentUser &&
+                    (currentUser.is_superuser ||
+                      currentUser.is_staff ||
+                      currentUser.id === doc.auteur_id))
                 const dateStr = formatDate(doc.created_at || doc.date || doc.date_upload)
                 const fileSize = formatSize(doc.fichier_taille || doc.taille)
 
@@ -587,10 +588,11 @@ export default function BibliothequeExplorer({ canUpload = false, currentUser = 
                     }
                     const fmt = getFormatInfo(doc)
                     const canDelete =
-                      currentUser &&
-                      (currentUser.is_superuser ||
-                        currentUser.is_staff ||
-                        currentUser.id === doc.auteur_id)
+                      isAdminView ||
+                      (currentUser &&
+                        (currentUser.is_superuser ||
+                          currentUser.is_staff ||
+                          currentUser.id === doc.auteur_id))
                     const dateStr = formatDate(doc.created_at || doc.date || doc.date_upload)
                     const fileSize = formatSize(doc.fichier_taille || doc.taille)
 

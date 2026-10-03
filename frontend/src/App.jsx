@@ -47,6 +47,7 @@ const AdminAdministration = lazy(() => import('./multi-page').then((m) => ({ def
 const AdminParametres = lazy(() => import('./multi-page').then((m) => ({ default: m.AdminParametres })))
 const AdminEtablissement = lazy(() => import('./multi-page').then((m) => ({ default: m.AdminEtablissement })))
 const AdminUploadPermissions = lazy(() => import('./multi-page').then((m) => ({ default: m.AdminUploadPermissions })))
+const AdminBibliotheque = lazy(() => import('./multi-page').then((m) => ({ default: m.AdminBibliotheque })))
 
 function Chargement() {
   return (
@@ -115,6 +116,7 @@ function App() {
             <Route path="creation" element={<Navigate to="/admin/professeurs/liste" replace />} />
           </Route>
           <Route path="contenu" element={<AdminContenu />} />
+          <Route path="bibliotheque" element={<AdminBibliotheque />} />
           <Route path="utilisateurs" element={<Navigate to="/admin/parametres/utilisateurs" replace />} />
           <Route path="administration" element={<AdminAdministration />} />
           <Route path="parametres">
