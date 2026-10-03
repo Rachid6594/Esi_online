@@ -212,6 +212,145 @@ const MOCK_RESOURCES = [
   { id: '20', titre: 'TD4 – Intégrales et séries de Fourier',                         type: 'TD',     matiere: 'Mathématiques',    professeur: 'Dr. Belhocine', date: '2024-03-18', taille: '540 Ko', annee: '2023-2024' },
 ]
 
+const MOCK_LIBRARY_TREE = [
+  {
+    id: 'filiere-1',
+    code: 'GL',
+    libelle: 'Génie Logiciel',
+    total_docs: 8,
+    matieres: [
+      { id: 'mat-1', code: 'INF301', libelle: 'Algorithmique et structures de données', doc_count: 3 },
+      { id: 'mat-2', code: 'INF302', libelle: 'Bases de données avancées', doc_count: 3 },
+      { id: 'mat-3', code: 'INF304', libelle: 'Génie logiciel & Méthodes agiles', doc_count: 2 },
+    ],
+  },
+  {
+    id: 'filiere-2',
+    code: 'RT',
+    libelle: 'Réseaux & Télécoms',
+    total_docs: 4,
+    matieres: [
+      { id: 'mat-4', code: 'INF303', libelle: 'Réseaux informatiques', doc_count: 2 },
+      { id: 'mat-5', code: 'SYS301', libelle: 'Systèmes d\'exploitation', doc_count: 2 },
+    ],
+  },
+  {
+    id: 'filiere-3',
+    code: 'SC',
+    libelle: 'Tronc Commun',
+    total_docs: 4,
+    matieres: [
+      { id: 'mat-6', code: 'MAT301', libelle: 'Mathématiques discrètes', doc_count: 3 },
+      { id: 'mat-7', code: 'ANG301', libelle: 'Anglais technique', doc_count: 1 },
+    ],
+  },
+]
+
+let mockLibraryDocuments = [
+  {
+    id: '1',
+    titre: 'Algorithmique et structures de données - Chapitre 1',
+    type: 'COURS',
+    description: 'Introduction aux concepts d\'algorithmes, complexité O(n) et structures linéaires.',
+    matiere_id: 'mat-1',
+    matiere_libelle: 'Algorithmique et structures de données',
+    matiere_code: 'INF301',
+    filiere_id: 'filiere-1',
+    filiere_code: 'GL',
+    auteur_nom: 'Dr. K. Bensaid',
+    annee: 2026,
+    annee_universitaire: '2025-2026',
+    fichier_taille: 2516582,
+    fichier_url: 'https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf',
+    created_at: '2026-04-15T10:30:00Z',
+  },
+  {
+    id: '2',
+    titre: 'TD1 - Listes chaînées et arbres binaires',
+    type: 'TD',
+    description: 'Exercices pratiques sur les pointeurs, listes doublement chaînées et arbres de recherche.',
+    matiere_id: 'mat-1',
+    matiere_libelle: 'Algorithmique et structures de données',
+    matiere_code: 'INF301',
+    filiere_id: 'filiere-1',
+    filiere_code: 'GL',
+    auteur_nom: 'Dr. K. Bensaid',
+    annee: 2026,
+    annee_universitaire: '2025-2026',
+    fichier_taille: 912000,
+    fichier_url: 'https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf',
+    created_at: '2026-04-22T08:15:00Z',
+  },
+  {
+    id: '3',
+    titre: 'Bases de données avancées - SQL & Optimisation',
+    type: 'COURS',
+    description: 'Cours complet sur l\'optimisation de requêtes SQL, transactions ACID et indexation B-Tree.',
+    matiere_id: 'mat-2',
+    matiere_libelle: 'Bases de données avancées',
+    matiere_code: 'INF302',
+    filiere_id: 'filiere-1',
+    filiere_code: 'GL',
+    auteur_nom: 'Dr. A. Zerrouki',
+    annee: 2026,
+    annee_universitaire: '2025-2026',
+    fichier_taille: 5340000,
+    fichier_url: 'https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf',
+    created_at: '2026-04-18T14:00:00Z',
+  },
+  {
+    id: '4',
+    titre: 'Examen Final - Algorithmique et Complexité (Session 2025)',
+    type: 'EXAMEN',
+    description: 'Sujet officiel de l\'examen de fin de semestre 5 avec barème.',
+    matiere_id: 'mat-1',
+    matiere_libelle: 'Algorithmique et structures de données',
+    matiere_code: 'INF301',
+    filiere_id: 'filiere-1',
+    filiere_code: 'GL',
+    auteur_nom: 'Dr. K. Bensaid',
+    annee: 2025,
+    annee_universitaire: '2024-2025',
+    fichier_taille: 327680,
+    fichier_url: 'https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf',
+    created_at: '2025-06-15T09:00:00Z',
+  },
+  {
+    id: '5',
+    titre: 'Réseaux Informatiques - Modèle OSI & Protocole TCP/IP',
+    type: 'COURS',
+    description: 'Architecture des réseaux, couches OSI, routage IP et protocoles applicatifs.',
+    matiere_id: 'mat-4',
+    matiere_libelle: 'Réseaux informatiques',
+    matiere_code: 'INF303',
+    filiere_id: 'filiere-2',
+    filiere_code: 'RT',
+    auteur_nom: 'M. S. Hadj',
+    annee: 2026,
+    annee_universitaire: '2025-2026',
+    fichier_taille: 3880000,
+    fichier_url: 'https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf',
+    created_at: '2026-04-20T11:00:00Z',
+  },
+  {
+    id: '6',
+    titre: 'Méthodes Agiles et Pratiques Scrum',
+    type: 'COURS',
+    description: 'Guide méthodologique sur Scrum, Kanban, User Stories et sprints de développement.',
+    matiere_id: 'mat-3',
+    matiere_libelle: 'Génie logiciel & Méthodes agiles',
+    matiere_code: 'INF304',
+    filiere_id: 'filiere-1',
+    filiere_code: 'GL',
+    auteur_nom: 'Dr. N. Messaoudi',
+    annee: 2026,
+    annee_universitaire: '2025-2026',
+    fichier_taille: 4400000,
+    fichier_url: 'https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf',
+    created_at: '2026-04-17T16:00:00Z',
+  },
+]
+
 export function makeServer({ environment = 'development' } = {}) {
   return createServer({
     environment,
@@ -289,7 +428,145 @@ export function makeServer({ environment = 'development' } = {}) {
         schema.filieres.find(request.params.id).destroy()
         return new Response(204)
       })
+      this.get('/matieres/', () => [
+        { id: 'mat-1', code: 'INF301', libelle: 'Algorithmique et structures de données' },
+        { id: 'mat-2', code: 'INF302', libelle: 'Bases de données avancées' },
+        { id: 'mat-3', code: 'INF304', libelle: 'Génie logiciel & Méthodes agiles' },
+        { id: 'mat-4', code: 'INF303', libelle: 'Réseaux informatiques' },
+        { id: 'mat-5', code: 'SYS301', libelle: 'Systèmes d\'exploitation' },
+        { id: 'mat-6', code: 'MAT301', libelle: 'Mathématiques discrètes' },
+        { id: 'mat-7', code: 'ANG301', libelle: 'Anglais technique' },
+      ])
       this.post('/users/import-csv', () => new Response(200, {}, { message: 'Import mock réussi' }))
+
+      // ── Bibliothèque Numérique & Documents ──────────────────────────────────
+      this.namespace = 'api/library'
+      this.get('/tree/', () => MOCK_LIBRARY_TREE)
+      this.get('/documents/', (schema, request) => {
+        let results = [...mockLibraryDocuments]
+        const filiereId = request.queryParams?.filiere
+        const matiereId = request.queryParams?.matiere
+        const typeDoc = request.queryParams?.type
+        const q = (request.queryParams?.q || '').toLowerCase().trim()
+
+        if (filiereId) {
+          results = results.filter((d) => d.filiere_id === filiereId || d.filiere_code === filiereId)
+        }
+        if (matiereId) {
+          results = results.filter((d) => d.matiere_id === matiereId || d.matiere_code === matiereId)
+        }
+        if (typeDoc) {
+          results = results.filter((d) => d.type === typeDoc)
+        }
+        if (q) {
+          results = results.filter(
+            (d) =>
+              d.titre.toLowerCase().includes(q) ||
+              (d.matiere_libelle && d.matiere_libelle.toLowerCase().includes(q)) ||
+              (d.auteur_nom && d.auteur_nom.toLowerCase().includes(q))
+          )
+        }
+        return results
+      })
+
+      this.post('/documents/', (schema, request) => {
+        let newDoc = {
+          id: String(Date.now()),
+          titre: 'Nouveau Document',
+          type: 'COURS',
+          description: '',
+          matiere_id: 'mat-1',
+          matiere_libelle: 'Algorithmique et structures de données',
+          matiere_code: 'INF301',
+          filiere_id: 'filiere-1',
+          filiere_code: 'GL',
+          auteur_nom: 'Professeur ESI',
+          annee: new Date().getFullYear(),
+          annee_universitaire: '2025-2026',
+          fichier_taille: 1540000,
+          fichier_url: 'https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf',
+          created_at: new Date().toISOString(),
+        }
+
+        if (request.requestBody instanceof FormData) {
+          const titre = request.requestBody.get('titre')
+          const type = request.requestBody.get('type')
+          const matiere_id = request.requestBody.get('matiere') || request.requestBody.get('matiere_id')
+          const description = request.requestBody.get('description')
+          const annee = request.requestBody.get('annee')
+          const file = request.requestBody.get('fichier') || request.requestBody.get('file')
+
+          if (titre) newDoc.titre = titre
+          if (type) newDoc.type = type
+          if (description) newDoc.description = description
+          if (annee) newDoc.annee = Number(annee)
+          if (file && file.name) {
+            newDoc.titre = titre || file.name
+            newDoc.fichier_taille = file.size || 1540000
+          }
+        } else if (typeof request.requestBody === 'string') {
+          try {
+            const body = JSON.parse(request.requestBody)
+            Object.assign(newDoc, body)
+          } catch (e) {}
+        }
+
+        mockLibraryDocuments.unshift(newDoc)
+        return new Response(201, {}, newDoc)
+      })
+
+      this.delete('/documents/:id/', (schema, request) => {
+        const id = request.params.id
+        mockLibraryDocuments = mockLibraryDocuments.filter((d) => d.id !== id)
+        return new Response(204)
+      })
+
+      this.post('/documents/:id/download/', () => {
+        return { success: true, message: 'Téléchargement enregistré' }
+      })
+
+      this.get('/my-downloads/', () => [
+        {
+          id: 'dl-1',
+          document_titre: 'Algorithmique et structures de données - Chapitre 1',
+          type: 'COURS',
+          matiere: 'Algorithmique',
+          downloaded_at: '2026-05-10T14:30:00Z',
+          taille: '2.5 Mo',
+        },
+        {
+          id: 'dl-2',
+          document_titre: 'Bases de données avancées - SQL & Optimisation',
+          type: 'COURS',
+          matiere: 'Bases de données',
+          downloaded_at: '2026-05-09T09:15:00Z',
+          taille: '5.3 Mo',
+        },
+      ])
+
+      this.get('/teacher-stats/', () => [
+        {
+          document_id: '1',
+          titre: 'Algorithmique et structures de données - Chapitre 1',
+          type: 'COURS',
+          downloads_count: 142,
+          last_downloaded: '2026-05-10T14:30:00Z',
+        },
+        {
+          document_id: '2',
+          titre: 'TD1 - Listes chaînées et arbres binaires',
+          type: 'TD',
+          downloads_count: 98,
+          last_downloaded: '2026-05-09T18:20:00Z',
+        },
+        {
+          document_id: '4',
+          titre: 'Examen Final - Algorithmique et Complexité (Session 2025)',
+          type: 'EXAMEN',
+          downloads_count: 310,
+          last_downloaded: '2026-05-10T11:05:00Z',
+        },
+      ])
 
       // ── Auth ─────────────────────────────────────────────────────────────────
       // Les routes Auth sont commentées pour permettre la connexion au vrai backend Django
