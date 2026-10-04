@@ -15,6 +15,11 @@ backend/*.sqlite3
 __pycache__/
 *.py[cod]
 
+# Schémas API générés à la volée : la seule source de vérité versionnée est
+# backend/esi_online/openapi-schema.yaml, vérifiée par la CI
+api-schema.json
+openapi-schema.json
+
 # Environnement
 .env
 .env.*
