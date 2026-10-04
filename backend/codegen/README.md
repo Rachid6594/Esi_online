@@ -40,7 +40,8 @@ python run_generate.py --json '{"model_name":"AnneeAcademique","app_name":"espac
 - **api/views.py** : vues `xxx_list` et `xxx_detail` (ajoutées).
 - **api/urls.py** : routes `xxxs/` et `xxxs/<int:pk>/` (ajoutées).
 
-Des sauvegardes sont créées dans `codegen/backups/` avant modification.
+Des sauvegardes sont créées dans `codegen/backups/` avant modification. Le
+dossier est local et ignoré par git : il est recréé à chaque exécution.
 
 ## Depuis Python
 
