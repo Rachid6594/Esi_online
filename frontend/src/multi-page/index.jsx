@@ -2,7 +2,6 @@
  * Multi-page : export central des pages de l'application.
  * Ajouter ici les nouvelles pages au fur et à mesure.
  */
-export { default as HomePage } from './HomePage'
 export {
   LandingPage,
   PublicLayout,
@@ -10,19 +9,15 @@ export {
   DocumentsPage,
   AProposPage,
   EnseignantsPage,
+  NotFoundPage,
 } from './landing'
 export { LoginPage, RegisterPage, ChangerMotDePassePage } from './auth'
 export {
   AdminLayout,
   AdminDashboard,
   AdminEtudiantsDashboard,
-  AdminEtudiantsCreation,
-  AdminEtudiantsRecherche,
-  AdminEtudiantsListe,
   AdminBibliothecairesListe,
-  AdminBibliothecairesCreation,
   AdminProfesseursListe,
-  AdminProfesseursCreation,
   AdminContenu,
   AdminUtilisateurs,
   AdminAdministration,

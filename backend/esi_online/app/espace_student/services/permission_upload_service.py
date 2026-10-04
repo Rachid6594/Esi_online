@@ -1,12 +1,10 @@
 """Service métier : permissions d'upload étudiant + upload de ressources."""
-import os
-import uuid
 from pathlib import Path
 
-from django.conf import settings
 from django.db import transaction
 
 from app.administration.models import Ressource
+from app.core.documents import enregistrer_fichier
 from app.core.exceptions import NotFoundError, ValidationError
 from app.espace_student.models import (
     TYPES_UPLOAD_VALIDES,
@@ -18,6 +16,9 @@ from app.espace_student.utils import (
     get_etudiant_for_auth_user,
 )
 
+# Plafond historique de l'upload etudiant. Le module partage porte la meme
+# valeur par defaut ; on la redefinit ici pour qu'une evolution du plafond
+# general ne change pas le contrat deja lu par les permissions existantes.
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 Mo
 ALLOWED_EXTENSIONS = {
     ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx",
@@ -150,50 +151,91 @@ class PermissionUploadService:
         titre = (titre or "").strip()
         if not titre:
             raise ValidationError("Le titre est requis.")
-        if not uploaded_file:
-            raise ValidationError("Le fichier est requis.")
 
-        size = getattr(uploaded_file, "size", 0) or 0
-        if size > MAX_UPLOAD_BYTES:
-            raise ValidationError("Fichier trop volumineux (max 20 Mo).")
+        # Tout ce qui peut etre refuse est refuse AVANT d'ecrire le disque :
+        # apres enregistrer_fichier, un echec laisserait un fichier orphelin
+        # que personne ne reference et que rien ne supprime.
+        matiere = self._resoudre_matiere(auth_user, matiere_id)
+        admin_user = self._app_admin(auth_user)
 
-        name = getattr(uploaded_file, "name", "fichier") or "fichier"
-        ext = Path(name).suffix.lower()
-        if ext not in ALLOWED_EXTENSIONS:
-            raise ValidationError(f"Extension non autorisée : {ext or '(aucune)'}")
+        # L'ecriture sur disque est partagee avec l'espace admin : memes
+        # extensions, meme plafond, meme nomuuid. Voir app/core/documents.py.
+        relative, size, ext = enregistrer_fichier(
+            uploaded_file,
+            sous_dossier=f"uploads/etudiants/{auth_user.id}",
+            taille_max=MAX_UPLOAD_BYTES,
+            extensions=ALLOWED_EXTENSIONS,
+        )
 
-        dest_dir = Path(settings.MEDIA_ROOT) / "uploads" / "etudiants" / str(auth_user.id)
-        dest_dir.mkdir(parents=True, exist_ok=True)
-        safe_name = f"{uuid.uuid4().hex}{ext}"
-        dest_path = dest_dir / safe_name
+        try:
+            return Ressource.objects.create(
+                titre=titre[:300],
+                description=(description or "")[:5000] or None,
+                type_ressource=type_ressource[:15],
+                matiere=matiere,
+                fichier=relative,
+                taille_fichier=size,
+                format_fichier=ext.lstrip(".")[:10] or None,
+                is_public=False,  # un devoir rendu n'est pas public, cf. DocumentEtudiantService
+                uploaded_by=admin_user,
+            )
+        except Exception:
+            # La transaction annule la ligne, pas le fichier deja ecrit.
+            _supprimer_fichier(relative)
+            raise
 
-        with open(dest_path, "wb") as out:
-            for chunk in uploaded_file.chunks():
-                out.write(chunk)
+    def _resoudre_matiere(self, auth_user, matiere_id):
+        """
+        Resout la matiere annoncee par l'etudiant, ou None.
 
-        relative = f"uploads/etudiants/{auth_user.id}/{safe_name}"
+        Un etudiant rattache son document a une matiere de son programme. Sans
+        ce controle, n'importe quel etudiant authentifie pouvait inscrire son
+        fichier dans la matiere d'une autre filiere en devinant un id : la
+        matiere est une cle etrangere partagee, pas une etiquette libre.
+        """
+        if matiere_id in ("", None):
+            return None
+        try:
+            matiere_id = int(matiere_id)
+        except (TypeError, ValueError):
+            raise ValidationError("matiere_id doit être un entier.")
 
-        # uploaded_by = app_admin.User aligné sur auth user id
+        from app.administration.models import Matiere
+
+        matiere = Matiere.objects.filter(pk=matiere_id).first()
+        if matiere is None:
+            raise NotFoundError(f"Matière #{matiere_id} introuvable.")
+
+        etudiant = get_etudiant_for_auth_user(auth_user)
+        classe = getattr(etudiant, "classe", None) if etudiant else None
+        if classe and not (
+            matiere.niveau_id == classe.niveau_id
+            and (
+                classe.filiere_id is None
+                or matiere.filiere_id in (None, classe.filiere_id)
+            )
+        ):
+            raise ValidationError("Cette matière ne fait pas partie de votre programme.")
+        return matiere
+
+    def _app_admin(self, auth_user):
+        """Ligne app_admin.User alignee sur l'id du User d'authentification."""
         from app.admin.models import User as AdminUser
 
         admin_user, _ = AdminUser.objects.get_or_create(
             id=auth_user.id,
             defaults={"role": "user", "is_active": True},
         )
+        return admin_user
 
-        matiere = None
-        if matiere_id:
-            from app.administration.models import Matiere
-            matiere = Matiere.objects.filter(pk=matiere_id).first()
 
-        return Ressource.objects.create(
-            titre=titre[:300],
-            description=(description or "")[:5000] or None,
-            type_ressource=type_ressource[:15],
-            matiere=matiere,
-            fichier=relative,
-            taille_fichier=size,
-            format_fichier=ext.lstrip(".")[:10] or None,
-            is_public=True,
-            uploaded_by=admin_user,
-        )
+def _supprimer_fichier(chemin_relatif: str) -> None:
+    """Efface un fichier ecrit sur le disque, sans jamais faire echouer l'appelant."""
+    try:
+        from django.conf import settings
+
+        (Path(settings.MEDIA_ROOT) / chemin_relatif).unlink(missing_ok=True)
+    except OSError:
+        # Un fichier orphelin est un leak d'espace disque, pas une panne :
+        # l'upload doit quand meme echouer sur son vrai motif.
+        pass

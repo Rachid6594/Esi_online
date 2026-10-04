@@ -749,6 +749,223 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenRefresh'
           description: ''
+  /api/auth/users/:
+    get:
+      operationId: auth_users_list
+      description: Liste tous les comptes (étudiants, professeurs, bibliothécaires,
+        administration, superusers) avec leur rôle, pour la gestion utilisateur de
+        l'admin.
+      summary: Lister tous les utilisateurs
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: ordering
+        schema:
+          type: string
+      - in: query
+        name: role
+        schema:
+          type: string
+      - in: query
+        name: search
+        schema:
+          type: string
+      tags:
+      - Authentification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GlobalUserListItem'
+          description: ''
+  /api/auth/users/{id}/:
+    delete:
+      operationId: auth_users_destroy
+      description: Supprime définitivement un utilisateur. Un superuser admin ne peut
+        pas être supprimé.
+      summary: Supprimer un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+          description: Action non autorisée.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
+  /api/auth/users/{id}/toggle-active/:
+    post:
+      operationId: auth_users_toggle_active_create
+      description: Bascule l'attribut is_active d'un utilisateur. Un superuser admin
+        ne peut pas être désactivé.
+      summary: Activer / désactiver un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+          description: Action non autorisée.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
+  /api/auth/users/{id}/update/:
+    put:
+      operationId: auth_users_update_update
+      description: 'Modifie un utilisateur existant : email, prénom, nom, nom d''utilisateur,
+        statut actif et mot de passe (optionnel). Un superuser ne peut pas être modifié.'
+      summary: Mettre à jour un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Données invalides.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
+    patch:
+      operationId: auth_users_update_partial_update
+      description: 'Modifie un utilisateur existant : email, prénom, nom, nom d''utilisateur,
+        statut actif et mot de passe (optionnel). Un superuser ne peut pas être modifié.'
+      summary: Mettre à jour un utilisateur
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Authentification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Données invalides.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+          description: Utilisateur introuvable.
   /api/bibliotheque/:
     get:
       operationId: bibliotheque_list
@@ -1041,6 +1258,1278 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/eleve/documents/:
+    get:
+      operationId: eleve_documents_list
+      description: Liste les documents visibles, filtres appliques cote serveur.
+      summary: Documents visibles par l'étudiant
+      parameters:
+      - in: query
+        name: annee_academique_id
+        schema:
+          type: integer
+      - in: query
+        name: classe_id
+        schema:
+          type: integer
+        description: Ressources de cette classe.
+      - in: query
+        name: filiere_id
+        schema:
+          type: integer
+      - in: query
+        name: matiere_id
+        schema:
+          type: integer
+      - in: query
+        name: niveau_id
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Titre, auteur, matière, description.
+      - in: query
+        name: type_ressource
+        schema:
+          type: string
+        description: 'Ex : Devoir, TP, Rapport.'
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DocumentEtudiant'
+          description: ''
+  /api/eleve/documents/{id}/telecharger/:
+    get:
+      operationId: eleve_documents_telecharger_retrieve
+      description: |-
+        Envoie les octets du fichier joint, pas une page HTML a interpreter.
+
+        Le nom propose vient du titre, nettoye, avec l'extension d'origine : c'est
+        ce que l'etudiant retrouvera dans ses telechargements.
+      summary: Télécharger un document
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/eleve/documents/types/:
+    get:
+      operationId: eleve_documents_types_retrieve
+      description: Types de documents, pour alimenter le menu de filtre.
+      summary: Types de documents
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+          description: ''
+  /api/eleve/etudiants/:
+    get:
+      operationId: eleve_etudiants_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister etudiant
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Etudiant'
+          description: ''
+    post:
+      operationId: eleve_etudiants_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer etudiant
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/etudiants/{id}/:
+    get:
+      operationId: eleve_etudiants_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_etudiants_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtudiantRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_etudiants_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEtudiantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEtudiantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEtudiantRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_etudiants_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer etudiant
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/me/upload/:
+    post:
+      operationId: eleve_me_upload_create
+      description: |-
+        Depose un document pour l'etudiant connecte.
+
+        JSONParser a ete retire des parseurs : cet endpoint est un multipart, et
+        un JSON passerait par une porte differente pour un traitement identique.
+        L'extension, le plafond et la permission sont verifies par le service.
+      summary: Uploader un fichier (étudiant autorisé)
+      tags:
+      - Upload étudiant
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadEtudiantRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadEtudiantReponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+  /api/eleve/me/upload-permission/:
+    get:
+      operationId: eleve_me_upload_permission_retrieve
+      summary: Ma permission d'upload (étudiant connecté)
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyUploadPermission'
+          description: ''
+  /api/eleve/rendutps/:
+    get:
+      operationId: eleve_rendutps_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister rendutp
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RenduTP'
+          description: ''
+    post:
+      operationId: eleve_rendutps_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer rendutp
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/rendutps/{id}/:
+    get:
+      operationId: eleve_rendutps_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_rendutps_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RenduTPRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_rendutps_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRenduTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRenduTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRenduTPRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenduTP'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_rendutps_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer rendutp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/reponseetudiantqcms/:
+    get:
+      operationId: eleve_reponseetudiantqcms_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister reponseetudiantqcm
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+    post:
+      operationId: eleve_reponseetudiantqcms_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer reponseetudiantqcm
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/reponseetudiantqcms/{id}/:
+    get:
+      operationId: eleve_reponseetudiantqcms_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_reponseetudiantqcms_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReponseEtudiantQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_reponseetudiantqcms_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReponseEtudiantQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReponseEtudiantQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReponseEtudiantQCMRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReponseEtudiantQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_reponseetudiantqcms_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer reponseetudiantqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/tentativeqcms/:
+    get:
+      operationId: eleve_tentativeqcms_list
+      description: 'GET: liste | POST: création.'
+      summary: Lister tentativeqcm
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+    post:
+      operationId: eleve_tentativeqcms_create
+      description: 'GET: liste | POST: création.'
+      summary: Creer tentativeqcm
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/tentativeqcms/{id}/:
+    get:
+      operationId: eleve_tentativeqcms_retrieve
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Detail tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: eleve_tentativeqcms_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Remplacer tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TentativeQCMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: eleve_tentativeqcms_partial_update
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Modifier partiellement tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTentativeQCMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTentativeQCMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTentativeQCMRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TentativeQCM'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: eleve_tentativeqcms_destroy
+      description: 'GET: détail | PUT/PATCH: modification | DELETE: suppression.'
+      summary: Supprimer tentativeqcm
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eleve/upload-permissions/:
+    get:
+      operationId: eleve_upload_permissions_list
+      summary: Lister ou accorder une permission d'upload (admin)
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+    post:
+      operationId: eleve_upload_permissions_create
+      summary: Lister ou accorder une permission d'upload (admin)
+      tags:
+      - Upload étudiant
+      requestBody:
+        content:
+          POST:
+            schema:
+              $ref: '#/components/schemas/PermissionUploadGrantRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+  /api/eleve/upload-permissions/{id}/:
+    get:
+      operationId: eleve_upload_permissions_retrieve
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+    put:
+      operationId: eleve_upload_permissions_update
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      requestBody:
+        content:
+          PATCH:
+            schema:
+              $ref: '#/components/schemas/PermissionUploadPatchRequest'
+          PUT:
+            schema:
+              $ref: '#/components/schemas/PermissionUploadPatchRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+    patch:
+      operationId: eleve_upload_permissions_partial_update
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      requestBody:
+        content:
+          PATCH:
+            schema:
+              $ref: '#/components/schemas/PatchedPermissionUploadPatchRequest'
+          PUT:
+            schema:
+              $ref: '#/components/schemas/PatchedPermissionUploadPatchRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+    delete:
+      operationId: eleve_upload_permissions_destroy
+      summary: Lire, modifier ou révoquer une permission d'upload (admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionUpload'
+          description: ''
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErreurDetail'
+          description: ''
+  /api/eleve/upload-types/:
+    get:
+      operationId: eleve_upload_types_list
+      summary: Types de ressources uploadables
+      tags:
+      - Upload étudiant
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TypeUpload'
+          description: ''
   /api/etablissement/administrationecoles/:
     get:
       operationId: etablissement_administrationecoles_list
@@ -2567,6 +4056,60 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
+          description: ''
+  /api/etablissement/documents/depot/:
+    post:
+      operationId: etablissement_documents_depot_create
+      description: |-
+        Depose un document (devoir, TD, TP, rapport...) et le rattache a sa classe,
+        sa matiere, son annee et sa categorie.
+
+        Le fichier est ecrit sous MEDIA_ROOT/uploads/admin/ avec un nom uuid, et
+        Ressource.fichier conserve le chemin relatif.
+      summary: Deposer un document
+      tags:
+      - Espace Eleve API
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ressource'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/etablissement/documents/types/:
+    get:
+      operationId: etablissement_documents_types_retrieve
+      description: |-
+        Liste des types de documents acceptes par l'endpoint de depot.
+
+        Le formulaire d'admin le lit au lieu d'ecrire sa propre liste : les deux
+        cotes ne peuvent plus diverger.
+      summary: Types de documents acceptes
+      tags:
+      - Espace Eleve API
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
           description: ''
   /api/etablissement/droitadministrations/:
     get:
@@ -7107,6 +8650,124 @@ components:
           nullable: true
       required:
       - email
+    DocumentEtudiant:
+      type: object
+      description: |-
+        Vue d'un document pour l'etudiant, avec des libelles et non des ids.
+
+        L'espace etudiant lisait directement RessourceSerializer, dont les cles
+        etrangeres sortent en cascade d'ids : le front affichait « Matiere N°5 »
+        dans ses filtres et son tri. Ici chaque libelle est resolu une fois, et
+        les ids restent disponibles pour relancer un filtre.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        titre:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+          nullable: true
+        type_ressource:
+          type: string
+          readOnly: true
+        auteur:
+          type: string
+          readOnly: true
+          nullable: true
+        fichier:
+          type: string
+          readOnly: true
+          nullable: true
+        lien:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        taille_fichier:
+          type: integer
+          readOnly: true
+          nullable: true
+        format_fichier:
+          type: string
+          readOnly: true
+          nullable: true
+        date_publication:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        matiere_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        matiere_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        classe_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        classe_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        niveau_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        filiere_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        annee_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        categorie_libelle:
+          type: string
+          nullable: true
+          readOnly: true
+        is_public:
+          type: boolean
+          readOnly: true
+        telechargeable:
+          type: boolean
+          readOnly: true
+        url_telechargement:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - annee_libelle
+      - auteur
+      - categorie_libelle
+      - classe_id
+      - classe_libelle
+      - created_at
+      - date_publication
+      - description
+      - fichier
+      - filiere_libelle
+      - format_fichier
+      - id
+      - is_public
+      - lien
+      - matiere_id
+      - matiere_libelle
+      - niveau_libelle
+      - taille_fichier
+      - telechargeable
+      - titre
+      - type_ressource
+      - url_telechargement
     DroitAdministration:
       type: object
       properties:
@@ -7432,6 +9093,19 @@ components:
       - date_retour_prevue
       - emprunteur
       - exemplaire
+    ErreurDetail:
+      type: object
+      description: |-
+        Forme de toutes les erreurs metier des endpoints d'upload.
+
+        Les vues renvoient {"detail": "message"} et rien d'autre. Sans ce
+        serialiseur, le schema annonait un objet libre sur chaque 400 et 404, et
+        le front ne pouvait pas typer ses cas d'erreur.
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
     ErrorDetail:
       type: object
       properties:
@@ -7480,6 +9154,97 @@ components:
           nullable: true
       required:
       - name
+    Etudiant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        matricule:
+          type: string
+          maxLength: 20
+        date_naissance:
+          type: string
+          format: date
+          nullable: true
+        lieu_naissance:
+          type: string
+          nullable: true
+          maxLength: 200
+        adresse:
+          type: string
+          nullable: true
+        annee_entree:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        contact_urgence_nom:
+          type: string
+          nullable: true
+          maxLength: 200
+        contact_urgence_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          type: integer
+        classe:
+          type: integer
+          nullable: true
+      required:
+      - created_at
+      - id
+      - matricule
+      - updated_at
+      - user
+    EtudiantRequest:
+      type: object
+      properties:
+        matricule:
+          type: string
+          minLength: 1
+          maxLength: 20
+        date_naissance:
+          type: string
+          format: date
+          nullable: true
+        lieu_naissance:
+          type: string
+          nullable: true
+          maxLength: 200
+        adresse:
+          type: string
+          nullable: true
+        annee_entree:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        contact_urgence_nom:
+          type: string
+          nullable: true
+          maxLength: 200
+        contact_urgence_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        user:
+          type: integer
+        classe:
+          type: integer
+          nullable: true
+      required:
+      - matricule
+      - user
     Evenement:
       type: object
       properties:
@@ -7731,6 +9496,47 @@ components:
           nullable: true
       required:
       - titre
+    GlobalUserListItem:
+      type: object
+      description: Élément de la vue globale de gestion des utilisateurs (admin).
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        username:
+          type: string
+        is_active:
+          type: boolean
+        is_staff:
+          type: boolean
+        is_superuser:
+          type: boolean
+        date_joined:
+          type: string
+          format: date-time
+          nullable: true
+        role:
+          type: string
+        poste:
+          type: string
+          nullable: true
+      required:
+      - date_joined
+      - email
+      - first_name
+      - id
+      - is_active
+      - is_staff
+      - is_superuser
+      - last_name
+      - role
+      - username
     ImportStudentsCsvRequestRequest:
       type: object
       properties:
@@ -8011,6 +9817,31 @@ components:
       - destinataire
       - expediteur
       - sujet
+    MyUploadPermission:
+      type: object
+      description: |-
+        Ma permission d'upload, vue par l'etudiant connecte.
+
+        Deux formes pour un seul endpoint : sans permission, l'endpoint renvoie
+        allowed/is_active/types_autorises sans id ni note, parce qu'il n'y a pas de
+        ligne a decrire. Les deux sont ici, avec les champs optionnels.
+      properties:
+        allowed:
+          type: boolean
+        is_active:
+          type: boolean
+        types_autorises:
+          type: array
+          items:
+            type: string
+        note:
+          type: string
+        id:
+          type: integer
+      required:
+      - allowed
+      - is_active
+      - types_autorises
     Niveau:
       type: object
       properties:
@@ -8488,6 +10319,42 @@ components:
         description:
           type: string
           nullable: true
+    PatchedEtudiantRequest:
+      type: object
+      properties:
+        matricule:
+          type: string
+          minLength: 1
+          maxLength: 20
+        date_naissance:
+          type: string
+          format: date
+          nullable: true
+        lieu_naissance:
+          type: string
+          nullable: true
+          maxLength: 200
+        adresse:
+          type: string
+          nullable: true
+        annee_entree:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        contact_urgence_nom:
+          type: string
+          nullable: true
+          maxLength: 200
+        contact_urgence_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        user:
+          type: integer
+        classe:
+          type: integer
+          nullable: true
     PatchedEvenementRequest:
       type: object
       properties:
@@ -8661,6 +10528,21 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+    PatchedPermissionUploadPatchRequest:
+      type: object
+      description: |-
+        Corps du PATCH. Tous les champs sont facultatifs : le service n'ecrit que
+        ceux qui sont presents, un PATCH {"is_active": false} doit laisser la liste
+        de types intacte.
+      properties:
+        types_autorises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TypeRessourceEnum'
+        is_active:
+          type: boolean
+        note:
+          type: string
     PatchedProfRequest:
       type: object
       properties:
@@ -8679,6 +10561,72 @@ components:
           type: integer
         user:
           type: integer
+    PatchedRenduTPRequest:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        tp:
+          type: integer
+        etudiant:
+          type: integer
+        fichier:
+          type: string
+          minLength: 1
+          maxLength: 500
+        commentaire_etudiant:
+          type: string
+          nullable: true
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        note:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        commentaire_enseignant:
+          type: string
+          nullable: true
+        fichier_correction:
+          type: string
+          nullable: true
+          maxLength: 500
+        date_correction:
+          type: string
+          format: date-time
+          nullable: true
+        corrige_par:
+          type: integer
+          nullable: true
+    PatchedReponseEtudiantQCMRequest:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        tentative:
+          type: integer
+        question:
+          type: integer
+        is_correcte:
+          type: boolean
+        points_obtenus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
     PatchedReponseRequest:
       type: object
       properties:
@@ -8759,10 +10707,13 @@ components:
           nullable: true
           maxLength: 500
         lien:
-          type: string
-          format: uri
           nullable: true
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         taille_fichier:
           type: integer
           maximum: 9223372036854775807
@@ -8792,6 +10743,9 @@ components:
           maximum: 2147483647
           minimum: -2147483648
         niveau:
+          type: integer
+          nullable: true
+        classe:
           type: integer
           nullable: true
         matiere:
@@ -8856,6 +10810,187 @@ components:
           type: string
           minLength: 1
           maxLength: 7
+    PatchedTentativeQCMRequest:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
+        numero_tentative:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        note_obtenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        pourcentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+    PatchedUserUpdateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          title: Adresse électronique
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+    PermissionUpload:
+      type: object
+      description: |-
+        Une permission d'upload, vue par l'admin.
+
+        Les noms et prenoms viennent du User d'authentification, pas du profil
+        Etudiant : c'est ce que le service lit, via get_auth_user_for_etudiant.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        etudiant_id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        email:
+          type: string
+          readOnly: true
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        matricule:
+          type: string
+          readOnly: true
+        types_autorises:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        accorde_par_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - accorde_par_id
+      - created_at
+      - email
+      - etudiant_id
+      - first_name
+      - id
+      - is_active
+      - last_name
+      - matricule
+      - note
+      - types_autorises
+      - updated_at
+      - user_id
+    PermissionUploadGrantRequest:
+      type: object
+      description: |-
+        Corps du POST d'octroi. Seul l'admin l'atteint (IsSuperAdmin).
+
+        Les types sont valides ici plutot que dans le service, pour que le schema
+        annonce la liste autorisee, libelles compris. Le service revérifie : un
+        sérialiseur documente, il n'est pas la seule porte.
+      properties:
+        user_id:
+          type: integer
+        types_autorises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TypeRessourceEnum'
+        is_active:
+          type: boolean
+          default: true
+        note:
+          type: string
+          default: ''
+      required:
+      - types_autorises
+      - user_id
+    PermissionUploadPatchRequest:
+      type: object
+      description: |-
+        Corps du PATCH. Tous les champs sont facultatifs : le service n'ecrit que
+        ceux qui sont presents, un PATCH {"is_active": false} doit laisser la liste
+        de types intacte.
+      properties:
+        types_autorises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TypeRessourceEnum'
+        is_active:
+          type: boolean
+        note:
+          type: string
     Prof:
       type: object
       properties:
@@ -8964,6 +11099,114 @@ components:
       required:
       - reponse
       - user
+    RenduTP:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tp:
+          type: integer
+        etudiant:
+          type: integer
+        fichier:
+          type: string
+          maxLength: 500
+        commentaire_etudiant:
+          type: string
+          nullable: true
+        statut:
+          type: string
+          maxLength: 15
+        note:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        commentaire_enseignant:
+          type: string
+          nullable: true
+        fichier_correction:
+          type: string
+          nullable: true
+          maxLength: 500
+        date_correction:
+          type: string
+          format: date-time
+          nullable: true
+        corrige_par:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - fichier
+      - id
+      - tp
+      - updated_at
+    RenduTPRequest:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        tp:
+          type: integer
+        etudiant:
+          type: integer
+        fichier:
+          type: string
+          minLength: 1
+          maxLength: 500
+        commentaire_etudiant:
+          type: string
+          nullable: true
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        note:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        commentaire_enseignant:
+          type: string
+          nullable: true
+        fichier_correction:
+          type: string
+          nullable: true
+          maxLength: 500
+        date_correction:
+          type: string
+          format: date-time
+          nullable: true
+        corrige_par:
+          type: integer
+          nullable: true
+      required:
+      - fichier
+      - tp
     Reponse:
       type: object
       properties:
@@ -9000,6 +11243,68 @@ components:
       - id
       - sujet
       - updated_at
+    ReponseEtudiantQCM:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tentative:
+          type: integer
+        question:
+          type: integer
+        is_correcte:
+          type: boolean
+        points_obtenus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - question
+      - tentative
+      - updated_at
+    ReponseEtudiantQCMRequest:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        tentative:
+          type: integer
+        question:
+          type: integer
+        is_correcte:
+          type: boolean
+        points_obtenus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      required:
+      - question
+      - tentative
     ReponseRequest:
       type: object
       properties:
@@ -9123,10 +11428,13 @@ components:
           nullable: true
           maxLength: 500
         lien:
-          type: string
-          format: uri
           nullable: true
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         taille_fichier:
           type: integer
           maximum: 9223372036854775807
@@ -9164,6 +11472,9 @@ components:
           format: date-time
           readOnly: true
         niveau:
+          type: integer
+          nullable: true
+        classe:
           type: integer
           nullable: true
         matiere:
@@ -9232,10 +11543,13 @@ components:
           nullable: true
           maxLength: 500
         lien:
-          type: string
-          format: uri
           nullable: true
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         taille_fichier:
           type: integer
           maximum: 9223372036854775807
@@ -9265,6 +11579,9 @@ components:
           maximum: 2147483647
           minimum: -2147483648
         niveau:
+          type: integer
+          nullable: true
+        classe:
           type: integer
           nullable: true
         matiere:
@@ -9522,6 +11839,97 @@ components:
       required:
       - nom
       - slug
+    TentativeQCM:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
+        numero_tentative:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        statut:
+          type: string
+          maxLength: 15
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        note_obtenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        pourcentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - qcm
+      - updated_at
+    TentativeQCMRequest:
+      type: object
+      description: |-
+        Refuse les champs reserves au staff pour un simple etudiant.
+
+        Les serializers listent desormais leurs champs un par un, ce qui evite le
+        "fields = '__all__'" qui laissait un etudiant ecrire sa propre note. Mais
+        lister ne suffit pas : l'enseignant doit garder le droit de corriger. Ce
+        mixin rejette donc explicitement les champs proteges quand la requete ne
+        vient pas d un utilisateur staff, plutot que de les ignorer en silence.
+      properties:
+        qcm:
+          type: integer
+        etudiant:
+          type: integer
+        numero_tentative:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        statut:
+          type: string
+          minLength: 1
+          maxLength: 15
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        note_obtenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        pourcentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+      required:
+      - qcm
     TokenRefresh:
       type: object
       properties:
@@ -9539,6 +11947,102 @@ components:
           minLength: 1
       required:
       - refresh
+    TypeRessourceEnum:
+      enum:
+      - Cours
+      - TD
+      - TP
+      - Devoir
+      - Examen
+      - Rapport
+      - Exercice
+      - Annonce
+      - Document
+      - Autre
+      type: string
+      description: |-
+        * `Cours` - Cours
+        * `TD` - TD
+        * `TP` - TP
+        * `Devoir` - Devoir
+        * `Examen` - Examen
+        * `Rapport` - Rapport de stage ou mémoire
+        * `Exercice` - Exercice
+        * `Annonce` - Annonce
+        * `Document` - Document
+        * `Autre` - Autre
+    TypeUpload:
+      type: object
+      description: Un couple (valeur stockee, libelle affiche) de la liste des types.
+      properties:
+        value:
+          type: string
+        label:
+          type: string
+      required:
+      - label
+      - value
+    UploadEtudiantReponse:
+      type: object
+      description: Ce que renvoie un depot accepte.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        titre:
+          type: string
+          readOnly: true
+        type_ressource:
+          type: string
+          readOnly: true
+        fichier:
+          type: string
+          readOnly: true
+          nullable: true
+        taille_fichier:
+          type: integer
+          readOnly: true
+          nullable: true
+        message:
+          type: string
+          readOnly: true
+      required:
+      - fichier
+      - id
+      - message
+      - taille_fichier
+      - titre
+      - type_ressource
+    UploadEtudiantRequest:
+      type: object
+      description: |-
+        Corps du POST de depot : multipart/form-data.
+
+        Le service valide l'extension, le plafond et la permission ; ce
+        sérialiseur valide la forme. Il ne peut pas valider le fichier lui-meme
+        (taille, extension), donc il ne le fait pas : un "fichier" declare ici
+        peut encore etre refuse, et c'est le service qui refuse.
+      properties:
+        titre:
+          type: string
+          minLength: 1
+          maxLength: 300
+        type_ressource:
+          $ref: '#/components/schemas/TypeRessourceEnum'
+        description:
+          type: string
+          default: ''
+          maxLength: 5000
+        matiere_id:
+          type: integer
+          nullable: true
+        fichier:
+          type: string
+          format: binary
+      required:
+      - fichier
+      - titre
+      - type_ressource
     User:
       type: object
       properties:
@@ -9553,10 +12057,13 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         email:
-          type: string
-          format: email
           title: Adresse électronique
-          maxLength: 254
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         is_active:
           type: boolean
           title: Actif
@@ -9592,16 +12099,57 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         email:
-          type: string
-          format: email
           title: Adresse électronique
-          maxLength: 254
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         password:
           type: string
           writeOnly: true
           minLength: 8
       required:
       - password
+      - username
+    UserUpdateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          title: Adresse électronique
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
       - username
     UserWithMessage:
       type: object

@@ -3,7 +3,8 @@ import { LayoutDashboard, LogOut, UserCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import { getAuth, clearAuth, isAdministrationEcole } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
-import { useSidebarState, SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
+import { useSidebarState } from '../../hooks/useSidebarState'
 import { Button } from '@/components/ui/button'
 
 const navClass = ({ isActive }) =>
@@ -23,6 +24,8 @@ export default function AdministrationLayout() {
     }
   }, [ok, navigate])
 
+  const [sidebarOpen, toggleSidebar] = useSidebarState()
+
   function handleLogout() {
     clearAuth()
     navigate('/login', { replace: true })
@@ -34,8 +37,6 @@ export default function AdministrationLayout() {
 
   const user = auth?.user
   const poste = user?.poste
-
-  const [sidebarOpen, toggleSidebar] = useSidebarState()
 
   return (
     <div className="flex min-h-screen bg-background font-sans text-foreground">
@@ -79,7 +80,7 @@ export default function AdministrationLayout() {
             </div>
             <Button type="button" variant="ghost" onClick={handleLogout} className="w-full justify-start gap-3 px-3 py-2.5">
               <LogOut className="h-5 w-5" strokeWidth={1.5} />
-              D�connexion
+              Déconnexion
             </Button>
           </div>
         </div>

@@ -34,6 +34,23 @@ SECRET_KEY = env(
 DEBUG = env("DEBUG", default=True)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "192.168.1.65"])
 
+# En production, ces deux valeurs par defaut sont interdites : DEBUG laisse
+# fuiter les tracbacks et les variables, et une SECRET_KEY connue permet de
+# forger un jeton JWT. On prefere refuser de demarrer plutot que d'exposer une
+# instance. Voir deployment/README.md.
+if not DEBUG:
+    _problemes = []
+    if SECRET_KEY == "forgot-key":
+        _problemes.append("SECRET_KEY est encore la valeur par défaut")
+    if "localhost" in ALLOWED_HOSTS and len(ALLOWED_HOSTS) == 1:
+        _problemes.append("ALLOWED_HOSTS ne contient que localhost")
+    if _problemes:
+        raise RuntimeError(
+            "Configuration de production incomplète : "
+            + " ; ".join(_problemes)
+            + ". Definissez ces variables dans le .env du serveur."
+        )
+
 # ---------------------------------------------------------------------------
 # Applications : Django + nos apps dans le dossier app/
 # ---------------------------------------------------------------------------
@@ -135,7 +152,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# En production le disque media vit hors du dépôt, pour que le deploiement du
+# code ne puisse pas le remplacer. Voir deployment/nginx/esi_online.conf.
+MEDIA_ROOT = Path(env("MEDIA_ROOT", default=str(BASE_DIR / "media")))
 
 # ---------------------------------------------------------------------------
 # Django REST Framework (JWT pour login unique + redirection par rôle)
@@ -159,6 +178,12 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    # La liste des types de documents sert a la fois a l'upload et a l'admin.
+    # Sans ce nom explicite, drf-spectacular cree deux enums de memes valeurs
+    # sous deux noms differents, et le Swagger affiche le message W001.
+    "ENUM_NAME_OVERRIDES": {
+        "TypeRessourceEnum": "app.core.documents.TYPES_DOCUMENT",
+    },
 }
 
 SWAGGER_UI_SETTINGS = {
@@ -171,6 +196,23 @@ SWAGGER_UI_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = env("CORS_ALLOW_ALL_ORIGINS", default=DEBUG)
 if not CORS_ALLOW_ALL_ORIGINS:
     CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+
+# ---------------------------------------------------------------------------
+# HTTPS
+# ---------------------------------------------------------------------------
+# Rien n'est actif par defaut : avant que le certificat existe, une redirection
+# vers HTTPS rendrait le site injoignable, et HSTS est irreversible — un
+# navigateur qui l'a memorise refuse le HTTP ensuite, meme si le certificat
+# saute. A activer dans le .env du serveur, une fois certbot installe.
+# Voir deployment/README.md.
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=False)
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=False)
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False
+)
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
 
 # ---------------------------------------------------------------------------
 # Frontend (liens dans les emails)

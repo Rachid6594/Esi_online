@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { List, UserPlus, RefreshCw, Eye } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
 import UserDetailModal from './UserDetailModal'
@@ -47,7 +47,7 @@ export default function AdminBibliothecairesListe() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams()
     if (search.trim()) params.set('search', search.trim())
@@ -57,12 +57,12 @@ export default function AdminBibliothecairesListe() {
       .then((data) => setList(Array.isArray(data) ? data : []))
       .catch(() => setList([]))
       .finally(() => setLoading(false))
-  }
+  }, [search])
 
   useEffect(() => {
     const t = setTimeout(load, 250)
     return () => clearTimeout(t)
-  }, [search])
+  }, [load])
 
   function openModal() {
     setEmail('')
@@ -80,7 +80,7 @@ export default function AdminBibliothecairesListe() {
     setError('')
     setSuccess('')
     if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caract�res.')
+      setError('Le mot de passe doit contenir au moins 8 caractères.')
       return
     }
     if (password !== confirmPassword) {
@@ -103,12 +103,12 @@ export default function AdminBibliothecairesListe() {
         return r.ok ? r.json() : r.json().then((data) => Promise.reject(data))
       })
       .catch((err) => {
-        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la cr�ation.')
+        setError(err?.detail || formatValidationErrors(err?.email || err) || 'Erreur lors de la création.')
         return null
       })
       .finally(() => setBusy(false))
     if (!res) return
-    setSuccess(res?.message || 'Compte biblioth�caire cr��.')
+    setSuccess(res?.message || 'Compte bibliothécaire créé.')
     setEmail('')
     setFirstName('')
     setLastName('')
@@ -128,35 +128,35 @@ export default function AdminBibliothecairesListe() {
             <List className="h-7 w-7" strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Gestion des biblioth�caires</h1>
-            <p className="text-muted-foreground">Comptes ayant acc�s � l&apos;espace biblioth�que.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Gestion des bibliothécaires</h1>
+            <p className="text-muted-foreground">Comptes ayant accès à l&apos;espace bibliothèque.</p>
           </div>
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Input
             type="search"
-            placeholder="Rechercher�"
+            placeholder="Rechercher…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full flex-1 sm:flex-none sm:max-w-xs"
           />
           <Button type="button" variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Rafra�chir
+            Rafraîchir
           </Button>
           <Button type="button" onClick={openModal}>
             <UserPlus className="h-4 w-4" />
-            Cr�er
+            Créer
           </Button>
         </div>
       </div>
 
       <Card className="shadow-sm">
         {loading ? (
-          <div className="p-8 text-center text-muted-foreground">Chargement�</div>
+          <div className="p-8 text-center text-muted-foreground">Chargement…</div>
         ) : list.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Aucun biblioth�caire. Cliquez sur � Cr�er � pour en ajouter un.
+            Aucun bibliothécaire. Cliquez sur « Créer » pour en ajouter un.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -164,7 +164,7 @@ export default function AdminBibliothecairesListe() {
               <thead>
                 <tr className="border-b border-border bg-background text-left text-muted-foreground">
                   <th className="px-4 py-3 font-medium">Nom</th>
-                  <th className="px-4 py-3 font-medium">Pr�nom</th>
+                  <th className="px-4 py-3 font-medium">Prénom</th>
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Statut</th>
                   <th className="px-4 py-3 text-right font-medium">Actions</th>
@@ -173,8 +173,8 @@ export default function AdminBibliothecairesListe() {
               <tbody>
                 {list.map((b) => (
                   <tr key={b.id} className="border-b border-border hover:bg-background">
-                    <td className="px-4 py-3 text-foreground">{b.last_name || '�'}</td>
-                    <td className="px-4 py-3 text-foreground">{b.first_name || '�'}</td>
+                    <td className="px-4 py-3 text-foreground">{b.last_name || '—'}</td>
+                    <td className="px-4 py-3 text-foreground">{b.first_name || '—'}</td>
                     <td className="px-4 py-3 text-foreground text-foreground">{b.email}</td>
                     <td className="px-4 py-3">
                       <Badge variant={b.is_active ? 'secondary' : 'outline'}>
@@ -200,7 +200,7 @@ export default function AdminBibliothecairesListe() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              Cr�er un biblioth�caire
+              Créer un bibliothécaire
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -220,8 +220,8 @@ export default function AdminBibliothecairesListe() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="bib_first">Pr�nom</Label>
-                <Input id="bib_first" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Pr�nom" />
+                <Label htmlFor="bib_first">Prénom</Label>
+                <Input id="bib_first" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Prénom" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="bib_last">Nom</Label>
@@ -230,18 +230,18 @@ export default function AdminBibliothecairesListe() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="bib_pass">Mot de passe <span className="text-destructive">*</span></Label>
-              <Input id="bib_pass" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Au moins 8 caract�res" />
+              <Input id="bib_pass" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Au moins 8 caractères" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bib_confirm">Confirmer le mot de passe <span className="text-destructive">*</span></Label>
-              <Input id="bib_confirm" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Rep�ter le mot de passe" />
+              <Input id="bib_confirm" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Répéter le mot de passe" />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
                 Annuler
               </Button>
               <Button type="submit" disabled={busy}>
-                {busy ? 'Cr�ation�' : 'Cr�er le compte'}
+                {busy ? 'Création…' : 'Créer le compte'}
               </Button>
             </DialogFooter>
           </form>

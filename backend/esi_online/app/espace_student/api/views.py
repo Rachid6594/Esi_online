@@ -6,6 +6,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from app.espace_student.services import EtudiantService
 from app.espace_student.api.serializers import EtudiantSerializer
 from app.core.exceptions import NotFoundError
+from app.espace_student.utils import get_etudiant_for_auth_user
 from app.espace_student.permissions.espace_student_permissions import (
     CanViewEtudiant, CanCreateEtudiant,
     CanUpdateEtudiant, CanDeleteEtudiant,
@@ -27,6 +28,54 @@ from app.espace_student.api.serializers import ReponseEtudiantQCMSerializer
 from app.espace_student.permissions.espace_student_permissions import (
     CanViewReponseEtudiantQCM, CanCreateReponseEtudiantQCM,
     CanUpdateReponseEtudiantQCM, CanDeleteReponseEtudiantQCM,
+)
+
+
+# --- Portee des donnees etUDIantes -----------------------------------------
+# Ces endpoints sont montes sous /api/eleve/ et lisent des donnees qui
+# appartiennent a un etudiant precis. Sans le filtrage ci-dessous, un compte
+# disposant de la permission de lecture voyait les rendus et les tentatives de
+# toute l'ecole. Le staff (enseignant, admin) garde la vue complete, c'est lui
+# qui corrige.
+
+
+def _est_staff(request) -> bool:
+    return bool(request.user and request.user.is_authenticated and request.user.is_staff)
+
+
+def _etudiant_du_requester(request):
+    """Profil Etudiant du demandeur, ou None s'il n'en a pas encore."""
+    return get_etudiant_for_auth_user(request.user)
+
+
+def _contexte(request):
+    """Les serializers filtrent les champs proteges grace a la request."""
+    return {"request": request}
+
+
+def _liste_scopee(request, service):
+    """Queryset de la liste : tout pour le staff, juste son profil sinon."""
+    if _est_staff(request):
+        return service.list_all()
+    etudiant = _etudiant_du_requester(request)
+    if etudiant is None:
+        return None
+    return service.list_pour_etudiant(etudiant)
+
+
+def _detail_scope(request, service, pk: int):
+    """Objet du detail, restreint au proprietaire pour un non-staff."""
+    if _est_staff(request):
+        return service.get_or_raise(pk)
+    etudiant = _etudiant_du_requester(request)
+    if etudiant is None:
+        return None
+    return service.get_pour_etudiant(pk, etudiant)
+
+
+AUCUN_PROFIL_ETUDIANT = Response(
+    {"detail": "Ce compte n'a pas de profil etudiant associe."},
+    status=status.HTTP_403_FORBIDDEN,
 )
 
 # --- Etudiant (CRUD + permissions) ---
@@ -85,18 +134,33 @@ def etudiant_detail(request, pk: int):
 ])
 def rendutp_list(request):
     """GET: liste | POST: création."""
-    if request.method == "GET":
-        service = RenduTPService()
-        qs = service.list_all()
-        serializer = RenduTPSerializer(qs, many=True)
-        return Response(serializer.data)
-    # POST
-    serializer = RenduTPSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
     service = RenduTPService()
-    obj = service.create(**serializer.validated_data)
-    serializer = RenduTPSerializer(obj)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    if request.method == "GET":
+        qs = _liste_scopee(request, service)
+        if qs is None:
+            return AUCUN_PROFIL_ETUDIANT
+        return Response(RenduTPSerializer(qs, many=True, context=_contexte(request)).data)
+    # POST
+    serializer = RenduTPSerializer(data=request.data, context=_contexte(request))
+    serializer.is_valid(raise_exception=True)
+    donnees = serializer.validated_data
+    if not _est_staff(request):
+        # Un etudiant depose pour lui-meme : le champ "etudiant" envoye par le
+        # client est ecrase, sinon il pourrait deposer a la place d un autre.
+        etudiant = _etudiant_du_requester(request)
+        if etudiant is None:
+            return AUCUN_PROFIL_ETUDIANT
+        donnees["etudiant"] = etudiant
+    elif not donnees.get("etudiant"):
+        return Response(
+            {"etudiant": ["Ce champ est obligatoire pour un dépôt fait par un enseignant."]},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    obj = service.create(**donnees)
+    return Response(
+        RenduTPSerializer(obj, context=_contexte(request)).data,
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["GET", "PUT", "PATCH", "DELETE"])
@@ -109,21 +173,26 @@ def rendutp_detail(request, pk: int):
     """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
     service = RenduTPService()
     try:
-        obj = service.get_or_raise(pk)
+        obj = _detail_scope(request, service, pk)
     except NotFoundError as e:
         return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if obj is None:
+        # Rendu absent, ou appartenant a quelqu'un d'autre : meme reponse dans
+        # les deux cas, pour ne pas divulguer l'existence du rendu.
+        return Response({"detail": "Rendu introuvable."}, status=status.HTTP_404_NOT_FOUND)
     if request.method == "GET":
-        serializer = RenduTPSerializer(obj)
-        return Response(serializer.data)
+        return Response(RenduTPSerializer(obj, context=_contexte(request)).data)
     if request.method == "DELETE":
         service.delete(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
     # PUT / PATCH
     partial = request.method == "PATCH"
-    serializer = RenduTPSerializer(obj, data=request.data, partial=partial)
+    serializer = RenduTPSerializer(
+        obj, data=request.data, partial=partial, context=_contexte(request)
+    )
     serializer.is_valid(raise_exception=True)
     updated = service.update(pk, **serializer.validated_data)
-    return Response(RenduTPSerializer(updated).data)
+    return Response(RenduTPSerializer(updated, context=_contexte(request)).data)
 
 # --- TentativeQCM (CRUD + permissions) ---
 @api_view(["GET", "POST"])
@@ -133,18 +202,35 @@ def rendutp_detail(request, pk: int):
 ])
 def tentativeqcm_list(request):
     """GET: liste | POST: création."""
-    if request.method == "GET":
-        service = TentativeQCMService()
-        qs = service.list_all()
-        serializer = TentativeQCMSerializer(qs, many=True)
-        return Response(serializer.data)
-    # POST
-    serializer = TentativeQCMSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
     service = TentativeQCMService()
-    obj = service.create(**serializer.validated_data)
-    serializer = TentativeQCMSerializer(obj)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    if request.method == "GET":
+        qs = _liste_scopee(request, service)
+        if qs is None:
+            return AUCUN_PROFIL_ETUDIANT
+        return Response(TentativeQCMSerializer(qs, many=True, context=_contexte(request)).data)
+    # POST : ouvrir une tentative
+    serializer = TentativeQCMSerializer(data=request.data, context=_contexte(request))
+    serializer.is_valid(raise_exception=True)
+    donnees = serializer.validated_data
+    if not _est_staff(request):
+        etudiant = _etudiant_du_requester(request)
+        if etudiant is None:
+            return AUCUN_PROFIL_ETUDIANT
+        donnees["etudiant"] = etudiant
+        # Le client ne choisit pas son numero de tentative ni son statut : ces
+        # champs sont proteges et rejetes plus haut s il les envoie.
+        donnees.setdefault("numero_tentative", 1)
+        donnees.setdefault("statut", "EN_COURS")
+    elif not donnees.get("etudiant"):
+        return Response(
+            {"etudiant": ["Ce champ est obligatoire pour une tentative créée par un enseignant."]},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    obj = service.create(**donnees)
+    return Response(
+        TentativeQCMSerializer(obj, context=_contexte(request)).data,
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["GET", "PUT", "PATCH", "DELETE"])
@@ -157,21 +243,26 @@ def tentativeqcm_detail(request, pk: int):
     """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
     service = TentativeQCMService()
     try:
-        obj = service.get_or_raise(pk)
+        obj = _detail_scope(request, service, pk)
     except NotFoundError as e:
         return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if obj is None:
+        return Response(
+            {"detail": "Tentative introuvable."}, status=status.HTTP_404_NOT_FOUND
+        )
     if request.method == "GET":
-        serializer = TentativeQCMSerializer(obj)
-        return Response(serializer.data)
+        return Response(TentativeQCMSerializer(obj, context=_contexte(request)).data)
     if request.method == "DELETE":
         service.delete(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
     # PUT / PATCH
     partial = request.method == "PATCH"
-    serializer = TentativeQCMSerializer(obj, data=request.data, partial=partial)
+    serializer = TentativeQCMSerializer(
+        obj, data=request.data, partial=partial, context=_contexte(request)
+    )
     serializer.is_valid(raise_exception=True)
     updated = service.update(pk, **serializer.validated_data)
-    return Response(TentativeQCMSerializer(updated).data)
+    return Response(TentativeQCMSerializer(updated, context=_contexte(request)).data)
 
 # --- ReponseEtudiantQCM (CRUD + permissions) ---
 @api_view(["GET", "POST"])
@@ -181,18 +272,36 @@ def tentativeqcm_detail(request, pk: int):
 ])
 def reponseetudiantqcm_list(request):
     """GET: liste | POST: création."""
-    if request.method == "GET":
-        service = ReponseEtudiantQCMService()
-        qs = service.list_all()
-        serializer = ReponseEtudiantQCMSerializer(qs, many=True)
-        return Response(serializer.data)
-    # POST
-    serializer = ReponseEtudiantQCMSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
     service = ReponseEtudiantQCMService()
+    if request.method == "GET":
+        qs = _liste_scopee(request, service)
+        if qs is None:
+            return AUCUN_PROFIL_ETUDIANT
+        return Response(
+            ReponseEtudiantQCMSerializer(qs, many=True, context=_contexte(request)).data
+        )
+    # POST : repondre a une question
+    serializer = ReponseEtudiantQCMSerializer(
+        data=request.data, context=_contexte(request)
+    )
+    serializer.is_valid(raise_exception=True)
+    if not _est_staff(request):
+        # La reponse se rattache a une tentative : on verifie qu elle est bien
+        # celle du demandeur, sinon il repondrait dans la tentative d un autre.
+        etudiant = _etudiant_du_requester(request)
+        if etudiant is None:
+            return AUCUN_PROFIL_ETUDIANT
+        tentative = serializer.validated_data["tentative"]
+        if not TentativeQCMService().get_pour_etudiant(tentative.pk, etudiant):
+            return Response(
+                {"tentative": ["Tentative introuvable."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
     obj = service.create(**serializer.validated_data)
-    serializer = ReponseEtudiantQCMSerializer(obj)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(
+        ReponseEtudiantQCMSerializer(obj, context=_contexte(request)).data,
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["GET", "PUT", "PATCH", "DELETE"])
@@ -205,21 +314,30 @@ def reponseetudiantqcm_detail(request, pk: int):
     """GET: détail | PUT/PATCH: modification | DELETE: suppression."""
     service = ReponseEtudiantQCMService()
     try:
-        obj = service.get_or_raise(pk)
+        obj = _detail_scope(request, service, pk)
     except NotFoundError as e:
         return Response({"detail": str(e.message)}, status=status.HTTP_404_NOT_FOUND)
+    if obj is None:
+        return Response(
+            {"detail": "Reponse introuvable."}, status=status.HTTP_404_NOT_FOUND
+        )
     if request.method == "GET":
-        serializer = ReponseEtudiantQCMSerializer(obj)
-        return Response(serializer.data)
+        return Response(
+            ReponseEtudiantQCMSerializer(obj, context=_contexte(request)).data
+        )
     if request.method == "DELETE":
         service.delete(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
     # PUT / PATCH
     partial = request.method == "PATCH"
-    serializer = ReponseEtudiantQCMSerializer(obj, data=request.data, partial=partial)
+    serializer = ReponseEtudiantQCMSerializer(
+        obj, data=request.data, partial=partial, context=_contexte(request)
+    )
     serializer.is_valid(raise_exception=True)
     updated = service.update(pk, **serializer.validated_data)
-    return Response(ReponseEtudiantQCMSerializer(updated).data)
+    return Response(
+        ReponseEtudiantQCMSerializer(updated, context=_contexte(request)).data
+    )
 
 
 def _decorate_crud_endpoints(resource_name: str, serializer_class):

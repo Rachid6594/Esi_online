@@ -15,18 +15,18 @@ export default function AdministrationDashboard() {
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
-            Tableau de bord � Administration de l&apos;�cole
+            Tableau de bord — Administration de l&apos;école
           </h1>
           <p className="text-muted-foreground">
             Bienvenue, <span className="font-medium text-foreground">{displayName}</span>
             {poste && (
-              <> � <span className="text-muted-foreground">{poste}</span></>
+              <> — <span className="text-muted-foreground">{poste}</span></>
             )}.
           </p>
         </div>
       </div>
       <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-        Espace r�serv� � l&apos;administration de l&apos;�cole. Contenu du tableau de bord � d�finir.
+        Espace réservé à l&apos;administration de l&apos;école. Contenu du tableau de bord à définir.
       </div>
     </div>
   )

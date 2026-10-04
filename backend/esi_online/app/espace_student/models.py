@@ -116,16 +116,13 @@ class ReponseEtudiantQCM(models.Model):
         return str(self.title if hasattr(self, 'title') else self.id)
 
 
-TYPE_UPLOAD_CHOICES = [
-    ("Cours", "Cours"),
-    ("TD", "TD"),
-    ("TP", "TP"),
-    ("Devoir", "Devoir"),
-    ("Examen", "Examen"),
-    ("Autre", "Autre"),
-]
+from app.core.documents import TYPES_DOCUMENT, TYPES_DOCUMENT_VALIDES
 
-TYPES_UPLOAD_VALIDES = {c[0] for c in TYPE_UPLOAD_CHOICES}
+# La liste des types de documents est definie une seule fois dans
+# app/core/documents.py, et partagee avec l'espace admin. Ces deux noms la
+# reutilisent parce que l'API d'upload et les tests existants les citent.
+TYPE_UPLOAD_CHOICES = TYPES_DOCUMENT
+TYPES_UPLOAD_VALIDES = TYPES_DOCUMENT_VALIDES
 
 
 class PermissionUploadEtudiant(models.Model):

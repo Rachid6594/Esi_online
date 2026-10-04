@@ -1,4 +1,4 @@
-import { apiPost, apiGet } from '../axiosConfig'
+import { apiGet } from '../axiosConfig'
 import { ENDPOINTS } from '../endpoints'
 
 /**

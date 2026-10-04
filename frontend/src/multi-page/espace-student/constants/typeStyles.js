@@ -1,4 +1,15 @@
-import { BookOpen, ClipboardList, GraduationCap, FileText } from 'lucide-react'
+import {
+  BookOpen,
+  ClipboardList,
+  FileCheck,
+  FileText,
+  FlaskConical,
+  GraduationCap,
+  ListChecks,
+  Megaphone,
+  NotebookPen,
+  Shapes,
+} from 'lucide-react'
 
 const NEUTRAL_BADGE = 'bg-muted text-foreground'
 const NEUTRAL_ICON = 'bg-muted text-foreground'
@@ -46,12 +57,22 @@ export const ICON_COLOR_EXTENDED = {
   slate: NEUTRAL_EXTENDED,
 }
 
-/* ── Config documents ── */
+/* ── Config documents ──
+ * Une entrée par type déposé (voir app/core/documents.py côté Django). Sans
+ * entrée, tout retombait sur DEFAULT_TYPE_CONFIG et l'icône FileText : un
+ * rapport de stage s'affichait donc comme un document quelconque.
+ * La palette reste neutre, comme les autres cartes de type. */
 export const TYPE_CONFIG = {
   Cours: { ...NEUTRAL_TYPE, icon: BookOpen },
   TD: { ...NEUTRAL_TYPE, icon: ClipboardList },
-  TP: { ...NEUTRAL_TYPE, icon: ClipboardList },
+  TP: { ...NEUTRAL_TYPE, icon: FlaskConical },
+  Devoir: { ...NEUTRAL_TYPE, icon: NotebookPen },
   Examen: { ...NEUTRAL_TYPE, icon: GraduationCap },
+  Rapport: { ...NEUTRAL_TYPE, icon: FileCheck },
+  Exercice: { ...NEUTRAL_TYPE, icon: ListChecks },
+  Annonce: { ...NEUTRAL_TYPE, icon: Megaphone },
+  Document: { ...NEUTRAL_TYPE, icon: FileText },
+  Autre: { ...NEUTRAL_TYPE, icon: Shapes },
 }
 export const DEFAULT_TYPE_CONFIG = {
   ...NEUTRAL_TYPE,

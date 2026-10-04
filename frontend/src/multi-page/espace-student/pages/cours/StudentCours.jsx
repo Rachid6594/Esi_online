@@ -37,7 +37,7 @@ export default function StudentCours() {
           <div>
             <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Cours</h1>
             <p className="text-sm text-muted-foreground sm:text-base">
-              {loading ? '�' : `${courses.length} mati�re${courses.length > 1 ? 's' : ''} � ${totalCredits} cr�dits`}
+              {loading ? '…' : `${courses.length} matière${courses.length > 1 ? 's' : ''} — ${totalCredits} crédits`}
             </p>
           </div>
         </div>
@@ -104,10 +104,10 @@ function CourseCard({ course, onClick }) {
           <div className="flex items-center gap-1.5"><User2 className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{course.professeur}</span></div>
           <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 shrink-0" /><span>{course.horaire}</span></div>
           <div className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" /><span>{course.salle}</span></div>
-          <div className="flex items-center gap-1.5"><Award className="h-3.5 w-3.5 shrink-0" /><span>{course.credits} cr�dits</span></div>
+          <div className="flex items-center gap-1.5"><Award className="h-3.5 w-3.5 shrink-0" /><span>{course.credits} crédits</span></div>
         </div>
         <div className="mt-3 flex items-center justify-center rounded-lg bg-muted py-1.5 text-[11px] font-medium text-muted-foreground transition group-hover:bg-primary/10 group-hover:text-primary dark:group-hover:bg-primary/15">
-          Cliquer pour voir les d�tails
+          Cliquer pour voir les détails
         </div>
       </CardContent>
     </Card>
