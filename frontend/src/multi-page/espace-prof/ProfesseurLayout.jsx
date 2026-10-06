@@ -16,16 +16,18 @@ export default function ProfesseurLayout() {
   const auth = getAuth()
   const ok = isProfesseur()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [lastPath, setLastPath] = useState(location.pathname)
+
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname)
+    setMobileOpen(false)
+  }
 
   useEffect(() => {
     if (!ok) {
       navigate('/login', { replace: true })
     }
   }, [ok, navigate])
-
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [location.pathname])
 
   function handleLogout() {
     clearAuth()

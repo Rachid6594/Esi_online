@@ -14,7 +14,7 @@ export default function DocumentUploadModal({ open = true, onClose, onUploaded, 
   const [typeDoc, setTypeDoc] = useState('COURS')
   const [matiereId, setMatiereId] = useState('')
   const [description, setDescription] = useState('')
-  const [annee, setAnnee] = useState(new Date().getFullYear())
+  const annee = new Date().getFullYear()
   
   const [matieres, setMatieres] = useState([])
   const [loadingMatieres, setLoadingMatieres] = useState(false)
@@ -176,7 +176,7 @@ export default function DocumentUploadModal({ open = true, onClose, onUploaded, 
         const errData = await response.json().catch(() => ({}))
         setError(errData.detail || errData.fichier?.[0] || 'Erreur lors du téléversement du document.')
       }
-    } catch (err) {
+    } catch {
       setError('Une erreur réseau est survenue. Veuillez réessayer.')
     } finally {
       setUploading(false)

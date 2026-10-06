@@ -17,16 +17,18 @@ export default function AdministrationLayout() {
   const auth = getAuth()
   const ok = isAdministrationEcole()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [lastPath, setLastPath] = useState(location.pathname)
+
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname)
+    setMobileOpen(false)
+  }
 
   useEffect(() => {
     if (!ok) {
       navigate('/login', { replace: true })
     }
   }, [ok, navigate])
-
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [location.pathname])
 
   function handleLogout() {
     clearAuth()
@@ -39,7 +41,6 @@ export default function AdministrationLayout() {
 
   const user = auth?.user
   const poste = user?.poste
-  const userName = user?.first_name || user?.email?.split('@')[0] || 'Administration'
 
   const sidebarContent = (
     <div className="flex h-full flex-col">

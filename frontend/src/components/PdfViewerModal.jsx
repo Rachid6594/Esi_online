@@ -14,15 +14,6 @@ export default function PdfViewerModal({ document: doc, onClose, onDownload }) {
   const [currentPage, setCurrentPage] = useState(1)
   const [pdfError, setPdfError] = useState(false)
 
-  if (!doc) return null
-
-  const fileUrl = doc.fichier_url || doc.fichier || ''
-  const isPdf = fileUrl?.toLowerCase().endsWith('.pdf')
-
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 200))
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50))
-  const handleRotate = () => setRotation((prev) => (prev + 90) % 360)
-
   const onDocumentLoadSuccess = useCallback(({ numPages }) => {
     setNumPages(numPages)
     setCurrentPage(1)
@@ -32,6 +23,15 @@ export default function PdfViewerModal({ document: doc, onClose, onDownload }) {
   const onDocumentLoadError = useCallback(() => {
     setPdfError(true)
   }, [])
+
+  if (!doc) return null
+
+  const fileUrl = doc.fichier_url || doc.fichier || ''
+  const isPdf = fileUrl?.toLowerCase().endsWith('.pdf')
+
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 200))
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50))
+  const handleRotate = () => setRotation((prev) => (prev + 90) % 360)
 
   const goToPrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1))
   const goToNextPage = () => setCurrentPage((p) => Math.min(p + 1, numPages || 1))

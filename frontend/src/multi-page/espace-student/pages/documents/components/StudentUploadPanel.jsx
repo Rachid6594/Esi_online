@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Upload, FileText, X, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { fetchWithAuth, getAccessToken } from '../../../../../auth'
 import { Button } from '@/components/ui/button'
@@ -30,18 +30,23 @@ export default function StudentUploadPanel({ onUploaded }) {
   const [progress, setProgress] = useState(0)
   const fileInputRef = useRef(null)
 
-  const loadPerm = useCallback(() => {
-    setLoading(true)
+  useEffect(() => {
+    let active = true
     fetchWithAuth(API_BASE, `${API_BASE}/api/eleve/me/upload-permission/`)
       .then((r) => (r && r.ok ? r.json() : null))
-      .then((data) => setPerm(data))
-      .catch(() => setPerm(null))
-      .finally(() => setLoading(false))
+      .then((data) => {
+        if (active) setPerm(data)
+      })
+      .catch(() => {
+        if (active) setPerm(null)
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
   }, [])
-
-  useEffect(() => {
-    loadPerm()
-  }, [loadPerm])
 
   if (loading || !perm?.allowed) return null
 

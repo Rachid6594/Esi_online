@@ -10,20 +10,40 @@ export default function BibliothequeStatsHistory({ userRole = 'user' }) {
   const [teacherStats, setTeacherStats] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
     setLoading(true)
+  }
+
+  useEffect(() => {
+    let active = true
     if (activeTab === 'history') {
       fetchWithAuth(API_BASE, `${API_BASE}/api/library/my-downloads/`)
         .then((r) => (r && r.ok ? r.json() : []))
-        .then((data) => setMyDownloads(Array.isArray(data) ? data : []))
-        .catch(() => setMyDownloads([]))
-        .finally(() => setLoading(false))
+        .then((data) => {
+          if (active) setMyDownloads(Array.isArray(data) ? data : [])
+        })
+        .catch(() => {
+          if (active) setMyDownloads([])
+        })
+        .finally(() => {
+          if (active) setLoading(false)
+        })
     } else {
       fetchWithAuth(API_BASE, `${API_BASE}/api/library/teacher-stats/`)
         .then((r) => (r && r.ok ? r.json() : []))
-        .then((data) => setTeacherStats(Array.isArray(data) ? data : []))
-        .catch(() => setTeacherStats([]))
-        .finally(() => setLoading(false))
+        .then((data) => {
+          if (active) setTeacherStats(Array.isArray(data) ? data : [])
+        })
+        .catch(() => {
+          if (active) setTeacherStats([])
+        })
+        .finally(() => {
+          if (active) setLoading(false)
+        })
+    }
+    return () => {
+      active = false
     }
   }, [activeTab])
 
@@ -34,7 +54,7 @@ export default function BibliothequeStatsHistory({ userRole = 'user' }) {
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 dark:border-gray-700">
         <button
-          onClick={() => setActiveTab('history')}
+          onClick={() => handleTabChange('history')}
           className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
             activeTab === 'history'
               ? 'bg-esi-orange text-white shadow-sm'
@@ -47,7 +67,7 @@ export default function BibliothequeStatsHistory({ userRole = 'user' }) {
 
         {isTeacherOrAdmin && (
           <button
-            onClick={() => setActiveTab('teacher_stats')}
+            onClick={() => handleTabChange('teacher_stats')}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
               activeTab === 'teacher_stats'
                 ? 'bg-esi-orange text-white shadow-sm'

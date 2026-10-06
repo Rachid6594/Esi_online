@@ -1,4 +1,4 @@
-﻿import { Outlet, useNavigate, NavLink, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate, NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   LogOut,
@@ -84,7 +84,6 @@ export default function AdminLayout() {
   const isBibliothecaires = location.pathname.startsWith('/admin/bibliothecaires')
   const isProfesseurs = location.pathname.startsWith('/admin/professeurs')
   const isContenu = location.pathname.startsWith('/admin/contenu') || location.pathname.startsWith('/admin/bibliotheque')
-  const isBibliotheque = location.pathname.startsWith('/admin/bibliotheque')
   const isParametres = location.pathname.startsWith('/admin/parametres')
   // Ouverture des sections du menu : l'etat n'est stocke que pour les sections
   // que l'utilisateur a explicitement ouvertes ou fermees. Sans override, la

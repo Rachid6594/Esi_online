@@ -599,13 +599,12 @@ export default function BibliothequeExplorer({ canUpload = false, currentUser = 
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
-                  {documents.map((doc, idx) => {
+                  {documents.map((doc) => {
                     const typeCfg = TYPE_CONFIG[doc.type] || { label: doc.type, badge: 'bg-slate-100 text-slate-700' }
                     const fmt = getFormatInfo(doc)
                     const canDelete =
                       isAdminView ||
                       (currentUser && (currentUser.is_superuser || currentUser.is_staff || currentUser.id === doc.auteur_id))
-                    const dateStr = formatDate(doc.created_at || doc.date || doc.date_upload)
                     const fileSize = formatSize(doc.fichier_taille || doc.taille)
 
                     return (
