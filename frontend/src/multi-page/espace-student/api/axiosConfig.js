@@ -15,8 +15,9 @@ const BASE_URL = '' // Proxy Vite ou URL directe
  */
 export async function apiClient(url, options = {}, _isRetry = false) {
   const token = getAccessToken()
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers || {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }

@@ -5,18 +5,30 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Compat héritage : anciennes classes esi-* → noir/blanc shadcn */
+/* Couleurs ESI institutionnelles — restaurées depuis le design original */
 @theme {
-  --color-esi-primary: var(--primary);
-  --color-esi-primary-hover: color-mix(in oklch, var(--primary) 85%, black);
-  --color-esi-primary-light: var(--muted);
-  --color-esi-orange: var(--foreground);
-  --color-esi-orange-hover: var(--foreground);
-  --color-esi-orange-light: var(--muted);
-  --color-esi-green: var(--foreground);
-  --color-esi-green-hover: var(--foreground);
-  --color-esi-muted: var(--muted-foreground);
-  --color-esi-border: var(--border);
+  /* Rouge bordeaux institutionnel */
+  --color-esi-primary:       #8B3A3D;
+  --color-esi-primary-hover: #722F31;
+  --color-esi-primary-light: #F0E4E4;
+
+  /* Orange accent */
+  --color-esi-orange:        #C45C26;
+  --color-esi-orange-hover:  #A34D1F;
+  --color-esi-orange-light:  #F5E6DF;
+
+  /* Vert secondaire */
+  --color-esi-green:         #2D6A32;
+  --color-esi-green-hover:   #235726;
+
+  /* Neutres */
+  --color-esi-muted:         #64748B;
+  --color-esi-border:        #E2E8F0;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.25s ease-out both;
+  --animate-slide-up: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-shimmer: shimmer 1.5s linear infinite;
 }
 
 @theme inline {
@@ -143,5 +155,88 @@
   }
   #root {
     @apply min-h-screen;
+  }
+}
+
+/* ── Keyframes ───────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.08); }
+}
+
+/* ── Utilities ───────────────────────────────────────────── */
+@layer utilities {
+  /* Fade-in animation */
+  .animate-fade-in  { animation: fade-in  0.25s ease-out both; }
+
+  /* Slide-up animation */
+  .animate-slide-up { animation: slide-up 0.30s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* Shimmer skeleton */
+  .animate-shimmer {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+  }
+
+  /* Staggered card delays */
+  .delay-50  { animation-delay: 50ms;  }
+  .delay-100 { animation-delay: 100ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-250 { animation-delay: 250ms; }
+  .delay-300 { animation-delay: 300ms; }
+
+  /* Card glass shimmer on hover */
+  .card-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255,255,255,0.18) 50%,
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .card-shine:hover::after { opacity: 1; }
+
+  /* ESI primary gradient border */
+  .esi-gradient-border {
+    border: 1.5px solid transparent;
+    background-clip: padding-box;
+    background-origin: border-box;
+  }
+
+  /* Glow on esi-orange buttons */
+  .btn-esi-glow:hover {
+    box-shadow: 0 4px 18px rgba(196, 92, 38, 0.35);
+  }
+
+  /* Sidebar active glow */
+  .nav-active-glow {
+    box-shadow: inset 3px 0 0 var(--color-esi-primary);
   }
 }

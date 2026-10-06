@@ -32,7 +32,24 @@ SECRET_KEY = env(
     default="forgot-key",
 )
 DEBUG = env("DEBUG", default=True)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "192.168.1.65"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1", "192.168.1.65", "[::1]"])
+
+# En production, ces deux valeurs par defaut sont interdites : DEBUG laisse
+# fuiter les tracbacks et les variables, et une SECRET_KEY connue permet de
+# forger un jeton JWT. On prefere refuser de demarrer plutot que d'exposer une
+# instance. Voir deployment/README.md.
+if not DEBUG:
+    _problemes = []
+    if SECRET_KEY == "forgot-key":
+        _problemes.append("SECRET_KEY est encore la valeur par défaut")
+    if "localhost" in ALLOWED_HOSTS and len(ALLOWED_HOSTS) == 1:
+        _problemes.append("ALLOWED_HOSTS ne contient que localhost")
+    if _problemes:
+        raise RuntimeError(
+            "Configuration de production incomplète : "
+            + " ; ".join(_problemes)
+            + ". Definissez ces variables dans le .env du serveur."
+        )
 
 # En production, ces deux valeurs par defaut sont interdites : DEBUG laisse
 # fuiter les tracbacks et les variables, et une SECRET_KEY connue permet de
@@ -112,7 +129,7 @@ TEMPLATES = [
 # ---------------------------------------------------------------------------
 # Base de données PostgreSQL (variables dans .env)
 # ---------------------------------------------------------------------------
-DATABASES = {
+'''DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env("DB_NAME", default="**"),
@@ -123,8 +140,14 @@ DATABASES = {
         "OPTIONS": env.dict("DB_OPTIONS", default={}),
     }
 }
+'''
 
-
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 # ---------------------------------------------------------------------------
 # Validation des mots de passe

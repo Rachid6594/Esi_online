@@ -21,6 +21,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+from app.espace_library.urls import library_urlpatterns
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
@@ -34,6 +36,7 @@ urlpatterns = [
     path("api/eleve/", include("app.espace_student.urls")),
     path("api/prof/", include("app.espace_prof.urls")),
     path("api/bibliotheque/", include("app.espace_library.urls")),
+    path("api/library/", include((library_urlpatterns, "library"))),
 ]
 
 if settings.DEBUG:

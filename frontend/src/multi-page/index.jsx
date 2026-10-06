@@ -24,6 +24,7 @@ export {
   AdminParametres,
   AdminEtablissement,
   AdminUploadPermissions,
+  AdminBibliotheque,
 } from './espace-admin'
 export {
   StudentLayout,

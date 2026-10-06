@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { UserPlus, Mail, Lock, User, GraduationCap } from 'lucide-react'
+import { UserPlus, Mail, Lock, User, GraduationCap, ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,26 +12,30 @@ const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
 function AuthShell({ children }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+    <div className="min-h-screen bg-gradient-to-b from-[#8B3A3D]/5 via-background to-background text-foreground flex flex-col justify-between">
+      <header className="border-b border-border/80 bg-background/90 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+          <Link to="/" className="group flex items-center gap-2.5 font-bold">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B3A3D] to-[#C45C26] text-white shadow-md shadow-[#8B3A3D]/20">
               <GraduationCap className="h-5 w-5" />
             </span>
-            <span>ESI Online</span>
+            <span className="text-base font-extrabold bg-gradient-to-r from-[#8B3A3D] to-[#C45C26] bg-clip-text text-transparent">
+              ESI Online
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/">Retour à l&apos;accueil</Link>
+            <Button variant="ghost" size="sm" asChild className="text-xs">
+              <Link to="/" className="flex items-center gap-1.5">
+                <ArrowLeft className="h-3.5 w-3.5" /> Accueil
+              </Link>
             </Button>
           </div>
         </div>
       </header>
       {children}
-      <footer className="border-t bg-card py-6 text-center text-sm text-muted-foreground">
-        © ESI Online — École Supérieure d&apos;Informatique
+      <footer className="border-t border-border/80 bg-background/80 py-4 text-center text-xs text-muted-foreground">
+        © {new Date().getFullYear()} ESI Online — Portail officiel de l'École Supérieure d'Informatique
       </footer>
     </div>
   )
@@ -42,6 +46,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -74,7 +80,7 @@ export default function RegisterPage() {
       }
       setSuccess(true)
     } catch {
-      setError('Erreur réseau. Réessayez.')
+      setError('Erreur réseau. Impossible de contacter le serveur.')
     } finally {
       setLoading(false)
     }
@@ -83,18 +89,21 @@ export default function RegisterPage() {
   if (success) {
     return (
       <AuthShell>
-        <main className="flex min-h-[calc(100vh-140px)] items-center justify-center px-4 py-12">
-          <Card className="w-full max-w-md text-center shadow-sm">
-            <CardContent className="pt-8">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-foreground">
-                <UserPlus className="h-6 w-6" strokeWidth={1.5} />
+        <main className="flex min-h-[calc(100vh-140px)] items-center justify-center px-4 py-10">
+          <Card className="w-full max-w-md text-center shadow-xl border-border/80 animate-slide-up">
+            <CardContent className="pt-8 pb-8 space-y-4">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="h-8 w-8" />
               </div>
-              <p className="font-medium">Compte créé !</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Votre inscription a bien été enregistrée. Vous pouvez maintenant vous connecter.
+              <h2 className="text-xl font-bold text-foreground">Compte créé avec succès !</h2>
+              <p className="text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
+                Votre inscription a bien été enregistrée. Vous pouvez dès à présent vous connecter à votre espace ESI.
               </p>
-              <Button className="mt-6" asChild>
-                <Link to="/login">Se connecter</Link>
+              <Button
+                className="mt-4 w-full bg-gradient-to-r from-[#8B3A3D] to-[#C45C26] hover:from-[#722F31] hover:to-[#A34D1F] text-white font-bold"
+                asChild
+              >
+                <Link to="/login">Accéder à la connexion</Link>
               </Button>
             </CardContent>
           </Card>
@@ -105,28 +114,29 @@ export default function RegisterPage() {
 
   return (
     <AuthShell>
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-md flex-col justify-center px-4 py-12">
-        <Card className="shadow-sm">
-          <CardHeader>
+      <main className="mx-auto flex w-full max-w-md flex-col justify-center px-4 py-10">
+        <Card className="shadow-xl border-border/80 overflow-hidden animate-slide-up">
+          <div className="h-2 bg-gradient-to-r from-[#C45C26] via-[#A8483B] to-[#8B3A3D]" />
+          <CardHeader className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-muted p-2.5 text-foreground">
-                <UserPlus className="h-6 w-6" strokeWidth={1.5} />
+              <div className="rounded-xl bg-gradient-to-br from-[#C45C26]/15 to-[#8B3A3D]/15 p-3 text-[#C45C26]">
+                <UserPlus className="h-6 w-6" strokeWidth={2} />
               </div>
               <div>
-                <CardTitle className="text-xl">Inscription</CardTitle>
-                <CardDescription>Créez votre compte ESI Online</CardDescription>
+                <CardTitle className="text-2xl font-bold">Inscription</CardTitle>
+                <CardDescription className="text-xs">Créez votre compte étudiant ou enseignant ESI</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                <Alert variant="destructive" className="py-2.5">
+                  <AlertDescription className="text-xs">{error}</AlertDescription>
                 </Alert>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="username">Nom d&apos;utilisateur</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="username" className="text-xs font-semibold">Nom d&apos;utilisateur</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.5} />
                   <Input
@@ -138,13 +148,13 @@ export default function RegisterPage() {
                     required
                     autoComplete="username"
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 h-10 text-sm focus-visible:ring-[#C45C26]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Adresse e-mail</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-semibold">Adresse e-mail universitaire</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.5} />
                   <Input
@@ -152,22 +162,22 @@ export default function RegisterPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="vous@exemple.com"
+                    placeholder="vous@esi.dz"
                     required
                     autoComplete="email"
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 h-10 text-sm focus-visible:ring-[#C45C26]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-xs font-semibold">Mot de passe</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.5} />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Minimum 8 caractères"
@@ -175,18 +185,31 @@ export default function RegisterPage() {
                     minLength={8}
                     autoComplete="new-password"
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 pr-10 h-10 text-sm focus-visible:ring-[#C45C26]"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none"
+                    title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" strokeWidth={1.75} />
+                    ) : (
+                      <Eye className="h-4 w-4" strokeWidth={1.75} />
+                    )}
+                  </button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirm">Confirmer le mot de passe</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm" className="text-xs font-semibold">Confirmer le mot de passe</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.5} />
                   <Input
                     id="confirm"
-                    type="password"
+                    type={showConfirm ? 'text' : 'password'}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="••••••••"
@@ -194,25 +217,44 @@ export default function RegisterPage() {
                     minLength={8}
                     autoComplete="new-password"
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 pr-10 h-10 text-sm focus-visible:ring-[#C45C26]"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none"
+                    title={showConfirm ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    aria-label={showConfirm ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  >
+                    {showConfirm ? (
+                      <EyeOff className="h-4 w-4" strokeWidth={1.75} />
+                    ) : (
+                      <Eye className="h-4 w-4" strokeWidth={1.75} />
+                    )}
+                  </button>
                 </div>
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full" size="lg">
-                <UserPlus className="h-4 w-4" /> {loading ? 'Inscription…' : 'Créer mon compte'}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 bg-gradient-to-r from-[#C45C26] to-[#8B3A3D] hover:from-[#A34D1F] hover:to-[#722F31] text-white font-bold shadow-md shadow-[#C45C26]/25 transition-all mt-2"
+                size="lg"
+              >
+                <UserPlus className="h-4 w-4" /> {loading ? 'Création en cours…' : 'Créer mon compte'}
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-muted-foreground">
+            <div className="mt-6 pt-4 border-t text-center text-xs text-muted-foreground">
               Déjà inscrit ?{' '}
-              <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+              <Link to="/login" className="font-bold text-[#8B3A3D] dark:text-rose-400 hover:underline">
                 Se connecter
               </Link>
-            </p>
+            </div>
           </CardContent>
         </Card>
       </main>
     </AuthShell>
   )
 }
+

@@ -1,5 +1,5 @@
-﻿import { useState } from 'react'
-import { Pencil, Save } from 'lucide-react'
+import { useState } from 'react'
+import { Pencil, Save, Eye, EyeOff } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
 import {
   Dialog,
@@ -28,6 +28,7 @@ const ROLE_LABELS = {
 export default function UserDetailModal({ user, onClose, onSaved }) {
   const [editing, setEditing] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
   const [display, setDisplay] = useState(user)
@@ -161,13 +162,24 @@ export default function UserDetailModal({ user, onClose, onSaved }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Laisser vide pour ne pas changer"
-                value={form.password}
-                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Laisser vide pour ne pas changer"
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none"
+                  title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Checkbox

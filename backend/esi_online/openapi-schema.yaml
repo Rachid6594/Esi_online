@@ -8441,8 +8441,9 @@ components:
           maxLength: 50
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -8472,8 +8473,9 @@ components:
           maxLength: 50
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
       required:
       - nom
     Classe:
@@ -8490,8 +8492,9 @@ components:
           maxLength: 200
         effectif_max:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -8531,8 +8534,9 @@ components:
           maxLength: 200
         effectif_max:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         niveau:
           type: integer
         filiere:
@@ -8783,8 +8787,9 @@ components:
           maxLength: 200
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           title: Ordre d'affichage
         domaine:
           type: string
@@ -8827,8 +8832,9 @@ components:
           maxLength: 200
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           title: Ordre d'affichage
         domaine:
           type: string
@@ -9176,8 +9182,9 @@ components:
           nullable: true
         annee_entree:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           nullable: true
         contact_urgence_nom:
           type: string
@@ -9226,8 +9233,9 @@ components:
           nullable: true
         annee_entree:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           nullable: true
         contact_urgence_nom:
           type: string
@@ -9661,12 +9669,14 @@ components:
           pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
         credit:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         semestre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -9725,12 +9735,14 @@ components:
           pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
         credit:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         semestre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         niveau:
           type: integer
         filiere:
@@ -9856,8 +9868,9 @@ components:
           maxLength: 100
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -9885,8 +9898,9 @@ components:
           maxLength: 100
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
       required:
       - code
       - libelle
@@ -10160,8 +10174,9 @@ components:
           maxLength: 50
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
     PatchedClasseRequest:
       type: object
       properties:
@@ -10175,8 +10190,9 @@ components:
           maxLength: 200
         effectif_max:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         niveau:
           type: integer
         filiere:
@@ -10209,8 +10225,9 @@ components:
           maxLength: 200
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           title: Ordre d'affichage
         domaine:
           type: string
@@ -10339,8 +10356,9 @@ components:
           nullable: true
         annee_entree:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           nullable: true
         contact_urgence_nom:
           type: string
@@ -10475,12 +10493,14 @@ components:
           pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
         credit:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         semestre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         niveau:
           type: integer
         filiere:
@@ -10526,8 +10546,9 @@ components:
           maxLength: 100
         ordre:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
     PatchedPermissionUploadPatchRequest:
       type: object
       description: |-
@@ -10635,8 +10656,9 @@ components:
           minLength: 1
         nombre_likes:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         is_solution:
           type: boolean
         sujet:
@@ -10689,8 +10711,9 @@ components:
           maxLength: 200
         annee_edition:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           nullable: true
         date_soutenance:
           type: string
@@ -10736,12 +10759,14 @@ components:
           type: boolean
         nombre_vues:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         nombre_telechargements:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         niveau:
           type: integer
           nullable: true
@@ -10784,12 +10809,14 @@ components:
           type: boolean
         nombre_vues:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         nombre_reponses:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         forum:
           type: integer
         auteur:
@@ -10827,8 +10854,9 @@ components:
           type: integer
         numero_tentative:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         statut:
           type: string
           minLength: 1
@@ -11217,8 +11245,9 @@ components:
           type: string
         nombre_likes:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         is_solution:
           type: boolean
         created_at:
@@ -11313,8 +11342,9 @@ components:
           minLength: 1
         nombre_likes:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         is_solution:
           type: boolean
         sujet:
@@ -11410,8 +11440,9 @@ components:
           maxLength: 200
         annee_edition:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           nullable: true
         date_soutenance:
           type: string
@@ -11457,12 +11488,14 @@ components:
           type: boolean
         nombre_vues:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         nombre_telechargements:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -11525,8 +11558,9 @@ components:
           maxLength: 200
         annee_edition:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           nullable: true
         date_soutenance:
           type: string
@@ -11572,12 +11606,14 @@ components:
           type: boolean
         nombre_vues:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         nombre_telechargements:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         niveau:
           type: integer
           nullable: true
@@ -11731,12 +11767,14 @@ components:
           type: boolean
         nombre_vues:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         nombre_reponses:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -11775,12 +11813,14 @@ components:
           type: boolean
         nombre_vues:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         nombre_reponses:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         forum:
           type: integer
         auteur:
@@ -11859,8 +11899,9 @@ components:
           type: integer
         numero_tentative:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         statut:
           type: string
           maxLength: 15
@@ -11908,8 +11949,9 @@ components:
           type: integer
         numero_tentative:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         statut:
           type: string
           minLength: 1
