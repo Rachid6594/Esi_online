@@ -6,12 +6,6 @@ import { ThemeProvider } from 'next-themes'
 import { Toaster } from '@/components/ui/sonner'
 import './index.css'
 import App from './App.jsx'
-// MirageJS pour mock API
-if (import.meta.env.DEV) {
-  import('./mirage/server').then(({ makeServer }) => {
-    makeServer({ environment: 'development' })
-  })
-}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

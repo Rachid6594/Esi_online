@@ -5,10 +5,10 @@ import { getAuth, clearAuth, isBibliothecaire } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
 
 const navClass = ({ isActive }) =>
-  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ' +
+  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ' +
   (isActive
-    ? 'bg-[var(--color-esi-primary-light)] text-[var(--color-esi-primary)] dark:bg-esi-primary/20 dark:text-esi-primary'
-    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white')
+    ? 'bg-[var(--color-esi-primary-light)] text-[var(--color-esi-primary)] font-semibold shadow-xs dark:bg-[var(--color-esi-primary)]/20 dark:text-[var(--color-esi-primary)] nav-active-glow'
+    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white')
 
 export default function BibliothecaireLayout() {
   const navigate = useNavigate()
@@ -41,13 +41,14 @@ export default function BibliothecaireLayout() {
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 dark:border-gray-700">
+      <div className="border-b border-slate-200 px-4 py-4 dark:border-gray-700" style={{ background: 'linear-gradient(135deg, var(--color-esi-primary-light) 0%, #fff 100%)' }}>
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-esi-primary)] text-white shadow-sm">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-md" style={{ background: 'linear-gradient(135deg, var(--color-esi-primary), #6B2D30)' }}>
             <BookOpen className="h-4 w-4" />
           </span>
-          <span className="truncate font-semibold text-slate-800 dark:text-slate-200">
-            <span className="text-[var(--color-esi-primary)]">ESI</span> Bibliothèque
+          <span className="truncate font-bold text-slate-800 dark:text-slate-200">
+            <span style={{ color: 'var(--color-esi-primary)' }}>ESI</span>{' '}Bibliothèque
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -59,6 +60,7 @@ export default function BibliothecaireLayout() {
           >
             <X className="h-5 w-5" />
           </button>
+        </div>
         </div>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">

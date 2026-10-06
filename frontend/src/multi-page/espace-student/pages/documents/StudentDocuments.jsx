@@ -23,10 +23,10 @@ function uniques(resources, champ) {
 
 function FilterPill({ label, value, onClear }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary dark:border-primary/30 dark:bg-primary/15">
+    <span className="inline-flex items-center gap-1 rounded-full border border-[#8B3A3D]/20 bg-[#8B3A3D]/10 px-2.5 py-0.5 text-xs font-medium text-[#8B3A3D] dark:border-[#8B3A3D]/30 dark:bg-[#8B3A3D]/15">
       <span className="text-[10px] uppercase tracking-wider opacity-60">{label}:</span>
       {value}
-      <Button type="button" variant="ghost" size="icon-xs" onClick={onClear} className="ml-0.5 h-4 w-4 hover:bg-primary/20">
+      <Button type="button" variant="ghost" size="icon-xs" onClick={onClear} className="ml-0.5 h-4 w-4 hover:bg-[#8B3A3D]/20">
         <X className="h-2.5 w-2.5" />
       </Button>
     </span>
@@ -108,16 +108,18 @@ export default function StudentDocuments() {
   }
 
   return (
-    <div className="p-6 sm:p-8">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-2.5 text-primary ring-1 ring-primary/10 dark:from-primary/20 dark:to-primary/10 dark:ring-primary/20">
-          <FileText className="h-7 w-7" strokeWidth={1.5} />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Documents</h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            {loading ? 'Chargement…' : `${resources.length} document${resources.length > 1 ? 's' : ''} disponibles`}
-          </p>
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto animate-fade-in">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 pb-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8B3A3D] to-[#C45C26] text-white shadow-md shadow-[#8B3A3D]/20">
+            <FileText className="h-6 w-6" strokeWidth={1.75} />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight">Documents</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              {loading ? 'Chargement…' : `${resources.length} document${resources.length > 1 ? 's' : ''} disponibles`}
+            </p>
+          </div>
         </div>
       </div>
       <StudentUploadPanel onUploaded={reload} />
@@ -132,8 +134,8 @@ export default function StudentDocuments() {
           </Button>
         </div>
       )}
-      <Card className="mb-6 shadow-sm backdrop-blur-sm">
-        <CardContent className="pt-6">
+      <Card className="shadow-sm backdrop-blur-sm rounded-2xl border-border/80">
+        <CardContent className="pt-5 pb-5">
           <div className="relative mb-4">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -158,9 +160,9 @@ export default function StudentDocuments() {
           </div>
           <div className="flex items-start gap-3">
             <div className="mt-5 hidden shrink-0 sm:block">
-              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              <SlidersHorizontal className="h-4 w-4 text-[#8B3A3D]" />
             </div>
-            <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               <FilterSelect id="filter-type" label="Type" icon={Filter} value={filterType} onChange={setFilterType} options={types} placeholder="Tous les types" />
               <FilterSelect id="filter-classe" label="Classe" icon={Users} value={filterClasse} onChange={setFilterClasse} options={classes} placeholder="Toutes les classes" />
               <FilterSelect id="filter-matiere" label="Matière" icon={BookOpen} value={filterMatiere} onChange={setFilterMatiere} options={matieres} placeholder="Toutes les matières" />
@@ -176,7 +178,7 @@ export default function StudentDocuments() {
                 valeur ? <FilterPill key={label} label={label} value={valeur} onClear={() => setValeur('')} /> : null
               )}
               {search && <FilterPill label="Recherche" value={`"${search}"`} onClear={() => setSearch('')} />}
-              <Button type="button" variant="ghost" size="sm" onClick={clearAllFilters} className="ml-auto text-xs text-muted-foreground hover:text-primary">
+              <Button type="button" variant="ghost" size="sm" onClick={clearAllFilters} className="ml-auto text-xs text-muted-foreground hover:text-[#8B3A3D]">
                 Tout effacer
               </Button>
             </div>
@@ -186,7 +188,7 @@ export default function StudentDocuments() {
       {!loading && (
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">
-            <Badge variant="secondary" className="mr-1.5 bg-primary/10 text-primary">{filtered.length}</Badge>
+            <Badge variant="secondary" className="mr-1.5 bg-[#8B3A3D]/10 text-[#8B3A3D] font-bold">{filtered.length}</Badge>
             résultat{filtered.length > 1 ? 's' : ''}{hasActiveFilters || search ? ' trouvé' + (filtered.length > 1 ? 's' : '') : ''}
           </p>
         </div>
@@ -194,14 +196,14 @@ export default function StudentDocuments() {
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-[76px] rounded-xl" style={{ animationDelay: `${i * 80}ms` }} />
+            <Skeleton key={i} className="h-[76px] rounded-2xl" style={{ animationDelay: `${i * 80}ms` }} />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <Card className="border-dashed shadow-none">
+        <Card className="border-dashed shadow-none rounded-2xl">
           <CardContent className="py-16 text-center">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-              <FileText className="h-7 w-7 text-muted-foreground/50" />
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#8B3A3D]/10">
+              <FileText className="h-7 w-7 text-[#8B3A3D]/40" />
             </div>
             <p className="font-medium text-muted-foreground">Aucun document trouvé</p>
             <p className="mt-1 text-xs text-muted-foreground/70">Essayez de modifier vos filtres ou votre recherche</p>

@@ -1,22 +1,22 @@
-import { Outlet, useNavigate, NavLink } from 'react-router-dom'
-import { LayoutDashboard, LogOut, UserCircle } from 'lucide-react'
-import { useEffect } from 'react'
+import { Outlet, useNavigate, NavLink, useLocation } from 'react-router-dom'
+import { LayoutDashboard, LogOut, UserCircle, Menu, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { getAuth, clearAuth, isAdministrationEcole } from '../../auth'
 import { ThemeToggle } from '../../components/ThemeToggle'
-import { SidebarCloseButton, SidebarOpenButton } from '../../components/SidebarToggle'
-import { useSidebarState } from '../../hooks/useSidebarState'
 import { Button } from '@/components/ui/button'
 
 const navClass = ({ isActive }) =>
-  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ' +
+  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ' +
   (isActive
-    ? 'bg-muted text-foreground'
-    : 'text-muted-foreground hover:bg-muted hover:text-foreground')
+    ? 'bg-[var(--color-esi-primary-light)] text-[var(--color-esi-primary)] font-semibold shadow-xs dark:bg-[var(--color-esi-primary)]/20 dark:text-[var(--color-esi-primary)] nav-active-glow'
+    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white')
 
 export default function AdministrationLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const auth = getAuth()
   const ok = isAdministrationEcole()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     if (!ok) {
@@ -24,7 +24,9 @@ export default function AdministrationLayout() {
     }
   }, [ok, navigate])
 
-  const [sidebarOpen, toggleSidebar] = useSidebarState()
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
 
   function handleLogout() {
     clearAuth()
@@ -37,57 +39,104 @@ export default function AdministrationLayout() {
 
   const user = auth?.user
   const poste = user?.poste
+  const userName = user?.first_name || user?.email?.split('@')[0] || 'Administration'
+
+  const sidebarContent = (
+    <div className="flex h-full flex-col">
+      <div className="border-b border-slate-200 px-4 py-4 dark:border-gray-700" style={{ background: 'linear-gradient(135deg, var(--color-esi-primary-light) 0%, #fff 100%)' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-md" style={{ background: 'linear-gradient(135deg, var(--color-esi-primary), #6B2D30)' }}>
+              <UserCircle className="h-4 w-4" />
+            </span>
+            <span className="truncate font-bold text-slate-800 dark:text-slate-200">
+              <span style={{ color: 'var(--color-esi-primary)' }}>ESI</span>{' '}Administration
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 md:hidden dark:hover:bg-gray-700"
+              aria-label="Fermer le menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        <NavLink to="/administration" end className={navClass} onClick={() => setMobileOpen(false)}>
+          <LayoutDashboard className="h-5 w-5" strokeWidth={1.5} />
+          Tableau de bord
+        </NavLink>
+      </nav>
+      <div className="border-t border-slate-200 p-3 dark:border-gray-700">
+        <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
+          <UserCircle className="h-9 w-9 shrink-0 text-muted-foreground dark:text-muted-foreground" strokeWidth={1.5} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-foreground">
+              {user?.email || user?.username || 'Administration'}
+            </p>
+            {poste && (
+              <p className="truncate text-xs text-muted-foreground">{poste}</p>
+            )}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-gray-700 dark:hover:text-white"
+        >
+          <LogOut className="h-5 w-5" strokeWidth={1.5} />
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  )
 
   return (
-    <div className="flex min-h-screen bg-background font-sans text-foreground">
-      {!sidebarOpen && (
-        <div className="fixed left-4 top-4 z-40">
-          <SidebarOpenButton onClick={toggleSidebar} className="bg-card shadow-md" />
-        </div>
+    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-800 dark:bg-gray-900 dark:text-slate-200">
+      {/* Bouton hamburger mobile */}
+      <div className="fixed left-3 top-3 z-40 md:hidden">
+        {!mobileOpen && (
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 shadow-md ring-1 ring-slate-900/5 transition hover:bg-slate-50 dark:bg-gray-800 dark:text-slate-200 dark:hover:bg-gray-700"
+            aria-label="Ouvrir le menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Overlay mobile */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
+
+      {/* Sidebar mobile (tiroir) */}
       <aside
-        className={`flex shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200 ${
-          sidebarOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden dark:border-gray-700 dark:bg-gray-800 ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex w-56 min-w-56 flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-border px-4 py-5">
-            <span className="truncate font-semibold text-foreground">
-              ESI Administration
-            </span>
-            <div className="flex items-center gap-1">
-              <ThemeToggle />
-              <SidebarCloseButton onClick={toggleSidebar} />
-            </div>
-          </div>
-          <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-            <NavLink to="/administration" end className={navClass}>
-              <LayoutDashboard className="h-5 w-5" strokeWidth={1.5} />
-              Tableau de bord
-            </NavLink>
-          </nav>
-          <div className="border-t border-border p-3">
-            <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
-              <UserCircle className="h-9 w-9 shrink-0 text-muted-foreground dark:text-muted-foreground" strokeWidth={1.5} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {user?.email || user?.username || 'Administration'}
-                </p>
-                {poste && (
-                  <p className="truncate text-xs text-muted-foreground">{poste}</p>
-                )}
-              </div>
-            </div>
-            <Button type="button" variant="ghost" onClick={handleLogout} className="w-full justify-start gap-3 px-3 py-2.5">
-              <LogOut className="h-5 w-5" strokeWidth={1.5} />
-              Déconnexion
-            </Button>
-          </div>
-        </div>
+        {sidebarContent}
       </aside>
-      <main className="flex-1 overflow-auto">
+
+      {/* Sidebar desktop (sticky) */}
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col dark:border-gray-700 dark:bg-gray-800">
+        {sidebarContent}
+      </aside>
+
+      {/* Zone de contenu principal */}
+      <main className="flex-1 min-w-0 pt-12 md:pt-0 overflow-auto">
         <Outlet />
       </main>
     </div>
   )
 }
+

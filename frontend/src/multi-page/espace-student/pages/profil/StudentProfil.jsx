@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { User, Mail, BookOpen, GraduationCap, Hash, Edit2, Check, X } from 'lucide-react'
 import { getAuth, setAuth } from '../../../../auth'
 import InfoRow from './components/InfoRow'
@@ -31,30 +31,30 @@ export default function StudentProfil() {
   const displayName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || 'Étudiant'
 
   return (
-    <div className="p-6 sm:p-8">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="rounded-xl bg-muted p-2.5 text-muted-foreground">
-          <User className="h-7 w-7" strokeWidth={1.5} />
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-4xl mx-auto animate-fade-in">
+      <div className="flex items-center gap-3 border-b border-border/60 pb-5">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8B3A3D] to-[#C45C26] text-white shadow-md shadow-[#8B3A3D]/20">
+          <User className="h-6 w-6" strokeWidth={1.75} />
         </div>
         <div>
-          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Mon profil</h1>
-          <p className="text-sm text-muted-foreground sm:text-base">Vos informations personnelles</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight">Mon profil</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Vos informations personnelles</p>
         </div>
       </div>
       {saved && (
-        <Alert className="mb-5 border-border bg-muted text-foreground">
+        <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-2xl">
           <Check className="h-4 w-4" />
           <AlertDescription>Profil mis à jour avec succès.</AlertDescription>
         </Alert>
       )}
-      <div className="space-y-6">
-        <Card className="shadow-sm">
-          <CardContent className="flex flex-col items-center gap-4 pt-6 sm:flex-row sm:items-center sm:gap-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground sm:h-16 sm:w-16 sm:text-2xl">
+      <div className="space-y-5">
+        <Card className="shadow-sm rounded-2xl overflow-hidden border-border/80">
+          <CardContent className="flex flex-col items-center gap-4 pt-6 pb-6 sm:flex-row sm:items-center sm:gap-5">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#8B3A3D] to-[#C45C26] text-xl font-bold text-white shadow-lg shadow-[#8B3A3D]/25 sm:h-18 sm:w-18 sm:text-2xl">
               {initials}
             </div>
             <div className="text-center sm:text-left">
-              <p className="text-lg font-semibold text-foreground sm:text-xl">{displayName}</p>
+              <p className="text-lg font-bold text-foreground sm:text-xl">{displayName}</p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
               {user.matricule && (
                 <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground sm:justify-start">
@@ -64,17 +64,17 @@ export default function StudentProfil() {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="shadow-sm rounded-2xl border-border/80">
           <CardHeader>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle>Informations personnelles</CardTitle>
               {!editing ? (
-                <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="border-[#8B3A3D]/30 text-[#8B3A3D] hover:bg-[#8B3A3D]/10">
                   <Edit2 className="h-3.5 w-3.5" /> Modifier
                 </Button>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Button size="sm" onClick={handleSave}>
+                  <Button size="sm" onClick={handleSave} className="bg-gradient-to-r from-[#8B3A3D] to-[#C45C26] hover:from-[#722F31] hover:to-[#A34D1F] text-white">
                     <Check className="h-3.5 w-3.5" /> Enregistrer
                   </Button>
                   <Button variant="outline" size="sm" onClick={handleCancel}>
@@ -107,7 +107,7 @@ export default function StudentProfil() {
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                      placeholder="votre@email.dz"
+                      placeholder="votre@email.com"
                     />
                   </FormField>
                 </>
@@ -121,7 +121,7 @@ export default function StudentProfil() {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="shadow-sm rounded-2xl border-border/80">
           <CardHeader>
             <CardTitle>Informations académiques</CardTitle>
           </CardHeader>

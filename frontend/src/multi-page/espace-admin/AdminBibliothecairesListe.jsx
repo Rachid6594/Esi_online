@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { List, UserPlus, RefreshCw, Eye } from 'lucide-react'
+import { List, UserPlus, RefreshCw, Eye, EyeOff } from 'lucide-react'
 import { fetchWithAuth } from '../../auth'
 import UserDetailModal from './UserDetailModal'
 import { Button } from '@/components/ui/button'
@@ -43,6 +43,8 @@ export default function AdminBibliothecairesListe() {
   const [lastName, setLastName] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -230,11 +232,49 @@ export default function AdminBibliothecairesListe() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="bib_pass">Mot de passe <span className="text-destructive">*</span></Label>
-              <Input id="bib_pass" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Au moins 8 caractères" />
+              <div className="relative">
+                <Input
+                  id="bib_pass"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Au moins 8 caractères"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none"
+                  title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="bib_confirm">Confirmer le mot de passe <span className="text-destructive">*</span></Label>
-              <Input id="bib_confirm" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Répéter le mot de passe" />
+              <div className="relative">
+                <Input
+                  id="bib_confirm"
+                  type={showConfirm ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Répéter le mot de passe"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none"
+                  title={showConfirm ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>

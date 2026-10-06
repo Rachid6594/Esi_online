@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Building2, UserPlus } from 'lucide-react'
+import { Building2, UserPlus, Eye, EyeOff } from 'lucide-react'
 import { getAccessToken, refreshAccessToken, clearAuthAndRedirectToLogin } from '../../auth'
 import { Button } from '@/components/ui/button'
 
@@ -69,6 +69,8 @@ export default function AdminAdministration() {
     droitIds: [],
   })
   const [submitting, setSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -221,29 +223,49 @@ export default function AdminAdministration() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Mot de passe * (min. 8 caractères)</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Au moins 8 caractères"
-                minLength={8}
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  className="w-full rounded-lg border border-border px-3 py-2 pr-10 text-sm"
+                  placeholder="Au moins 8 caractères"
+                  minLength={8}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none"
+                  title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Confirmer le mot de passe *</label>
-              <input
-                type="password"
-                value={form.passwordConfirm}
-                onChange={(e) => setForm((f) => ({ ...f, passwordConfirm: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Au moins 8 caractères"
-                minLength={8}
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  value={form.passwordConfirm}
+                  onChange={(e) => setForm((f) => ({ ...f, passwordConfirm: e.target.value }))}
+                  className="w-full rounded-lg border border-border px-3 py-2 pr-10 text-sm"
+                  placeholder="Au moins 8 caractères"
+                  minLength={8}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none"
+                  title={showConfirm ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Téléphone (optionnel)</label>
