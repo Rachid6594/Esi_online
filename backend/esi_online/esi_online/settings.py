@@ -127,27 +127,30 @@ TEMPLATES = [
 ]
 
 # ---------------------------------------------------------------------------
-# Base de données PostgreSQL (variables dans .env)
+# Base de données : PostgreSQL via DB_ENGINE=postgresql (variables DB_* dans
+# .env), SQLite par défaut pour le développement local et la CI locale.
+# Le runbook de déploiement (deployment/README.md) et backup.sh supposent
+# PostgreSQL en production.
 # ---------------------------------------------------------------------------
-'''DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME", default="**"),
-        "USER": env("DB_USER", default="*"),
-        "PASSWORD": env("DB_PASSWORD", default=""),
-        "HOST": env("DB_HOST", default=""),
-        "PORT": env("DB_PORT", default=""),
-        "OPTIONS": env.dict("DB_OPTIONS", default={}),
+if env("DB_ENGINE", default="sqlite") == "postgresql":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("DB_NAME", default="esi_online"),
+            "USER": env("DB_USER", default="esi"),
+            "PASSWORD": env("DB_PASSWORD", default=""),
+            "HOST": env("DB_HOST", default=""),
+            "PORT": env("DB_PORT", default=""),
+            "OPTIONS": env.dict("DB_OPTIONS", default={}),
+        }
     }
-}
-'''
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
 
 # ---------------------------------------------------------------------------
 # Validation des mots de passe
@@ -174,7 +177,10 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
-MEDIA_URL = "media/"
+# Slash initial : convention Django, et c'est ce que nginx attend
+# (location /media/ dans deployment/nginx/esi_online.conf) et ce que le
+# front construit (${API_BASE}/media/...) en toutes circonstances.
+MEDIA_URL = "/media/"
 # En production le disque media vit hors du dépôt, pour que le deploiement du
 # code ne puisse pas le remplacer. Voir deployment/nginx/esi_online.conf.
 MEDIA_ROOT = Path(env("MEDIA_ROOT", default=str(BASE_DIR / "media")))

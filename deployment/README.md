@@ -1,24 +1,30 @@
 # Déploiement ESI-Online sur un VPS unique
 
-Un seul serveur nginx qui sert les fichiers statiques et les médias, et qui
-passe le reste à Django sous gunicorn, avec PostgreSQL en base.
+Un seul serveur nginx qui sert la SPA React (build Vite), les fichiers
+statiques et les médias, et qui passe le reste à Django sous gunicorn, avec
+PostgreSQL en base.
 
 ```
-nginx ──┬── /media/     → /srv/esi-online/media/        (disque direct)
-        ├── /static/    → backend/esi_online/staticfiles/ (disque direct)
-        └── tout le reste → gunicorn (127.0.0.1:8000) → PostgreSQL
+nginx ──┬── /            → frontend/dist                    (SPA, fallback index.html)
+        ├── /media/      → /srv/esi-online/media/           (disque direct)
+        ├── /static/     → backend/esi_online/staticfiles/  (disque direct)
+        ├── /api/        → gunicorn (127.0.0.1:8000) → PostgreSQL
+        └── /django-admin/ → gunicorn (site Django)
 ```
 
 Les documents déposés ne repassent pas par Django. Un cours de 80 Mo serait
 sinon envoyé en mémoire à travers la socket, puis réécrit : le double du
 trafic, et le timeout de 300 s qui finit par couper le dépôt.
 
+La SPA occupe les routes `/admin`, `/home`, … Le site Django a donc été
+déplacé sous `/django-admin/` et n'est plus accessible sur `/admin/`.
+
 ## Arborescence attendue sur le serveur
 
 ```
 /srv/esi-online/
 ├── backend/                 # dépôt, .venv, .env
-├── frontend/
+├── frontend/                # dépôt, node_modules, dist/ (build Vite)
 ├── deployment/              # ce dossier
 └── media/                   # documents déposés, hors du dépôt git
 ```
@@ -32,17 +38,24 @@ ne doit jamais pouvoir remplacer les fichiers téléversés.
 # 1. Utilisateur système, sans shell
 sudo adduser --system --group --home /srv/esi-online esi
 
-# 2. Code et dépendances
+# 2. Code et dépendances (backend)
 sudo -u esi git clone <url> /srv/esi-online
 cd /srv/esi-online/backend
 sudo -u esi python3.14 -m venv .venv
 sudo -u esi .venv/bin/pip install -r requirements.txt
 
-# 3. Supports des fichiers déposés
+# 3. Code et dépendances (frontend)
+cd /srv/esi-online/frontend
+sudo -u esi npm ci
+# VITE_API_URL reste vide (même origine : nginx sert front et API sur un seul
+# domaine). Ne pas créer de .env.local avec une autre valeur.
+sudo -u esi npm run build
+
+# 4. Supports des fichiers déposés
 sudo -u esi mkdir -p /srv/esi-online/media
 sudo chown -R esi:esi /srv/esi-online
 
-# 4. Base
+# 5. Base
 sudo -u postgres createuser --pwprompt esi
 sudo -u postgres createdb --owner=esi esi_online
 ```
@@ -63,7 +76,14 @@ sudo -u esi nano backend/.env
 DEBUG=false
 SECRET_KEY=<généré par : python -c "import secrets;print(secrets.token_urlsafe(64))">
 ALLOWED_HOSTS=esi.example.dz
+# Mot de passe du superutilisateur « admin » créé à la première migration.
+# Sans cette variable, la migration tombe sur une valeur par défaut connue
+# (à changer immédiatement). Voir DB_ENGINE ci-dessous.
+ADMIN_INITIAL_PASSWORD=<mot de passe fort>
 
+# DB_ENGINE=postgresql active PostgreSQL (lu par settings.py) ; en
+# développement on laisse la valeur par défaut « sqlite ».
+DB_ENGINE=postgresql
 DB_NAME=esi_online
 DB_USER=esi
 DB_PASSWORD=<mot de passe>
@@ -78,10 +98,17 @@ défaut ou si `ALLOWED_HOSTS` ne contient que `localhost`. C'est volontaire :
 une instance qui démarre avec une clé connue permet de forger un jeton JWT.
 
 `CORS_ALLOW_ALL_ORIGINS` vaut `DEBUG` par défaut, donc il passe à `false` seul.
-En production, renseignez alors `CORS_ALLOWED_ORIGINS` avec l'origine du front
-si elle diffère du domaine de l'API.
+La SPA étant servie par le même nginx que l'API (même origine), aucune origine
+CORS n'est à renseigner. Ne l'ouvrez que si le front et l'API vivaient sur des
+domaines différents (cas non prévu par ce runbook).
 
-## Migration et collecte
+## Migration et build
+
+Le `migrate` crée le superutilisateur `admin` (mot de passe `ADMIN_INITIAL_PASSWORD`
+du `.env`). `collectstatic` ne sert plus que le site Django `/django-admin/` — la
+SPA est servie directement depuis `frontend/dist` par nginx.
+du `.env`). `collectstatic` ne sert plus que le site Django `/django-admin/` — la
+SPA est servie directement depuis `frontend/dist` par nginx.
 
 ```bash
 cd /srv/esi-online/backend
@@ -89,7 +116,14 @@ sudo -u esi .venv/bin/python esi_online/manage.py migrate --noinput
 sudo -u esi .venv/bin/python esi_online/manage.py collectstatic --noinput
 ```
 
+Le build du front se lance au déploiement (étape 3 plus haut) :
+`VITE_API_URL` doit rester vide pour que la SPA appelle l'API en même origine.
+
 ## Service et proxy
+
+Le nom de domaine apparaît à deux endroits : `ALLOWED_HOSTS` (Django) et
+`server_name` (`deployment/nginx/esi_online.conf`, placeholder `_`). Les deux
+doivent pointer vers le même domaine, remplacé partout avant la mise en ligne.
 
 ```bash
 sudo cp deployment/systemd/esi-online.service /etc/systemd/system/
@@ -179,6 +213,9 @@ sudo -u esi .venv/bin/python esi_online/manage.py check --deploy
 sudo systemctl status esi-online
 sudo journalctl -u esi-online -f
 curl -I https://esi.example.dz/api/auth/me/   # 401 attendu : token requis
+curl -s https://esi.example.dz/ | grep -q "<div id=\"root\">" && echo "SPA ok"
+# Le site Django (maintenance) reste accessible sur /django-admin/
+curl -I https://esi.example.dz/django-admin/login/ # 200 attendu
 ```
 
 Un dépôt d'un document doit créer un fichier sous

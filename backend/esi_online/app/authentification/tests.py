@@ -180,3 +180,62 @@ class UserDeleteTests(UserManagementBaseTestCase):
     def test_unknown_user_returns_404(self):
         resp = self.client.delete(f"{API_PREFIX}/99999/")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class StudentCreationTests(APITestCase):
+    """Créer un étudiant doit garantie son profil Etudiant (espace documents)."""
+
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="admin_crea", email="admin_crea@esi.dz", password="pass-test-123",
+        )
+        self.client.force_authenticate(user=self.admin)
+
+    def _profil(self, user_id):
+        from app.admin.models import User as AppAdminUser
+        from app.espace_student.models import Etudiant
+        admin_user = AppAdminUser.objects.filter(pk=user_id).first()
+        if admin_user is None:
+            return None
+        return Etudiant.objects.filter(user=admin_user).first()
+
+    def test_creer_un_etudiant_cree_son_profil(self):
+        reponse = self.client.post(
+            "/api/auth/students/create/",
+            {"email": "nouveau@esi.dz", "first_name": "Nina", "last_name": "Ngombe"},
+        )
+
+        self.assertEqual(status.HTTP_201_CREATED, reponse.status_code)
+        user = User.objects.get(email="nouveau@esi.dz")
+        self.assertIsNotNone(
+            self._profil(user.id),
+            "la création d'un étudiant doit créer son profil Etudiant",
+        )
+
+    def test_etudiant_sans_profil_initial_peut_consulter_ses_documents(self):
+        """Un étudiant créé par l'admin doit ouvrir /api/eleve/documents/ (200)."""
+        # Sans profil Etudiant au départ : le repli de l'espace étudiant le crée.
+        user = User.objects.create_user(
+            username="legacy", email="legacy@esi.dz", password="pass-test-123",
+        )
+        self.assertIsNone(self._profil(user.id))
+
+        self.client.force_authenticate(user=user)
+        reponse = self.client.get("/api/eleve/documents/")
+
+        self.assertEqual(status.HTTP_200_OK, reponse.status_code)
+        self.assertIsNotNone(self._profil(user.id))
+
+    def test_inscription_publique_cree_son_profil(self):
+        self.client.force_authenticate(user=None)
+        reponse = self.client.post(
+            "/api/auth/register/",
+            {"username": "inscrit", "email": "inscrit@esi.dz", "password": "Mdp1-fort-xyz"},
+        )
+
+        self.assertEqual(status.HTTP_201_CREATED, reponse.status_code)
+        user = User.objects.get(username="inscrit")
+        self.assertIsNotNone(
+            self._profil(user.id),
+            "l'inscription publique doit créer le profil Etudiant",
+        )

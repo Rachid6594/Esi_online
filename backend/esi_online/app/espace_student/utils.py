@@ -43,8 +43,15 @@ def get_etudiant_for_auth_user(auth_user) -> Etudiant | None:
     try:
         admin_user = AdminUser.objects.get(pk=auth_user.id)
     except AdminUser.DoesNotExist:
-        return None
-    return Etudiant.objects.filter(user=admin_user).first()
+        pass
+    else:
+        etudiant = Etudiant.objects.filter(user=admin_user).first()
+        if etudiant:
+            return etudiant
+    # Aucun profil : en créer un. Un compte étudiant peut exister sans profil
+    # Etudiant (créé via le site Django, un seed, une inscription ancienne) ;
+    # sans ce repli, l'espace documents répond "Profil étudiant introuvable".
+    return ensure_etudiant_for_auth_user(auth_user)
 
 
 def get_auth_user_for_etudiant(etudiant) -> AuthUser | None:

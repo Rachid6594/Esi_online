@@ -7836,6 +7836,215 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
+  /api/library/documents/:
+    get:
+      operationId: library_documents_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      tags:
+      - library
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLibraryDocumentList'
+          description: ''
+    post:
+      operationId: library_documents_create
+      tags:
+      - library
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryDocumentCreate'
+          description: ''
+  /api/library/documents/{id}/:
+    get:
+      operationId: library_documents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) library document.
+        required: true
+      tags:
+      - library
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryDocument'
+          description: ''
+    put:
+      operationId: library_documents_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) library document.
+        required: true
+      tags:
+      - library
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryDocumentCreate'
+          description: ''
+    patch:
+      operationId: library_documents_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) library document.
+        required: true
+      tags:
+      - library
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLibraryDocumentCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLibraryDocumentCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLibraryDocumentCreateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryDocumentCreate'
+          description: ''
+    delete:
+      operationId: library_documents_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) library document.
+        required: true
+      tags:
+      - library
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/library/documents/{id}/download/:
+    post:
+      operationId: library_documents_download_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) library document.
+        required: true
+      tags:
+      - library
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LibraryDocumentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryDocument'
+          description: ''
+  /api/library/my-downloads/:
+    get:
+      operationId: library_my_downloads_retrieve
+      tags:
+      - library
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/library/teacher-stats/:
+    get:
+      operationId: library_teacher_stats_retrieve
+      tags:
+      - library
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/library/tree/:
+    get:
+      operationId: library_tree_retrieve
+      tags:
+      - library
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/prof/:
     get:
       operationId: prof_list
@@ -9617,6 +9826,151 @@ components:
       required:
       - annonce
       - user
+    LibraryDocument:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        titre:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/TypeRessourceEnum'
+        fichier:
+          type: string
+          maxLength: 500
+        fichier_url:
+          type: string
+          readOnly: true
+        description:
+          type: string
+        matiere:
+          type: integer
+          nullable: true
+        matiere_libelle:
+          type: string
+          readOnly: true
+        filiere:
+          type: integer
+          nullable: true
+        filiere_libelle:
+          type: string
+          readOnly: true
+        auteur:
+          type: integer
+          nullable: true
+        auteur_id:
+          type: string
+          readOnly: true
+        auteur_nom:
+          type: string
+          readOnly: true
+        annee:
+          type: string
+          maxLength: 9
+        nb_telechargements:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        date_ajout:
+          type: string
+          format: date-time
+          readOnly: true
+        est_approuve:
+          type: boolean
+      required:
+      - auteur_id
+      - auteur_nom
+      - date_ajout
+      - fichier_url
+      - filiere_libelle
+      - id
+      - matiere_libelle
+      - titre
+      - type
+    LibraryDocumentCreate:
+      type: object
+      properties:
+        titre:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/TypeRessourceEnum'
+        description:
+          type: string
+        matiere:
+          type: integer
+          nullable: true
+        filiere:
+          type: integer
+          nullable: true
+        annee:
+          type: string
+          maxLength: 9
+      required:
+      - titre
+      - type
+    LibraryDocumentCreateRequest:
+      type: object
+      properties:
+        titre:
+          type: string
+          minLength: 1
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/TypeRessourceEnum'
+        description:
+          type: string
+        matiere:
+          type: integer
+          nullable: true
+        filiere:
+          type: integer
+          nullable: true
+        annee:
+          type: string
+          maxLength: 9
+      required:
+      - titre
+      - type
+    LibraryDocumentRequest:
+      type: object
+      properties:
+        titre:
+          type: string
+          minLength: 1
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/TypeRessourceEnum'
+        fichier:
+          type: string
+          maxLength: 500
+        description:
+          type: string
+        matiere:
+          type: integer
+          nullable: true
+        filiere:
+          type: integer
+          nullable: true
+        auteur:
+          type: integer
+          nullable: true
+        annee:
+          type: string
+          maxLength: 9
+        nb_telechargements:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        est_approuve:
+          type: boolean
+      required:
+      - titre
+      - type
     LoginRequest:
       type: object
       properties:
@@ -9999,6 +10353,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EspaceBibliotheque'
+    PaginatedLibraryDocumentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LibraryDocument'
     PaginatedProfList:
       type: object
       required:
@@ -10469,6 +10846,26 @@ components:
           type: integer
         user:
           type: integer
+    PatchedLibraryDocumentCreateRequest:
+      type: object
+      properties:
+        titre:
+          type: string
+          minLength: 1
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/TypeRessourceEnum'
+        description:
+          type: string
+        matiere:
+          type: integer
+          nullable: true
+        filiere:
+          type: integer
+          nullable: true
+        annee:
+          type: string
+          maxLength: 9
     PatchedMatiereRequest:
       type: object
       properties:

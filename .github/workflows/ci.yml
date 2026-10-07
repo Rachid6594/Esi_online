@@ -63,6 +63,7 @@ jobs:
           --health-retries 5
 
     env:
+      DB_ENGINE: postgresql
       DB_NAME: esi_test
       DB_USER: esi
       DB_PASSWORD: esi

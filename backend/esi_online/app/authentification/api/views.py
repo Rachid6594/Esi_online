@@ -48,6 +48,7 @@ from app.authentification.models import UserClasse
 from app.authentification.services import AuthService
 from app.authentification.services.student_email_service import send_student_credentials
 from app.core.exceptions import ValidationError
+from app.espace_student.utils import ensure_etudiant_for_auth_user
 
 User = get_user_model()
 
@@ -132,6 +133,10 @@ def register(request):
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
+        # Un compte inscrit publiquement est un étudiant : il lui faut un
+        # profil Etudiant, sinon l'espace documents renvoie "Profil
+        # étudiant introuvable".
+        ensure_etudiant_for_auth_user(user)
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
     except ValidationError as e:
         return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
@@ -171,6 +176,9 @@ def create_student(request):
             from app.administration.models import Classe
             if Classe.objects.filter(pk=classe_id).exists():
                 UserClasse.objects.update_or_create(user=user, defaults={"classe_id": classe_id})
+        # Profil Etudiant garanti (après UserClasse pour que la classe soit
+        # reprise dans le profil). Sans lui, l'élève ne peut rien consulter.
+        ensure_etudiant_for_auth_user(user)
         try:
             send_student_credentials(user, raw_password)
             message = "Compte créé. Identifiants envoyés par email."
@@ -257,6 +265,7 @@ def import_students_csv(request):
             )
             if classe_id and Classe.objects.filter(pk=classe_id).exists():
                 UserClasse.objects.update_or_create(user=user, defaults={"classe_id": classe_id})
+            ensure_etudiant_for_auth_user(user)
             send_student_credentials(user, raw_password)
             created.append({"email": email, "id": user.id})
         except ValidationError as e:

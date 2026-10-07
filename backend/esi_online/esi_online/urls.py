@@ -24,7 +24,10 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 from app.espace_library.urls import library_urlpatterns
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    # Site d'administration Django déplacé sous /django-admin/ : la SPA occupe
+    # déjà /admin (espace administrateur publié via Vite). Voir
+    # deployment/nginx/esi_online.conf pour le routage nginx.
+    path("django-admin/", admin.site.urls),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="api-schema"), name="api-docs"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="api-schema"), name="api-redoc"),

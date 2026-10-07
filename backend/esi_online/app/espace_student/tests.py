@@ -701,6 +701,32 @@ class DocumentsEtudiantTests(APITestCase):
 
         self.assertIn(rendu.id, [d["id"] for d in reponse.json()])
 
+    def test_compte_sans_profil_etudiant_voit_quand_meme_les_documents(self):
+        """Un compte élève créé sans profil Etudiant ne doit plus recevoir 404.
+
+        Autrefois /api/eleve/documents/ répondait « Profil étudiant
+        introuvable » tant qu'aucune permission de dépôt n'avait été accordée,
+        ce qui bloquait la consultation des documents publiés par l'admin.
+        """
+        auth_user = User.objects.create_user(
+            username="et_frais", email="et_frais@esi.dz", password="pass-test-123",
+        )
+        self.assertIsNone(
+            Etudiant.objects.filter(user__id=auth_user.id).first(),
+            "postulat : le compte n'a pas de profil Etudiant au départ",
+        )
+        self._doc("Cours public")
+
+        self.client.force_authenticate(user=auth_user)
+        reponse = self.client.get(self.API)
+
+        self.assertEqual(status.HTTP_200_OK, reponse.status_code)
+        self.assertGreater(len(reponse.json()), 0)
+        self.assertTrue(
+            Etudiant.objects.filter(user__id=auth_user.id).exists(),
+            "le repli get_etudiant_for_auth_user doit créer le profil",
+        )
+
     # --- libelles et telechargement --------------------------------------
 
     def test_liste_renvoie_des_libelles_et_non_des_ids(self):
